@@ -23,7 +23,7 @@ module.exports = async function handler(req, res) {
         admin: true,
         prefer: "return=representation"
       });
-      sendJson(res, 200, { reservations }, ["GET", "POST", "OPTIONS"]);
+      sendJson(req, res, 200, { reservations }, ["GET", "POST", "OPTIONS"]);
       return;
     }
 
@@ -35,11 +35,11 @@ module.exports = async function handler(req, res) {
       body: reservation
     });
 
-    sendJson(res, 201, {
+    sendJson(req, res, 201, {
       reservation: Array.isArray(inserted) ? inserted[0] : inserted
     }, ["GET", "POST", "OPTIONS"]);
   } catch (error) {
-    sendJson(res, error.statusCode || 500, errorPayload(error), ["GET", "POST", "OPTIONS"]);
+    sendJson(req, res, error.statusCode || 500, errorPayload(error), ["GET", "POST", "OPTIONS"]);
   }
 };
 

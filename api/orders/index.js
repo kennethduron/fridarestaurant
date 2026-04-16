@@ -28,7 +28,7 @@ module.exports = async function handler(req, res) {
         admin: true,
         prefer: "return=representation"
       });
-      sendJson(res, 200, { orders }, ["GET", "POST", "OPTIONS"]);
+      sendJson(req, res, 200, { orders }, ["GET", "POST", "OPTIONS"]);
       return;
     }
 
@@ -64,9 +64,9 @@ module.exports = async function handler(req, res) {
       }
     });
 
-    sendJson(res, 201, { order: createdOrder }, ["GET", "POST", "OPTIONS"]);
+    sendJson(req, res, 201, { order: createdOrder }, ["GET", "POST", "OPTIONS"]);
   } catch (error) {
-    sendJson(res, error.statusCode || 500, errorPayload(error), ["GET", "POST", "OPTIONS"]);
+    sendJson(req, res, error.statusCode || 500, errorPayload(error), ["GET", "POST", "OPTIONS"]);
   }
 };
 

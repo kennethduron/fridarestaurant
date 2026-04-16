@@ -7,11 +7,11 @@ module.exports = async function handler(req, res) {
 
   try {
     requireMethod(req, ["GET"]);
-    sendJson(res, 200, {
+    sendJson(req, res, 200, {
       ok: true,
       service: "frida-restaurant-api"
     }, ["GET", "OPTIONS"]);
   } catch (error) {
-    sendJson(res, error.statusCode || 500, errorPayload(error), ["GET", "OPTIONS"]);
+    sendJson(req, res, error.statusCode || 500, errorPayload(error), ["GET", "OPTIONS"]);
   }
 };

@@ -51,8 +51,8 @@ module.exports = async function handler(req, res) {
       }
     });
 
-    sendJson(res, 200, { order }, ["PATCH", "OPTIONS"]);
+    sendJson(req, res, 200, { order }, ["PATCH", "OPTIONS"]);
   } catch (error) {
-    sendJson(res, error.statusCode || 500, errorPayload(error), ["PATCH", "OPTIONS"]);
+    sendJson(req, res, error.statusCode || 500, errorPayload(error), ["PATCH", "OPTIONS"]);
   }
 };

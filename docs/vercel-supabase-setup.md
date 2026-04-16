@@ -15,7 +15,7 @@ Set these in Vercel Project Settings > Environment Variables. Do not commit real
 
 ```env
 SUPABASE_SERVICE_ROLE_KEY=
-WEB_ORIGIN=https://fridarestauranthn.com
+WEB_ORIGINS=https://fridarestauranthn.web.app,https://fridarestauranthn.com
 STAFF_EMAIL_DOMAIN=frida.local
 ```
 

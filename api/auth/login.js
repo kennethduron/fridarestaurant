@@ -10,8 +10,8 @@ module.exports = async function handler(req, res) {
     requireMethod(req, ["POST"]);
     const body = await readJson(req);
     const session = await signInStaff(body.username, body.password);
-    sendJson(res, 200, session, ["POST", "OPTIONS"]);
+    sendJson(req, res, 200, session, ["POST", "OPTIONS"]);
   } catch (error) {
-    sendJson(res, error.statusCode || 500, errorPayload(error), ["POST", "OPTIONS"]);
+    sendJson(req, res, error.statusCode || 500, errorPayload(error), ["POST", "OPTIONS"]);
   }
 };

@@ -35,10 +35,10 @@ module.exports = async function handler(req, res) {
       body: payload
     });
 
-    sendJson(res, 201, {
+    sendJson(req, res, 201, {
       token: Array.isArray(inserted) ? inserted[0] : inserted
     }, ["POST", "OPTIONS"]);
   } catch (error) {
-    sendJson(res, error.statusCode || 500, errorPayload(error), ["POST", "OPTIONS"]);
+    sendJson(req, res, error.statusCode || 500, errorPayload(error), ["POST", "OPTIONS"]);
   }
 };
