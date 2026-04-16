@@ -1,0 +1,5 @@
+- [x] Verify that the copilot-instructions.md file exists and is up to date.
+- [x] Scaffold project files for a bilingual restaurant site and CRM (index.html, crm.html, css, js, assets, README).
+- [x] Ensure Firebase initialization code is included in `js/firebase-config.js` using the provided config.
+- [x] Confirm README contains run & Firebase setup steps.
+- [ ] Customize Firestore rules for production (manual step).

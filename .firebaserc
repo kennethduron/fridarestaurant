@@ -1,0 +1,23 @@
+{
+  "projects": {
+    "default": "restaurant-saas-84140",
+    "casabrava2": "casabrava2-400d3"
+  },
+  "targets": {
+    "restaurant-saas-84140": {
+      "hosting": {
+        "casabrava2": [
+          "casabrava2"
+        ]
+      }
+    },
+    "casabrava2-400d3": {
+      "hosting": {
+        "casabrava2": [
+          "casabrava1"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

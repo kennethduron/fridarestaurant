@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isStaff() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/staff/$(request.auth.uid))
+        && get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.active == true
+        && (get(/databases/$(database)/documents/staff/$(request.auth.uid)).data.role in ['admin', 'agent', 'representative']);
+    }
+
+    function validOrderCreate() {
+      return request.resource.data.keys().hasOnly([
+          'displayId', 'language', 'customer', 'items', 'total', 'payment', 'invoice', 'status', 'createdAt', 'updatedAt', 'updatedBy'
+        ])
+        && request.resource.data.customer is map
+        && request.resource.data.customer.keys().hasOnly(['name', 'phone', 'comments', 'pickup'])
+        && request.resource.data.customer.name is string
+        && request.resource.data.customer.phone is string
+        && (!('comments' in request.resource.data.customer) || request.resource.data.customer.comments is string)
+        && (!('pickup' in request.resource.data.customer) || request.resource.data.customer.pickup is bool)
+        && request.resource.data.items is list
+        && request.resource.data.total is number
+        && (!('payment' in request.resource.data)
+          || (
+            request.resource.data.payment is map
+            && request.resource.data.payment.keys().hasOnly(['method', 'status', 'provider', 'checkoutUrl', 'cardLast4', 'transactionId', 'paypalOrderId'])
+            && request.resource.data.payment.method is string
+            && request.resource.data.payment.status is string
+            && request.resource.data.payment.provider is string
+            && request.resource.data.payment.checkoutUrl is string
+            && request.resource.data.payment.cardLast4 is string
+            && request.resource.data.payment.transactionId is string
+            && request.resource.data.payment.paypalOrderId is string
+          ))
+        && (!('invoice' in request.resource.data)
+          || (
+            request.resource.data.invoice is map
+            && request.resource.data.invoice.keys().hasOnly([
+              'billingName', 'billingRTN', 'invoiceNumber', 'notes', 'hasExoneration', 'exemptionRegister', 'exemptOrderNumber', 'sagRegister'
+            ])
+            && request.resource.data.invoice.billingName is string
+            && request.resource.data.invoice.billingRTN is string
+            && request.resource.data.invoice.invoiceNumber is string
+            && request.resource.data.invoice.notes is string
+            && request.resource.data.invoice.hasExoneration is bool
+            && request.resource.data.invoice.exemptionRegister is string
+            && request.resource.data.invoice.exemptOrderNumber is string
+            && request.resource.data.invoice.sagRegister is string
+          ))
+        && request.resource.data.status == 'pending';
+    }
+
+    function validReservationCreate() {
+      return request.resource.data.keys().hasOnly([
+          'name', 'phone', 'email', 'date', 'time', 'party', 'occasion', 'allergies', 'notes', 'language', 'createdAt'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.phone is string
+        && request.resource.data.party is number;
+    }
+
+    match /orders/{orderId} {
+      allow create: if validOrderCreate();
+      allow get: if true;
+      allow list: if isStaff();
+      allow update: if isStaff();
+      allow delete: if false;
+    }
+
+    match /reservations/{reservationId} {
+      allow create: if validReservationCreate();
+      allow read: if isStaff();
+      allow update: if isStaff();
+      allow delete: if false;
+    }
+
+    match /staff/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    match /usernames/{username} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    match /settings/{settingId} {
+      allow get: if isStaff();
+      allow list: if false;
+      allow create, update: if isStaff();
+      allow delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frida Restaurant Cocina | Pedidos en preparacion</title>
+  <meta name="description" content="Pantalla de cocina en tiempo real para pedidos en preparacion.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=20260404a">
+  <link rel="icon" type="image/jpeg" href="assets/icon.jpg">
+  <link rel="shortcut icon" href="assets/icon.jpg">
+  <link rel="apple-touch-icon" href="assets/icon.jpg">
+</head>
+
+<body class="kitchen-page">
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="crm.html">Frida Restaurant Cocina</a>
+      <div class="crm-head-actions">
+        <button id="kitchenLangToggle" class="btn btn-ghost" aria-label="Cambiar idioma">EN</button>
+        <button id="kitchenSignOut" class="btn btn-outline hidden">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container section">
+    <section id="authGate" class="auth-gate">
+      <h1 data-i18n="authTitle">Acceso de cocina</h1>
+      <p data-i18n="authText">Ingresa con usuario y contrasena para ver los pedidos en preparacion.</p>
+      <form id="kitchenAuthForm" class="reservation-form" novalidate>
+        <label class="full">
+          <span data-i18n="authUserLabel">Usuario</span>
+          <input id="kitchenUser" type="text" autocomplete="username" required>
+        </label>
+        <label class="full">
+          <span data-i18n="authPassLabel">Contrasena</span>
+          <input id="kitchenPassword" type="password" autocomplete="current-password" required>
+        </label>
+        <div class="full">
+          <button type="submit" class="btn btn-primary" data-i18n="authButton">Ingresar</button>
+        </div>
+      </form>
+      <p id="authMessage" class="muted-line"></p>
+    </section>
+
+    <section id="kitchenApp" class="hidden">
+      <div class="section-head kitchen-head">
+        <h1 data-i18n="screenTitle">Pedidos en preparacion</h1>
+        <p data-i18n="screenSub">Esta pantalla muestra unicamente pedidos marcados como En preparacion.</p>
+        <p id="staffBadge" class="muted-line"></p>
+      </div>
+      <div class="kitchen-summary">
+        <strong data-i18n="countLabel">Pendientes en cocina:</strong>
+        <span id="prepCount">0</span>
+      </div>
+      <section id="prepOrdersList" class="kitchen-grid"></section>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/kitchen.js?v=20260304"></script>
+</body>
+
+</html>

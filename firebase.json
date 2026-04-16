@@ -1,0 +1,33 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "hosting": [
+    {
+      "target": "casabrava2",
+      "public": ".",
+      "ignore": [
+        "firebase.json",
+        "firestore.rules",
+        "README.md",
+        "package.json",
+        "package-lock.json",
+        "firebase-debug.log",
+        "functions/**",
+        "api/**",
+        "lib/**",
+        "supabase/**",
+        "src/**",
+        "dataconnect/**",
+        "public/**",
+        "vercel.json",
+        ".env.example",
+        ".codex-tools/**",
+        ".github/**",
+        ".vscode/**",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    }
+  ]
+}

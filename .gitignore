@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.DS_Store
+.vscode/
+coverage/
+.idea/
+dist/
+**/thumbs.db
+credentials.json
+service-account.json
+firebase-service-account.json
+*.private.json
