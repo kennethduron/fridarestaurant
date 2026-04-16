@@ -76,8 +76,8 @@ function normalizeOrder(body) {
 
   const customerName = String(body.customer_name || body.customerName || body.name || "").trim();
   const customerPhone = String(body.customer_phone || body.customerPhone || body.phone || "").trim();
-  if (!customerName || !customerPhone) {
-    throw httpError(400, "missing_customer", "Customer name and phone are required.");
+  if (!customerName) {
+    throw httpError(400, "missing_customer", "Customer name is required.");
   }
 
   const subtotal = Number(body.subtotal || 0);
@@ -100,6 +100,7 @@ function normalizeOrder(body) {
     total,
     payment_method: String(body.payment_method || body.paymentMethod || "cash").trim(),
     payment_status: String(body.payment_status || body.paymentStatus || "unpaid").trim(),
+    invoice: body.invoice || null,
     source: "web"
   };
 }

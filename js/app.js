@@ -127,11 +127,12 @@ const i18n = {
     trackerItems: "Productos",
     trackerTotal: "Total",
     trackerPayAtCashier: "Pagar en caja",
-    trackerPaymentProcessed: "Pago procesado con éxito",
+    trackerPaymentProcessed: "Pago procesado con Ã©xito",
     status_pending: "Pendiente",
-    status_in_progress: "En preparacion",
+    status_preparing: "Preparando",
     status_ready: "Listo",
-    status_accepted: "Aceptado",
+    status_accepted: "Aceptada",
+    status_delivered: "Entregada",
     status_rejected: "Rechazado",
     orderError: "No se pudo enviar el pedido. Intenta de nuevo.",
     invalidCardData: "Completa los datos de tarjeta correctamente.",
@@ -267,9 +268,10 @@ const i18n = {
     trackerPayAtCashier: "Pay at cashier",
     trackerPaymentProcessed: "Payment was successfully processed",
     status_pending: "Pending",
-    status_in_progress: "In preparation",
+    status_preparing: "Preparing",
     status_ready: "Ready",
     status_accepted: "Accepted",
+    status_delivered: "Delivered",
     status_rejected: "Rejected",
     orderError: "Could not send order. Please try again.",
     invalidCardData: "Please complete valid card details.",
@@ -734,7 +736,7 @@ function renderHondurasWeather() {
     return;
   }
   const roundedTemp = Math.round(Number(weatherState.temperature));
-  hnWeatherValue.textContent = `${roundedTemp}°C | ${weatherLabelFromCode(weatherState.weatherCode)}`;
+  hnWeatherValue.textContent = `${roundedTemp}Â°C | ${weatherLabelFromCode(weatherState.weatherCode)}`;
 }
 
 async function fetchHondurasWeather() {
@@ -1029,7 +1031,7 @@ function scheduleAcceptedTrackerClear(order) {
   if (!order || !order.id) return;
   const orderId = order.id;
   clearTrackerTimer(orderId);
-  const isTerminalStatus = order && (order.status === "accepted" || order.status === "rejected");
+  const isTerminalStatus = order && (order.status === "delivered" || order.status === "rejected" || order.status === "cancelled");
   if (!isTerminalStatus) return;
 
   const resolvedAt = asDate(order.updatedAt) || asDate(order.createdAt);

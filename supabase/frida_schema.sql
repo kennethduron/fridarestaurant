@@ -30,6 +30,7 @@ create table if not exists public.orders (
   total numeric(10, 2) not null default 0,
   payment_method text not null default 'cash',
   payment_status text not null default 'unpaid',
+  invoice jsonb,
   source text not null default 'web',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -83,12 +84,21 @@ create table if not exists public.notification_tokens (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.app_settings (
+  key text primary key,
+  value jsonb not null default '{}'::jsonb,
+  updated_by_staff_profile_id uuid references public.staff_profiles(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 alter table public.staff_profiles enable row level security;
 alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
 alter table public.order_status_events enable row level security;
 alter table public.reservations enable row level security;
 alter table public.notification_tokens enable row level security;
+alter table public.app_settings enable row level security;
 
 -- The app backend uses the service role key, which bypasses RLS.
 -- Keep direct browser access closed until we intentionally add public policies.

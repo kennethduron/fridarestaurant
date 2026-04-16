@@ -17,13 +17,13 @@ const i18n = {
     authButton: "Ingresar",
     authInvalid: "Usuario o contrasena invalidos.",
     authUserNotFound: "Usuario no encontrado.",
-    authUserNeedsMapping: "Ese usuario no existe. Usa tu correo completo o crea usernames/{usuario} con el campo email en Firestore.",
+    authUserNeedsMapping: "Ese usuario no existe. Verifica el usuario asignado en Supabase.",
     authDenied: "Tu usuario no tiene permisos para esta pantalla.",
     authChecking: "Validando acceso...",
-    authProviderDisabled: "Firebase Email/Password no esta habilitado para este proyecto. Activalo en Authentication > Sign-in method.",
-    authUnauthorizedDomain: "Este dominio no esta autorizado en Firebase Authentication. Abre esta pantalla desde un dominio autorizado.",
-    authNetworkError: "No se pudo conectar con Firebase. Revisa tu conexion e intenta de nuevo.",
-    authPermissionError: "Firebase bloqueo la validacion del usuario. Revisa las reglas y la configuracion del proyecto.",
+    authProviderDisabled: "El acceso con usuario y contrasena no esta habilitado. Revisa Supabase Auth.",
+    authUnauthorizedDomain: "Este dominio no esta autorizado para el backend. Revisa WEB_ORIGINS en Vercel.",
+    authNetworkError: "No se pudo conectar con la API. Revisa tu conexion e intenta de nuevo.",
+    authPermissionError: "La API bloqueo la validacion del usuario. Revisa roles y variables privadas.",
     screenTitle: "Pedidos en preparacion",
     screenSub: "Esta pantalla muestra unicamente pedidos marcados como En preparacion.",
     countLabel: "Pendientes en cocina:",
@@ -41,7 +41,7 @@ const i18n = {
     noComments: "Sin comentarios",
     total: "Total",
     status: "Estado",
-    status_in_progress: "En preparacion",
+    status_preparing: "Preparando",
     btnReady: "Marcar listo",
     updated: "Estado actualizado"
   },
@@ -53,13 +53,13 @@ const i18n = {
     authButton: "Sign in",
     authInvalid: "Invalid username or password.",
     authUserNotFound: "Username not found.",
-    authUserNeedsMapping: "That username does not exist. Use the full email or create usernames/{username} with an email field in Firestore.",
+    authUserNeedsMapping: "That username does not exist. Check the assigned Supabase username.",
     authDenied: "Your user does not have access to this screen.",
     authChecking: "Validating access...",
-    authProviderDisabled: "Firebase Email/Password is not enabled for this project. Enable it in Authentication > Sign-in method.",
-    authUnauthorizedDomain: "This domain is not authorized in Firebase Authentication. Open this screen from an authorized domain.",
-    authNetworkError: "Firebase could not be reached. Check the connection and try again.",
-    authPermissionError: "Firebase blocked the user validation request. Check the project rules and configuration.",
+    authProviderDisabled: "Username and password access is not enabled. Check Supabase Auth.",
+    authUnauthorizedDomain: "This domain is not authorized for the backend. Check WEB_ORIGINS in Vercel.",
+    authNetworkError: "The API could not be reached. Check the connection and try again.",
+    authPermissionError: "The API blocked user validation. Check roles and private variables.",
     screenTitle: "Orders in preparation",
     screenSub: "This screen only shows orders marked as In preparation.",
     countLabel: "Kitchen queue:",
@@ -77,7 +77,7 @@ const i18n = {
     noComments: "No comments",
     total: "Total",
     status: "Status",
-    status_in_progress: "In preparation",
+    status_preparing: "Preparing",
     btnReady: "Mark ready",
     updated: "Status updated"
   }
@@ -189,7 +189,7 @@ async function setReady(orderId) {
 
 function prepOrders() {
   return ordersCache
-    .filter((order) => order.status === "in_progress")
+    .filter((order) => order.status === "preparing")
     .sort((a, b) => {
       const aDate = parseDate(a.createdAt);
       const bDate = parseDate(b.createdAt);
@@ -212,7 +212,7 @@ function renderOrders() {
         <article class="kitchen-ticket">
           <div class="kitchen-ticket-head">
             <strong>${ref}</strong>
-            <span class="badge in_progress">${t("status_in_progress")}</span>
+            <span class="badge preparing">${t("status_preparing")}</span>
           </div>
           <p><strong>${t("date")}:</strong> ${formatDate(order.createdAt)} | <strong>${t("time")}:</strong> ${formatTime(order.createdAt)}</p>
           <p><strong>${t("customer")}:</strong> ${order.customer?.name || "-"} (${order.customer?.phone || "-"})</p>

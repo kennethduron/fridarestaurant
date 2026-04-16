@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --bg: #f5f1ea;
   --surface: #fffdf8;
   --surface-2: #fdf6ea;
@@ -1730,7 +1730,7 @@ textarea:focus {
   color: #7a4a00;
 }
 
-.badge.in_progress {
+.badge.preparing {
   background: #ffeec9;
   color: #84510f;
 }
@@ -1741,6 +1741,11 @@ textarea:focus {
 }
 
 .badge.accepted {
+  background: #d7f4e8;
+  color: #155a43;
+}
+
+.badge.delivered {
   background: #d7f4e8;
   color: #155a43;
 }

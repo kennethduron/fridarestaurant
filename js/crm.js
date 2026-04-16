@@ -32,10 +32,10 @@ const i18n = {
     authDenied: "Tu usuario no tiene permisos CRM. Contacta al administrador.",
     authStartupError: "El acceso fue valido, pero el CRM no pudo iniciar correctamente. Intenta de nuevo.",
     authChecking: "Validando acceso...",
-    authProviderDisabled: "Firebase Email/Password no esta habilitado para este proyecto. Activalo en Authentication > Sign-in method.",
-    authUnauthorizedDomain: "Este dominio no esta autorizado en Firebase Authentication. Abre el CRM desde un dominio autorizado.",
-    authNetworkError: "No se pudo conectar con Firebase. Revisa tu conexion e intenta de nuevo.",
-    authPermissionError: "Firebase bloqueo la validacion del usuario. Revisa las reglas y la configuracion del proyecto.",
+    authProviderDisabled: "El acceso con usuario y contrasena no esta habilitado. Revisa Supabase Auth.",
+    authUnauthorizedDomain: "Este dominio no esta autorizado para el backend. Revisa WEB_ORIGINS en Vercel.",
+    authNetworkError: "No se pudo conectar con la API. Revisa tu conexion e intenta de nuevo.",
+    authPermissionError: "La API bloqueo la validacion del usuario. Revisa roles y variables privadas.",
     kitchenScreen: "Pantalla cocina",
     fiscalSettingsPage: "Ajustes fiscales",
     fiscalModalTitle: "Ajustes fiscales",
@@ -46,12 +46,14 @@ const i18n = {
     viewReservations: "Reservas",
     filterAll: "Todos",
     filterPending: "Pendiente",
-    filterInProgress: "En preparacion",
+    filterInProgress: "Preparando",
     filterReady: "Listo",
-    filterAccepted: "Entregado",
+    filterAccepted: "Aceptada",
+    filterPreparing: "Preparando",
+    filterDelivered: "Entregado",
     filterRejected: "Rechazado",
     btnPending: "Pendiente",
-    btnInProgress: "En preparacion",
+    btnInProgress: "Preparando",
     btnReady: "Listo",
     btnAccept: "Entregar",
     btnReject: "Rechazar",
@@ -73,7 +75,7 @@ const i18n = {
     orderComments: "Comentarios del pedido",
     invoiceRequestSummary: "Solicita factura con RTN y nombre",
     orderPickupBadge: "Para llevar",
-    orderCashierPending: "Pagará en caja",
+    orderCashierPending: "PagarÃ¡ en caja",
     orderPaidMessage: "Pago realizado",
     orderUnpaidMessage: "No ha pagado el pedido",
     payment: "Pago",
@@ -151,14 +153,15 @@ const i18n = {
     total: "Total",
     date: "Fecha",
     status_pending: "Pendiente",
-    status_in_progress: "En preparacion",
+    status_preparing: "Preparando",
     status_ready: "Listo",
-    status_accepted: "Entregado",
+    status_accepted: "Aceptada",
+    status_delivered: "Entregado",
     status_rejected: "Rechazado",
     reservationsCount: "Reservas",
     ordersCount: "Pedidos",
     pendingCount: "Pendientes",
-    progressCount: "En preparacion",
+    progressCount: "Preparando",
     readyCount: "Listos",
     acceptedCount: "Entregados",
     revenueCount: "Ingresos",
@@ -204,10 +207,10 @@ const i18n = {
     authDenied: "Your user does not have CRM permissions. Contact the admin.",
     authStartupError: "Sign-in succeeded, but the CRM could not start correctly. Please try again.",
     authChecking: "Validating access...",
-    authProviderDisabled: "Firebase Email/Password is not enabled for this project. Enable it in Authentication > Sign-in method.",
-    authUnauthorizedDomain: "This domain is not authorized in Firebase Authentication. Open the CRM from an authorized domain.",
-    authNetworkError: "Firebase could not be reached. Check the connection and try again.",
-    authPermissionError: "Firebase blocked the user validation request. Check the project rules and configuration.",
+    authProviderDisabled: "Username and password access is not enabled. Check Supabase Auth.",
+    authUnauthorizedDomain: "This domain is not authorized for the backend. Check WEB_ORIGINS in Vercel.",
+    authNetworkError: "The API could not be reached. Check the connection and try again.",
+    authPermissionError: "The API blocked user validation. Check roles and private variables.",
     kitchenScreen: "Kitchen screen",
     fiscalSettingsPage: "Fiscal settings",
     fiscalModalTitle: "Fiscal settings",
@@ -218,12 +221,14 @@ const i18n = {
     viewReservations: "Reservations",
     filterAll: "All",
     filterPending: "Pending",
-    filterInProgress: "In preparation",
+    filterInProgress: "Preparing",
     filterReady: "Ready",
-    filterAccepted: "Delivered",
+    filterAccepted: "Accepted",
+    filterPreparing: "Preparing",
+    filterDelivered: "Delivered",
     filterRejected: "Rejected",
     btnPending: "Pending",
-    btnInProgress: "In preparation",
+    btnInProgress: "Preparing",
     btnReady: "Ready",
     btnAccept: "Deliver",
     btnReject: "Reject",
@@ -323,14 +328,15 @@ const i18n = {
     total: "Total",
     date: "Date",
     status_pending: "Pending",
-    status_in_progress: "In preparation",
+    status_preparing: "Preparing",
     status_ready: "Ready",
-    status_accepted: "Delivered",
+    status_accepted: "Accepted",
+    status_delivered: "Delivered",
     status_rejected: "Rejected",
     reservationsCount: "Reservations",
     ordersCount: "Orders",
     pendingCount: "Pending",
-    progressCount: "In preparation",
+    progressCount: "Preparing",
     readyCount: "Ready",
     acceptedCount: "Delivered",
     revenueCount: "Revenue",
@@ -639,7 +645,7 @@ function orderStatusLabel(status) {
   return t(`status_${status}`);
 }
 
-const ORDER_STATUS_FLOW = ["pending", "in_progress", "ready", "accepted"];
+const ORDER_STATUS_FLOW = ["pending", "accepted", "preparing", "ready", "delivered"];
 
 function previousOrderStatus(status) {
   const index = ORDER_STATUS_FLOW.indexOf(status);
@@ -666,7 +672,7 @@ function renderStatusActionButton({ orderId, targetStatus, variant = "outline", 
 function renderOrderStatusActions(order) {
   const status = order?.status || "pending";
 
-  if (status === "accepted") {
+  if (status === "delivered") {
     return renderStatusActionButton({
       orderId: order.id,
       targetStatus: "ready",
@@ -697,7 +703,7 @@ function renderOrderStatusActions(order) {
   if (status === "ready") {
     actions.push(renderStatusActionButton({
       orderId: order.id,
-      targetStatus: "accepted",
+      targetStatus: "delivered",
       variant: "primary",
       label: t("btnAccept")
     }));
@@ -740,14 +746,14 @@ function paymentStatusLabel(status) {
 
 function invoicePaymentMethod(order) {
   const method = order?.payment?.method;
-  if (method === "cash_on_pickup" && order?.status === "accepted") return "cash";
+  if (method === "cash_on_pickup" && order?.status === "delivered") return "cash";
   return method;
 }
 
 function paymentDone(order) {
   if (order?.payment?.status === "paid") return true;
   const method = invoicePaymentMethod(order);
-  return order?.status === "accepted" && (method === "cash" || method === "card");
+  return order?.status === "delivered" && (method === "cash" || method === "card");
 }
 
 function crmPaymentLine(order) {
@@ -867,7 +873,7 @@ function updateFiscalRangeAlert() {
 }
 
 function invoiceStateLabel(order) {
-  if (order?.status === "accepted") return orderStatusLabel("accepted");
+  if (order?.status === "delivered") return orderStatusLabel("delivered");
   return orderStatusLabel(order?.status || "pending");
 }
 
@@ -1531,7 +1537,7 @@ function reservationsForPeriod() {
 }
 
 function acceptedSalesRows() {
-  return salesRowsForPeriod().filter((order) => order.status === "accepted");
+  return salesRowsForPeriod().filter((order) => order.status === "delivered");
 }
 
 function updateLanguageToggleButtons() {
@@ -1567,9 +1573,9 @@ function renderStats() {
   const periodOrders = salesRowsForPeriod();
   const periodReservations = reservationsForPeriod();
   const pending = periodOrders.filter((o) => o.status === "pending").length;
-  const progress = periodOrders.filter((o) => o.status === "in_progress").length;
+  const progress = periodOrders.filter((o) => o.status === "preparing").length;
   const ready = periodOrders.filter((o) => o.status === "ready").length;
-  const acceptedOrders = periodOrders.filter((o) => o.status === "accepted");
+  const acceptedOrders = periodOrders.filter((o) => o.status === "delivered");
   const revenue = acceptedOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
   const avgTicket = acceptedOrders.length ? revenue / acceptedOrders.length : 0;
   statsGrid.innerHTML = `
@@ -1637,7 +1643,7 @@ function salesByDayForMonth(referenceMonth) {
   const year = referenceMonth.getFullYear();
   const map = new Map();
   ordersCache
-    .filter((order) => order.status === "accepted")
+    .filter((order) => order.status === "delivered")
     .forEach((order) => {
       const when = parseDate(order.createdAt);
       if (!when) return;
@@ -2044,7 +2050,7 @@ function toggleCRMHeaderNav() {
 async function setStatus(orderId, status) {
   const order = ordersCache.find((row) => row.id === orderId);
   if (!order) return;
-  if (status === "accepted" && !paymentMethodSelectValue(order)) {
+  if (status === "delivered" && !paymentMethodSelectValue(order)) {
     showToast(t("paymentMethodRequired"));
     return;
   }
@@ -2353,7 +2359,7 @@ if (salesCalendar) {
 }
 
 if (reviewPending) reviewPending.addEventListener("click", () => selectedOrderId && setStatus(selectedOrderId, "pending"));
-if (reviewProgress) reviewProgress.addEventListener("click", () => selectedOrderId && setStatus(selectedOrderId, "in_progress"));
+if (reviewProgress) reviewProgress.addEventListener("click", () => selectedOrderId && setStatus(selectedOrderId, "preparing"));
 if (reviewAccept) reviewAccept.addEventListener("click", () => selectedOrderId && setStatus(selectedOrderId, "accepted"));
 if (reviewReject) reviewReject.addEventListener("click", () => selectedOrderId && setStatus(selectedOrderId, "rejected"));
 closeReview.addEventListener("click", closeReviewModal);
