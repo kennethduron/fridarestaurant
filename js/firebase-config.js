@@ -56,7 +56,7 @@ function sessionUser(session = currentSession) {
   return {
     uid: session.user.id,
     id: session.user.id,
-    email: staffEmailForUsername(session.user.username),
+    email: session.user.email || staffEmailForUsername(session.user.username),
     username: session.user.username,
     role: session.user.role,
     accessToken: session.access_token

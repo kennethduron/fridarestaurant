@@ -6,12 +6,15 @@ create extension if not exists pgcrypto;
 create table if not exists public.staff_profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references auth.users(id) on delete cascade,
+  login_email text,
   username text not null unique check (username ~ '^[a-z0-9._-]+$'),
   role text not null check (role in ('admin', 'kitchen', 'cashier')),
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.staff_profiles add column if not exists login_email text;
 
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
@@ -108,3 +111,6 @@ create index if not exists idx_orders_type_status on public.orders(order_type, s
 create index if not exists idx_order_items_order_id on public.order_items(order_id);
 create index if not exists idx_reservations_created_at on public.reservations(created_at desc);
 create index if not exists idx_notification_tokens_order_id on public.notification_tokens(order_id);
+create unique index if not exists idx_staff_profiles_login_email_unique
+  on public.staff_profiles (lower(login_email))
+  where login_email is not null;
