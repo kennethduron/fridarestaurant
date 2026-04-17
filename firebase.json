@@ -4,7 +4,7 @@
   },
   "hosting": [
     {
-      "target": "casabrava2",
+      "site": "fridarestauranthn",
       "public": ".",
       "ignore": [
         "firebase.json",
@@ -23,6 +23,12 @@
         "vercel.json",
         ".env.example",
         ".codex-tools/**",
+        ".git/**",
+        ".git",
+        ".gitignore",
+        ".firebaserc",
+        ".env",
+        ".env.*",
         ".github/**",
         ".vscode/**",
         "**/.*",

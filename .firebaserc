@@ -1,6 +1,8 @@
 {
   "projects": {
-    "default": "restaurant-saas-84140",
+    "default": "fridarestaurant-768ab",
+    "frida": "fridarestaurant-768ab",
+    "restaurant-saas": "restaurant-saas-84140",
     "casabrava2": "casabrava2-400d3"
   },
   "targets": {
