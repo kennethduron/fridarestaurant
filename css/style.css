@@ -26,7 +26,7 @@ body {
   margin: 0;
   padding: 0;
   scroll-behavior: smooth;
-  scroll-padding-top: 108px;
+  scroll-padding-top: 132px;
 }
 
 body {
@@ -596,6 +596,14 @@ h4 {
 
 .section {
   padding: 34px 0;
+}
+
+#inicio,
+#menu,
+#pedido,
+#reservas,
+#nosotros {
+  scroll-margin-top: 132px;
 }
 
 .section-head h2 {

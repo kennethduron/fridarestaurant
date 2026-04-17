@@ -1520,6 +1520,34 @@ async function submitReservation(event) {
   }
 }
 
+function scrollToPageSection(hash) {
+  if (!hash || hash === "#") return false;
+  const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+  if (!target) return false;
+
+  const headerHeight = document.querySelector(".site-header")?.offsetHeight || 0;
+  const top = target.getBoundingClientRect().top + window.scrollY - headerHeight - 24;
+  window.scrollTo({
+    top: Math.max(0, top),
+    behavior: "smooth"
+  });
+  window.history.pushState(null, "", hash);
+  return true;
+}
+
+document.addEventListener("click", (event) => {
+  const link = event.target.closest('a[href^="#"]');
+  if (!link) return;
+  const url = new URL(link.href, window.location.href);
+  if (url.pathname !== window.location.pathname) return;
+  if (!scrollToPageSection(url.hash)) return;
+  event.preventDefault();
+  if (primaryNav && navToggle) {
+    primaryNav.classList.remove("open");
+    navToggle.setAttribute("aria-expanded", "false");
+  }
+});
+
 tabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     tabs.forEach((node) => node.classList.remove("active"));
