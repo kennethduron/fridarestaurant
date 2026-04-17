@@ -14,7 +14,7 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260417a";
+} from "./firebase-config.js?v=20260417b";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 
 if (window.location.search === "?") {
@@ -37,6 +37,7 @@ const i18n = {
     authUnauthorizedDomain: "Este dominio no esta autorizado para el backend. Revisa WEB_ORIGINS en Vercel.",
     authNetworkError: "No se pudo conectar con la API. Revisa tu conexion e intenta de nuevo.",
     authPermissionError: "La API bloqueo la validacion del usuario. Revisa roles y variables privadas.",
+    authSessionExpired: "Tu sesion expiro. Ingresa de nuevo.",
     kitchenScreen: "Pantalla cocina",
     fiscalSettingsPage: "Ajustes fiscales",
     fiscalModalTitle: "Ajustes fiscales",
@@ -195,6 +196,8 @@ const i18n = {
     paymentReceived: "Pago recibido",
     crmNotificationsReady: "Avisos del CRM activados.",
     crmNotificationsUnavailable: "El CRM esta abierto, pero este navegador no pudo activar avisos push.",
+    ordersListenerError: "No se pudieron cargar los pedidos.",
+    reservationsListenerError: "No se pudieron cargar las reservas.",
     staffRole: "Rol",
     signOut: "Cerrar sesion",
     signOutShort: "Salir"
@@ -214,6 +217,7 @@ const i18n = {
     authUnauthorizedDomain: "This domain is not authorized for the backend. Check WEB_ORIGINS in Vercel.",
     authNetworkError: "The API could not be reached. Check the connection and try again.",
     authPermissionError: "The API blocked user validation. Check roles and private variables.",
+    authSessionExpired: "Your session expired. Please sign in again.",
     kitchenScreen: "Kitchen screen",
     fiscalSettingsPage: "Fiscal settings",
     fiscalModalTitle: "Fiscal settings",
@@ -372,6 +376,8 @@ const i18n = {
     paymentReceived: "Payment received",
     crmNotificationsReady: "CRM alerts enabled.",
     crmNotificationsUnavailable: "The CRM is open, but this browser could not enable push alerts.",
+    ordersListenerError: "Could not load orders.",
+    reservationsListenerError: "Could not load reservations.",
     staffRole: "Role",
     signOut: "Sign out",
     signOutShort: "Out"
@@ -444,6 +450,7 @@ let knownOrderIds = new Set();
 let knownOrderPaymentStatus = new Map();
 let audioCtx = null;
 let audioUnlocked = false;
+let realtimeAuthExpiredHandled = false;
 let fiscalSettings = mergeFiscalSettings();
 
 function t(key) {
@@ -2226,8 +2233,36 @@ function stopRealtime() {
   knownOrderPaymentStatus = new Map();
 }
 
+function isAuthRealtimeError(error) {
+  const code = String(error?.code || "");
+  return code === "invalid_token" ||
+    code === "missing_token" ||
+    code === "staff_denied" ||
+    code === "role_denied" ||
+    code === "http/401" ||
+    code === "http/403";
+}
+
+async function handleRealtimeError(error, fallbackKey) {
+  console.warn("CRM realtime error", error);
+  if (isAuthRealtimeError(error)) {
+    if (realtimeAuthExpiredHandled) return;
+    realtimeAuthExpiredHandled = true;
+    pendingAuthMessage = t("authSessionExpired");
+    showToast(t("authSessionExpired"));
+    try {
+      await signOutUser();
+    } catch (_signOutError) {
+      lockUI();
+    }
+    return;
+  }
+  showToast(t(fallbackKey));
+}
+
 function startRealtime() {
   stopRealtime();
+  realtimeAuthExpiredHandled = false;
   unsubscribeOrders = listenOrders(
     (orders) => {
       const nextIds = new Set(orders.map((order) => order.id));
@@ -2258,7 +2293,7 @@ function startRealtime() {
       renderOrders();
       if (selectedOrderId) openReview(selectedOrderId);
     },
-    () => showToast("Orders listener error")
+    (error) => handleRealtimeError(error, "ordersListenerError")
   );
 
   unsubscribeReservations = listenReservations(
@@ -2267,7 +2302,7 @@ function startRealtime() {
       renderStats();
       renderReservations();
     },
-    () => showToast("Reservations listener error")
+    (error) => handleRealtimeError(error, "reservationsListenerError")
   );
 }
 
