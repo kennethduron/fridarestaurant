@@ -14,6 +14,7 @@ const {
   requireStaff,
   assertOrderStatus
 } = require("../../../lib/server/supabase");
+const { sendToTokens } = require("../../../lib/server/firebaseAdmin");
 
 module.exports = async function handler(req, res) {
   if (handleOptions(req, res, ["PATCH", "OPTIONS"])) return;
@@ -51,8 +52,68 @@ module.exports = async function handler(req, res) {
       }
     });
 
+    await notifyOrderStatus(order).catch(() => null);
+
     sendJson(req, res, 200, { order }, ["PATCH", "OPTIONS"]);
   } catch (error) {
     sendJson(req, res, error.statusCode || 500, errorPayload(error), ["PATCH", "OPTIONS"]);
   }
 };
+
+async function notifyOrderStatus(order) {
+  const rows = await supabaseFetch(`/rest/v1/notification_tokens?order_id=eq.${encodeURIComponent(order.id)}&active=eq.true&select=token`, {
+    admin: true,
+    prefer: "return=representation"
+  });
+  const tokens = Array.isArray(rows) ? rows.map((row) => row.token) : [];
+  if (!tokens.length) return;
+
+  const message = statusMessage(order.status);
+  await sendToTokens(tokens, {
+    title: message.title,
+    body: message.body,
+    link: "https://fridarestauranthn.web.app/",
+    data: {
+      orderId: order.id,
+      status: order.status,
+      displayId: order.display_id || ""
+    }
+  });
+}
+
+function statusMessage(status) {
+  const messages = {
+    pending: {
+      title: "Pedido recibido",
+      body: "Tu pedido esta pendiente de autorizacion."
+    },
+    accepted: {
+      title: "Pedido aceptado",
+      body: "Tu pedido fue aceptado y pronto pasara a cocina."
+    },
+    preparing: {
+      title: "Pedido en preparacion",
+      body: "Cocina ya esta preparando tu pedido."
+    },
+    ready: {
+      title: "Pedido listo",
+      body: "Tu pedido ya esta listo."
+    },
+    delivered: {
+      title: "Pedido entregado",
+      body: "Tu pedido fue marcado como entregado. Gracias por elegirnos."
+    },
+    rejected: {
+      title: "Pedido rechazado",
+      body: "No pudimos aceptar tu pedido. Contacta al restaurante para mas detalles."
+    },
+    cancelled: {
+      title: "Pedido cancelado",
+      body: "Tu pedido fue cancelado."
+    }
+  };
+  return messages[status] || {
+    title: "Actualizacion de pedido",
+    body: "Tu pedido tiene una actualizacion."
+  };
+}

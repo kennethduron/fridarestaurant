@@ -7,9 +7,19 @@ const API_BASE_URL = (
 const SESSION_KEY = "frida_staff_session_v1";
 const POLL_INTERVAL_MS = 5000;
 const STAFF_EMAIL_DOMAIN = "frida.local";
+const FCM_VAPID_KEY = "BNmfp8tu6f6EWUwnX4grqCsQxPBR35s1Qr9XF1R3JzIN-s1k8ySArkSStrFlQbjcPgTv2h3y-7bspsmmpxej2xM";
+const FIREBASE_PUBLIC_CONFIG = {
+  apiKey: "AIzaSyAkoY3Disr5BnZWorJaAKxP4HHQ4UcHKc4",
+  authDomain: "fridarestaurant-768ab.firebaseapp.com",
+  projectId: "fridarestaurant-768ab",
+  storageBucket: "fridarestaurant-768ab.firebasestorage.app",
+  messagingSenderId: "133167188727",
+  appId: "1:133167188727:web:d0233adab39ff54ce5a1f2"
+};
 
 let currentSession = readSession();
 const authListeners = new Set();
+let messagingSetupPromise = null;
 
 const app = null;
 const db = null;
@@ -161,6 +171,68 @@ async function addReservation(reservation) {
     }
   });
   return result.reservation.id;
+}
+
+async function registerOrderNotificationToken(orderId, phone = "") {
+  if (!orderId) return null;
+  const setup = await setupFirebaseMessaging();
+  if (!setup) return null;
+
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") return null;
+
+  const token = await setup.getToken(setup.messaging, {
+    vapidKey: FCM_VAPID_KEY,
+    serviceWorkerRegistration: setup.registration
+  });
+  if (!token) return null;
+
+  await apiRequest("/api/notifications/register-token", {
+    method: "POST",
+    body: {
+      token,
+      order_id: orderId,
+      customer_phone: phone,
+      platform: "web"
+    }
+  });
+  return token;
+}
+
+async function setupFirebaseMessaging() {
+  if (messagingSetupPromise) return messagingSetupPromise;
+  messagingSetupPromise = (async () => {
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) return null;
+
+    const messagingModule = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-messaging.js");
+    const appModule = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js");
+    if (messagingModule.isSupported && !(await messagingModule.isSupported())) return null;
+
+    const firebaseApp = appModule.getApps().length
+      ? appModule.getApps()[0]
+      : appModule.initializeApp(FIREBASE_PUBLIC_CONFIG);
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    const messaging = messagingModule.getMessaging(firebaseApp);
+
+    messagingModule.onMessage(messaging, (payload) => {
+      const title = payload.notification?.title || "Frida Restaurant";
+      const body = payload.notification?.body || "Tu pedido tiene una actualizacion.";
+      if (Notification.permission === "granted") {
+        new Notification(title, {
+          body,
+          icon: "/assets/icon.jpg",
+          data: payload.data || {}
+        });
+      }
+    });
+
+    return {
+      messaging,
+      registration,
+      getToken: messagingModule.getToken
+    };
+  })().catch(() => null);
+  return messagingSetupPromise;
 }
 
 function mapOrder(row) {
@@ -404,6 +476,7 @@ export {
   loadFiscalSettings,
   saveFiscalSettings,
   reserveNextFiscalInvoiceNumber,
+  registerOrderNotificationToken,
   getStaffProfile,
   isStaffAuthorized,
   signInWithEmailPassword,

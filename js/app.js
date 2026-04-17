@@ -1,4 +1,4 @@
-import { addOrder, addReservation, listenOrderById } from "./firebase-config.js";
+import { addOrder, addReservation, listenOrderById, registerOrderNotificationToken } from "./firebase-config.js";
 
 const STORAGE = {
   cart: "restaurant_cart_v1",
@@ -1405,6 +1405,7 @@ async function submitOrderWithMode(mode, paymentMeta = {}, options = {}) {
   try {
     const orderId = await addOrder(orderPayload);
     addRecentOrderId(orderId);
+    registerOrderNotificationToken(orderId, customer.customerPhone).catch(() => {});
     cart = [];
     write(STORAGE.cart, cart);
     renderCart();

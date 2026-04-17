@@ -25,7 +25,7 @@ Firebase Messaging server-side keys will be added later:
 FIREBASE_PROJECT_ID=
 FIREBASE_CLIENT_EMAIL=
 FIREBASE_PRIVATE_KEY=
-FCM_VAPID_KEY=
+FCM_VAPID_KEY=BNmfp8tu6f6EWUwnX4grqCsQxPBR35s1Qr9XF1R3JzIN-s1k8ySArkSStrFlQbjcPgTv2h3y-7bspsmmpxej2xM
 ```
 
 ## Supabase schema
