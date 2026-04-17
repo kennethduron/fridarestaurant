@@ -176,16 +176,22 @@ async function addReservation(reservation) {
 async function registerOrderNotificationToken(orderId, phone = "") {
   if (!orderId) return null;
   const setup = await setupFirebaseMessaging();
-  if (!setup) return null;
+  if (!setup) {
+    throw new Error("notifications_not_supported");
+  }
 
   const permission = await Notification.requestPermission();
-  if (permission !== "granted") return null;
+  if (permission !== "granted") {
+    throw new Error("notifications_permission_denied");
+  }
 
   const token = await setup.getToken(setup.messaging, {
     vapidKey: FCM_VAPID_KEY,
     serviceWorkerRegistration: setup.registration
   });
-  if (!token) return null;
+  if (!token) {
+    throw new Error("notifications_token_missing");
+  }
 
   await apiRequest("/api/notifications/register-token", {
     method: "POST",
@@ -231,7 +237,7 @@ async function setupFirebaseMessaging() {
       registration,
       getToken: messagingModule.getToken
     };
-  })().catch(() => null);
+  })();
   return messagingSetupPromise;
 }
 

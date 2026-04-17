@@ -141,6 +141,8 @@ const i18n = {
     paypalPaymentError: "No se pudo completar el pago con PayPal.",
     paymentCashSent: "Pedido enviado a cocina. Estara completado aproximadamente en 15 minutos.",
     paymentCardSent: "Pago aprobado. Pedido confirmado y listo aproximadamente en 15 minutos.",
+    notificationReady: "Notificaciones activadas para este pedido.",
+    notificationUnavailable: "El pedido se envio, pero no se pudo activar la notificacion en este navegador.",
     reservationError: "No se pudo enviar la reserva. Intenta de nuevo.",
     hnTimeLabel: "Hora en Honduras",
     hnWeatherLabel: "Clima en El Progreso",
@@ -280,6 +282,8 @@ const i18n = {
     paypalPaymentError: "Could not complete PayPal payment.",
     paymentCashSent: "Order sent to kitchen. It will be completed in about 15 minutes.",
     paymentCardSent: "Payment approved. Order confirmed and ready in about 15 minutes.",
+    notificationReady: "Notifications enabled for this order.",
+    notificationUnavailable: "The order was sent, but notifications could not be enabled in this browser.",
     reservationError: "Could not send reservation. Please try again.",
     hnTimeLabel: "Honduras time",
     hnWeatherLabel: "Weather in El Progreso",
@@ -1405,7 +1409,15 @@ async function submitOrderWithMode(mode, paymentMeta = {}, options = {}) {
   try {
     const orderId = await addOrder(orderPayload);
     addRecentOrderId(orderId);
-    registerOrderNotificationToken(orderId, customer.customerPhone).catch(() => {});
+    try {
+      const notificationToken = await registerOrderNotificationToken(orderId, customer.customerPhone);
+      if (notificationToken) {
+        showToast(t("notificationReady"), { duration: 2600, highlight: true });
+      }
+    } catch (notificationError) {
+      console.warn("Notification registration failed", notificationError);
+      showToast(t("notificationUnavailable"), { duration: 4200 });
+    }
     cart = [];
     write(STORAGE.cart, cart);
     renderCart();
