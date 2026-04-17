@@ -181,6 +181,11 @@ const i18n = {
     calendarSearchEmpty: "No hay pedidos que coincidan con esa busqueda.",
     calendarOrders: "Pedidos",
     calendarRevenue: "Ingresos",
+    calendarPaymentBreakdown: "Cierre por metodo de pago",
+    calendarPaymentFilter: "Ver ventas por metodo",
+    calendarPaymentAll: "Todos los metodos",
+    calendarPaymentSelected: "Seleccion actual",
+    calendarPaymentOther: "Otros metodos",
     calendarDetailsTitle: "Detalle del dia",
     calendarPrev: "Mes anterior",
     calendarNext: "Mes siguiente",
@@ -362,6 +367,11 @@ const i18n = {
     calendarSearchEmpty: "No orders match that search.",
     calendarOrders: "Orders",
     calendarRevenue: "Revenue",
+    calendarPaymentBreakdown: "Payment method closeout",
+    calendarPaymentFilter: "View sales by method",
+    calendarPaymentAll: "All methods",
+    calendarPaymentSelected: "Current selection",
+    calendarPaymentOther: "Other methods",
     calendarDetailsTitle: "Day details",
     calendarPrev: "Previous month",
     calendarNext: "Next month",
@@ -446,6 +456,7 @@ let calendarMonth = (() => {
 })();
 let selectedCalendarDate = null;
 let salesDaySearchTerm = "";
+let salesDayPaymentFilter = "all";
 let unsubscribeOrders = null;
 let unsubscribeReservations = null;
 let hasSeenInitialOrdersSnapshot = false;
@@ -851,6 +862,38 @@ function paymentMethodSelectValue(order) {
 function selectedPaymentMethodLabel(order) {
   const selectedMethod = paymentMethodSelectValue(order);
   return selectedMethod ? paymentMethodLabel(selectedMethod) : "";
+}
+
+function salesPaymentMethodKey(order) {
+  const method = invoicePaymentMethod(order);
+  if (method === "bank_transfer") return "bank_transfer";
+  if (method === "card" || method === "paypal" || method === "online") return "card";
+  if (method === "cash" || method === "cash_on_pickup") return "cash";
+  return "other";
+}
+
+function salesPaymentMethodLabel(method) {
+  if (method === "all") return t("calendarPaymentAll");
+  if (method === "other") return t("calendarPaymentOther");
+  return paymentMethodLabel(method);
+}
+
+function salesPaymentBreakdown(orders) {
+  const breakdown = {
+    cash: { key: "cash", count: 0, revenue: 0 },
+    card: { key: "card", count: 0, revenue: 0 },
+    bank_transfer: { key: "bank_transfer", count: 0, revenue: 0 },
+    other: { key: "other", count: 0, revenue: 0 }
+  };
+
+  orders.forEach((order) => {
+    const key = salesPaymentMethodKey(order);
+    const row = breakdown[key] || breakdown.other;
+    row.count += 1;
+    row.revenue += Number(order.total || 0);
+  });
+
+  return breakdown;
 }
 
 async function refreshFiscalSettings() {
@@ -1819,9 +1862,30 @@ function renderSalesCalendar() {
   }
 
   const selectedBucket = monthSales.get(selectedCalendarDate) || null;
+  const selectedDayOrders = selectedBucket ? selectedBucket.orders : [];
+  const paymentBreakdown = salesPaymentBreakdown(selectedDayOrders);
+  const paymentBreakdownRows = [
+    paymentBreakdown.cash,
+    paymentBreakdown.card,
+    paymentBreakdown.bank_transfer,
+    ...(paymentBreakdown.other.count ? [paymentBreakdown.other] : [])
+  ];
+  const paymentFilterOptions = [
+    { key: "all", label: t("calendarPaymentAll") },
+    { key: "cash", label: t("payMethodCash") },
+    { key: "card", label: t("payMethodCard") },
+    { key: "bank_transfer", label: t("payMethodTransfer") },
+    ...(paymentBreakdown.other.count || salesDayPaymentFilter === "other"
+      ? [{ key: "other", label: t("calendarPaymentOther") }]
+      : [])
+  ];
+  const paymentFilteredDayOrders = salesDayPaymentFilter === "all"
+    ? selectedDayOrders
+    : selectedDayOrders.filter((order) => salesPaymentMethodKey(order) === salesDayPaymentFilter);
+  const paymentFilteredRevenue = paymentFilteredDayOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
   const normalizedSalesDaySearch = salesDaySearchTerm.trim().toLowerCase();
   const filteredDayOrders = selectedBucket
-    ? selectedBucket.orders.filter((order) => {
+    ? paymentFilteredDayOrders.filter((order) => {
         if (!normalizedSalesDaySearch) return true;
         const customerName = String(order.customer?.name || "").toLowerCase();
         const invoiceNumber = String(order.invoice?.invoiceNumber || "").toLowerCase();
@@ -1840,7 +1904,7 @@ function renderSalesCalendar() {
   const dayFoodRows = (() => {
     if (!selectedBucket) return [];
     const byFood = new Map();
-    selectedBucket.orders.forEach((order) => {
+    paymentFilteredDayOrders.forEach((order) => {
       (order.items || []).forEach((item) => {
         const key = item.id || foodName(item);
         const existing = byFood.get(key) || { name: foodName(item), qty: 0, sales: 0 };
@@ -1888,6 +1952,7 @@ function renderSalesCalendar() {
                 <div class="sales-day-copy">
                   <h4>${t("calendarDetailsTitle")}: ${selectedDateLabel}</h4>
                   <p><strong>${t("calendarOrders")}:</strong> ${selectedBucket.count} | <strong>${t("calendarRevenue")}:</strong> ${money(selectedBucket.revenue)}</p>
+                  <p class="sales-payment-selected"><strong>${t("calendarPaymentSelected")}:</strong> ${salesPaymentMethodLabel(salesDayPaymentFilter)} | ${paymentFilteredDayOrders.length} ${t("calendarOrders")} | ${money(paymentFilteredRevenue)}</p>
                 </div>
                 <label class="sales-day-search" for="salesDaySearch">
                   <span>${escapeHtml(t("calendarSearchPlaceholder"))}</span>
@@ -1903,6 +1968,37 @@ function renderSalesCalendar() {
                     spellcheck="false"
                     value="${escapeHtml(salesDaySearchTerm)}"
                     placeholder="${escapeHtml(t("calendarSearchPlaceholder"))}">
+                </label>
+              </div>
+              <div class="sales-payment-tools">
+                <section class="sales-payment-breakdown" aria-label="${escapeHtml(t("calendarPaymentBreakdown"))}">
+                  <h5>${t("calendarPaymentBreakdown")}</h5>
+                  <div class="sales-payment-cards">
+                    ${paymentBreakdownRows
+                      .map((row) => `
+                        <button
+                          type="button"
+                          class="sales-payment-card ${salesDayPaymentFilter === row.key ? "selected" : ""}"
+                          data-sales-payment-filter="${row.key}">
+                          <span>${escapeHtml(salesPaymentMethodLabel(row.key))}</span>
+                          <strong>${money(row.revenue)}</strong>
+                          <em>${row.count} ${t("calendarOrders")}</em>
+                        </button>
+                      `)
+                      .join("")}
+                  </div>
+                </section>
+                <label class="sales-payment-filter" for="salesDayPaymentFilter">
+                  <span>${t("calendarPaymentFilter")}</span>
+                  <select id="salesDayPaymentFilter">
+                    ${paymentFilterOptions
+                      .map((option) => `
+                        <option value="${option.key}" ${salesDayPaymentFilter === option.key ? "selected" : ""}>
+                          ${escapeHtml(option.label)}
+                        </option>
+                      `)
+                      .join("")}
+                  </select>
                 </label>
               </div>
               <div class="sales-day-list">
@@ -2506,6 +2602,13 @@ if (salesCalendar) {
       return;
     }
 
+    const paymentFilterBtn = event.target.closest("[data-sales-payment-filter]");
+    if (paymentFilterBtn) {
+      salesDayPaymentFilter = paymentFilterBtn.dataset.salesPaymentFilter || "all";
+      renderSalesCalendar();
+      return;
+    }
+
     const dayBtn = event.target.closest("[data-calendar-date]");
     if (dayBtn) {
       selectedCalendarDate = dayBtn.dataset.calendarDate;
@@ -2527,6 +2630,13 @@ if (salesCalendar) {
     if (!searchInput) return;
     salesDaySearchTerm = searchInput.value || "";
     renderSalesCalendarKeepingSearchPosition(searchInput.selectionStart, searchInput.selectionEnd);
+  });
+
+  salesCalendar.addEventListener("change", (event) => {
+    const paymentFilterSelect = event.target.closest("#salesDayPaymentFilter");
+    if (!paymentFilterSelect) return;
+    salesDayPaymentFilter = paymentFilterSelect.value || "all";
+    renderSalesCalendar();
   });
 }
 
