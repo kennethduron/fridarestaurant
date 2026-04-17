@@ -715,14 +715,16 @@ function orderStatusLabel(status) {
   return t(`status_${status}`);
 }
 
-const ORDER_STATUS_FLOW = ["pending", "accepted", "preparing", "ready", "delivered"];
+const ORDER_STATUS_FLOW = ["pending", "preparing", "ready", "delivered"];
 
 function previousOrderStatus(status) {
+  if (status === "accepted") return "pending";
   const index = ORDER_STATUS_FLOW.indexOf(status);
   return index > 0 ? ORDER_STATUS_FLOW[index - 1] : "";
 }
 
 function nextOrderStatus(status) {
+  if (status === "accepted") return "preparing";
   const index = ORDER_STATUS_FLOW.indexOf(status);
   return index >= 0 && index < ORDER_STATUS_FLOW.length - 1 ? ORDER_STATUS_FLOW[index + 1] : "";
 }
