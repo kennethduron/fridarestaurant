@@ -141,8 +141,10 @@ const i18n = {
     paypalPaymentError: "No se pudo completar el pago con PayPal.",
     paymentCashSent: "Pedido enviado a cocina. Estara completado aproximadamente en 15 minutos.",
     paymentCardSent: "Pago aprobado. Pedido confirmado y listo aproximadamente en 15 minutos.",
+    orderSubmitting: "Enviando pedido...",
     notificationReady: "Notificaciones activadas para este pedido.",
     notificationUnavailable: "El pedido se envio, pero no se pudo activar la notificacion en este navegador.",
+    reservationSubmitting: "Enviando reserva...",
     reservationError: "No se pudo enviar la reserva. Intenta de nuevo.",
     hnTimeLabel: "Hora en Honduras",
     hnWeatherLabel: "Clima en El Progreso",
@@ -282,8 +284,10 @@ const i18n = {
     paypalPaymentError: "Could not complete PayPal payment.",
     paymentCashSent: "Order sent to kitchen. It will be completed in about 15 minutes.",
     paymentCardSent: "Payment approved. Order confirmed and ready in about 15 minutes.",
+    orderSubmitting: "Sending order...",
     notificationReady: "Notifications enabled for this order.",
     notificationUnavailable: "The order was sent, but notifications could not be enabled in this browser.",
+    reservationSubmitting: "Sending reservation...",
     reservationError: "Could not send reservation. Please try again.",
     hnTimeLabel: "Honduras time",
     hnWeatherLabel: "Weather in El Progreso",
@@ -389,6 +393,7 @@ const cardExpiryInput = document.getElementById("cardExpiry");
 const cardCvvInput = document.getElementById("cardCvv");
 const paypalButtonsContainer = document.getElementById("paypalButtonsContainer");
 const toast = document.getElementById("toast");
+const busyScreen = createBusyScreen();
 const tracker = document.getElementById("orderTracker");
 const reservationForm = document.getElementById("reservationForm");
 const langToggle = document.getElementById("langToggle");
@@ -992,6 +997,49 @@ function showCenterNotice(message, duration = 2200) {
   showToast(message, { duration, center: true, highlight: true });
 }
 
+function setCheckoutBusy(isBusy) {
+  [
+    sendToKitchenBtn,
+    choosePayCashBtn,
+    choosePayNowBtn,
+    pickupPayCashBtn,
+    pickupPayNowBtn,
+    invoicePayCashBtn,
+    invoicePayNowBtn,
+    cardFallbackForm?.querySelector('button[type="submit"]')
+  ].filter(Boolean).forEach((button) => {
+    button.disabled = isBusy;
+    button.classList.toggle("is-busy", isBusy);
+  });
+}
+
+function createBusyScreen() {
+  const node = document.createElement("div");
+  node.className = "busy-screen hidden";
+  node.setAttribute("role", "status");
+  node.setAttribute("aria-live", "polite");
+  node.innerHTML = '<div class="busy-card"><span></span></div>';
+  document.body.appendChild(node);
+  return node;
+}
+
+async function withSlowBusyScreen(message, action, delay = 900) {
+  let visible = false;
+  const label = busyScreen.querySelector("span");
+  const timer = setTimeout(() => {
+    if (label) label.textContent = message;
+    busyScreen.classList.remove("hidden");
+    visible = true;
+  }, delay);
+
+  try {
+    return await action();
+  } finally {
+    clearTimeout(timer);
+    if (visible) busyScreen.classList.add("hidden");
+  }
+}
+
 function readRecentOrderIds() {
   const saved = read(STORAGE.recentOrderIds, []);
   if (!Array.isArray(saved)) return [];
@@ -1381,6 +1429,7 @@ async function submitOrderWithMode(mode, paymentMeta = {}, options = {}) {
   const customer = validateCustomerForOrder();
   if (!customer) return false;
   isSubmittingOrder = true;
+  setCheckoutBusy(true);
 
   const orderPayload = {
     language: lang,
@@ -1407,45 +1456,51 @@ async function submitOrderWithMode(mode, paymentMeta = {}, options = {}) {
   };
 
   try {
-    const orderId = await addOrder(orderPayload);
-    addRecentOrderId(orderId);
-    try {
-      const notificationToken = await registerOrderNotificationToken(orderId, customer.customerPhone);
-      if (notificationToken) {
-        showToast(t("notificationReady"), { duration: 2600, highlight: true });
-      }
-    } catch (notificationError) {
-      console.warn("Notification registration failed", notificationError);
-      showToast(t("notificationUnavailable"), { duration: 4200 });
-    }
-    cart = [];
-    write(STORAGE.cart, cart);
-    renderCart();
-    const commentsField = document.getElementById("orderCustomerComments");
-    if (commentsField) commentsField.value = "";
-    const pickupField = document.getElementById("orderPickup");
-    if (pickupField) pickupField.checked = false;
-    const needInvoiceField = document.getElementById("orderNeedInvoice");
-    if (needInvoiceField) needInvoiceField.checked = false;
-    const businessNameField = document.getElementById("orderBusinessName");
-    if (businessNameField) businessNameField.value = "";
-    const businessRTNField = document.getElementById("orderBusinessRTN");
-    if (businessRTNField) businessRTNField.value = "";
-    const invoiceFieldsBox = document.getElementById("orderInvoiceFields");
-    if (invoiceFieldsBox) invoiceFieldsBox.classList.add("hidden");
-    closePaypalPaymentModal();
-    closePaymentChoiceModal();
-    closeDrawer();
-    if (showConfirmation) {
-      showCenterNotice(mode === "paypal_paid" ? t("paymentCardSent") : t("paymentCashSent"));
-    }
+    const orderId = await withSlowBusyScreen(t("orderSubmitting"), () => addOrder(orderPayload));
+    finishSuccessfulOrder(orderId, mode, showConfirmation, customer.customerPhone);
     return true;
   } catch (_e) {
     showToast(t("orderError"));
     return false;
   } finally {
     isSubmittingOrder = false;
+    setCheckoutBusy(false);
   }
+}
+
+function finishSuccessfulOrder(orderId, mode, showConfirmation, customerPhone) {
+  addRecentOrderId(orderId);
+  cart = [];
+  write(STORAGE.cart, cart);
+  renderCart();
+  const commentsField = document.getElementById("orderCustomerComments");
+  if (commentsField) commentsField.value = "";
+  const pickupField = document.getElementById("orderPickup");
+  if (pickupField) pickupField.checked = false;
+  const needInvoiceField = document.getElementById("orderNeedInvoice");
+  if (needInvoiceField) needInvoiceField.checked = false;
+  const businessNameField = document.getElementById("orderBusinessName");
+  if (businessNameField) businessNameField.value = "";
+  const businessRTNField = document.getElementById("orderBusinessRTN");
+  if (businessRTNField) businessRTNField.value = "";
+  const invoiceFieldsBox = document.getElementById("orderInvoiceFields");
+  if (invoiceFieldsBox) invoiceFieldsBox.classList.add("hidden");
+  closePaypalPaymentModal();
+  closePaymentChoiceModal();
+  closeDrawer();
+  if (showConfirmation) {
+    showCenterNotice(mode === "paypal_paid" || mode === "card_paid" ? t("paymentCardSent") : t("paymentCashSent"));
+  }
+  registerOrderNotificationToken(orderId, customerPhone)
+    .then((notificationToken) => {
+      if (notificationToken) {
+        showToast(t("notificationReady"), { duration: 2600, highlight: true });
+      }
+    })
+    .catch((notificationError) => {
+      console.warn("Notification registration failed", notificationError);
+      showToast(t("notificationUnavailable"), { duration: 4200 });
+    });
 }
 
 async function submitReservation(event) {
@@ -1457,7 +1512,7 @@ async function submitReservation(event) {
   }
 
   try {
-    await addReservation({ ...data, language: lang });
+    await withSlowBusyScreen(t("reservationSubmitting"), () => addReservation({ ...data, language: lang }));
     showToast(t("reservationSent"));
     reservationForm.reset();
   } catch (_e) {

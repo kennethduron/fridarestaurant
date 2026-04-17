@@ -190,6 +190,7 @@ const i18n = {
     period_day: "Hoy",
     period_week: "Semana",
     period_month: "Mes",
+    savingAction: "Aplicando cambio...",
     updated: "Estado actualizado",
     paymentUpdated: "Pago actualizado",
     paymentMethodUpdated: "Metodo de pago actualizado",
@@ -370,6 +371,7 @@ const i18n = {
     period_day: "Today",
     period_week: "Week",
     period_month: "Month",
+    savingAction: "Applying change...",
     updated: "Status updated",
     paymentUpdated: "Payment updated",
     paymentMethodUpdated: "Payment method updated",
@@ -425,6 +427,7 @@ const fiscalRangeAlertTitle = document.getElementById("fiscalRangeAlertTitle");
 const fiscalRangeAlertText = document.getElementById("fiscalRangeAlertText");
 const fiscalRangeAlertButton = document.getElementById("fiscalRangeAlertButton");
 const toast = document.getElementById("toast");
+const busyScreen = createBusyScreen();
 
 let lang = "es";
 let activeFilter = "all";
@@ -554,6 +557,33 @@ function showToast(message) {
   toast.textContent = message;
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 1600);
+}
+
+function createBusyScreen() {
+  const node = document.createElement("div");
+  node.className = "busy-screen hidden";
+  node.setAttribute("role", "status");
+  node.setAttribute("aria-live", "polite");
+  node.innerHTML = '<div class="busy-card"><span></span></div>';
+  document.body.appendChild(node);
+  return node;
+}
+
+async function withSlowBusyScreen(message, action, delay = 900) {
+  let visible = false;
+  const label = busyScreen.querySelector("span");
+  const timer = setTimeout(() => {
+    if (label) label.textContent = message;
+    busyScreen.classList.remove("hidden");
+    visible = true;
+  }, delay);
+
+  try {
+    return await action();
+  } finally {
+    clearTimeout(timer);
+    if (visible) busyScreen.classList.add("hidden");
+  }
 }
 
 function canUseBrowserNotifications() {
@@ -2087,6 +2117,26 @@ function toggleCRMHeaderNav() {
   crmNavToggle.setAttribute("aria-expanded", String(isOpen));
 }
 
+function refreshOrderViews(orderId) {
+  renderStats();
+  renderFoodStats();
+  renderSalesCalendar();
+  renderOrders();
+  if (selectedOrderId === orderId) openReview(orderId);
+}
+
+function patchOrderInCache(orderId, patcher) {
+  let previousOrder = null;
+  let nextOrder = null;
+  ordersCache = ordersCache.map((order) => {
+    if (order.id !== orderId) return order;
+    previousOrder = order;
+    nextOrder = patcher(order);
+    return nextOrder;
+  });
+  return { previousOrder, nextOrder };
+}
+
 async function setStatus(orderId, status) {
   const order = ordersCache.find((row) => row.id === orderId);
   if (!order) return;
@@ -2094,45 +2144,84 @@ async function setStatus(orderId, status) {
     showToast(t("paymentMethodRequired"));
     return;
   }
+  const previousStatus = order.status;
+  patchOrderInCache(orderId, (current) => ({
+    ...current,
+    status,
+    updatedAt: new Date().toISOString()
+  }));
+  refreshOrderViews(orderId);
   try {
-    await updateOrderStatus(orderId, status, currentStaffUser);
+    await withSlowBusyScreen(t("savingAction"), () => updateOrderStatus(orderId, status, currentStaffUser));
     showToast(t("updated"));
   } catch (_e) {
+    patchOrderInCache(orderId, (current) => ({
+      ...current,
+      status: previousStatus,
+      updatedAt: order.updatedAt
+    }));
+    refreshOrderViews(orderId);
     showToast("Error");
   }
 }
 
 async function setPaymentStatus(orderId, paymentStatus) {
+  const order = ordersCache.find((row) => row.id === orderId);
+  if (!order) return;
+  const previousStatus = order.payment?.status || "unpaid";
+  patchOrderInCache(orderId, (current) => ({
+    ...current,
+    payment: {
+      ...(current.payment || {}),
+      status: paymentStatus
+    },
+    updatedAt: new Date().toISOString()
+  }));
+  refreshOrderViews(orderId);
   try {
-    await updateOrderPaymentStatus(orderId, paymentStatus, currentStaffUser);
+    await withSlowBusyScreen(t("savingAction"), () => updateOrderPaymentStatus(orderId, paymentStatus, currentStaffUser));
     showToast(t("paymentUpdated"));
   } catch (_e) {
+    patchOrderInCache(orderId, (current) => ({
+      ...current,
+      payment: {
+        ...(current.payment || {}),
+        status: previousStatus
+      },
+      updatedAt: order.updatedAt
+    }));
+    refreshOrderViews(orderId);
     showToast("Error");
   }
 }
 
 async function setPaymentMethod(orderId, paymentMethod) {
   if (!paymentMethod) return;
+  const order = ordersCache.find((row) => row.id === orderId);
+  if (!order) return;
+  const previousMethod = order.payment?.method || "";
+  patchOrderInCache(orderId, (current) => ({
+    ...current,
+    payment: {
+      ...(current.payment || {}),
+      method: paymentMethod
+    },
+    updatedAt: new Date().toISOString()
+  }));
+  refreshOrderViews(orderId);
   try {
-    await updateOrderPaymentMethod(orderId, paymentMethod, currentStaffUser);
-    ordersCache = ordersCache.map((order) => (
-      order.id === orderId
-        ? {
-            ...order,
-            payment: {
-              ...(order.payment || {}),
-              method: paymentMethod
-            }
-          }
-        : order
-    ));
-    if (selectedOrderId === orderId) {
-      const selectedOrder = ordersCache.find((order) => order.id === orderId);
-      if (selectedOrder) reviewBody.innerHTML = renderReviewBody(selectedOrder);
-    }
-    renderOrders();
+    await withSlowBusyScreen(t("savingAction"), () => updateOrderPaymentMethod(orderId, paymentMethod, currentStaffUser));
     showToast(t("paymentMethodUpdated"));
   } catch (_e) {
+    patchOrderInCache(orderId, (current) => ({
+      ...current,
+      payment: {
+        ...(current.payment || {}),
+        method: previousMethod
+      },
+      updatedAt: order.updatedAt
+    }));
+    refreshOrderViews(orderId);
     showToast("Error");
   }
 }
