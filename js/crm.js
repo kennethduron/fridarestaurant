@@ -175,6 +175,10 @@ const i18n = {
     topFoodEmpty: "No hay ventas aceptadas para este periodo.",
     calendarTitle: "Calendario de ventas",
     calendarSub: "Selecciona fecha para revisar ventas entregadas y sus pedidos.",
+    calendarCollapsedText: "Resumen mensual listo. Abre el reporte para revisar dias, pagos y comida vendida.",
+    calendarShow: "Mostrar reporte",
+    calendarHide: "Ocultar reporte",
+    calendarMonthSummary: "Resumen del mes",
     calendarNoSalesMonth: "No hay ventas entregadas en este mes.",
     calendarNoSalesDay: "No hay ventas entregadas en esta fecha.",
     calendarSearchPlaceholder: "Buscar por cliente, numero de orden, factura o pedido",
@@ -361,6 +365,10 @@ const i18n = {
     topFoodEmpty: "No accepted sales for this period.",
     calendarTitle: "Sales calendar",
     calendarSub: "Pick a date to review delivered sales and order details.",
+    calendarCollapsedText: "Monthly summary ready. Open the report to review days, payments, and food sold.",
+    calendarShow: "Show report",
+    calendarHide: "Hide report",
+    calendarMonthSummary: "Month summary",
     calendarNoSalesMonth: "No delivered sales in this month.",
     calendarNoSalesDay: "No delivered sales on this date.",
     calendarSearchPlaceholder: "Search by customer, order number, invoice, or item",
@@ -457,6 +465,7 @@ let calendarMonth = (() => {
 let selectedCalendarDate = null;
 let salesDaySearchTerm = "";
 let salesDayPaymentFilter = "all";
+let salesCalendarExpanded = false;
 let unsubscribeOrders = null;
 let unsubscribeReservations = null;
 let hasSeenInitialOrdersSnapshot = false;
@@ -1925,135 +1934,158 @@ function renderSalesCalendar() {
         month: "long",
         day: "numeric"
       });
+  const monthSummary = Array.from(monthSales.values()).reduce(
+    (summary, row) => ({
+      count: summary.count + row.count,
+      revenue: summary.revenue + row.revenue
+    }),
+    { count: 0, revenue: 0 }
+  );
+  const calendarNav = `
+    <div class="sales-calendar-nav">
+      <button class="btn btn-outline" data-calendar-shift="-1" aria-label="${t("calendarPrev")}">&lt;</button>
+      <strong>${monthLabel(calendarMonth)}</strong>
+      <button class="btn btn-outline" data-calendar-shift="1" aria-label="${t("calendarNext")}">&gt;</button>
+    </div>
+  `;
+  const expandedCalendarContent = `
+    ${calendarNav}
+    <div class="sales-calendar-grid">
+      ${calendarWeekdayLabels().map((label) => `<div class="calendar-cell weekday">${label}</div>`).join("")}
+      ${dayCells.join("")}
+    </div>
+    ${monthSales.size ? "" : `<p class="calendar-empty-month">${t("calendarNoSalesMonth")}</p>`}
+    <section class="sales-day-details">
+      ${
+        selectedBucket
+          ? `
+            <div class="sales-day-head">
+              <div class="sales-day-copy">
+                <h4>${t("calendarDetailsTitle")}: ${selectedDateLabel}</h4>
+                <p><strong>${t("calendarOrders")}:</strong> ${selectedBucket.count} | <strong>${t("calendarRevenue")}:</strong> ${money(selectedBucket.revenue)}</p>
+                <p class="sales-payment-selected"><strong>${t("calendarPaymentSelected")}:</strong> ${salesPaymentMethodLabel(salesDayPaymentFilter)} | ${paymentFilteredDayOrders.length} ${t("calendarOrders")} | ${money(paymentFilteredRevenue)}</p>
+              </div>
+              <label class="sales-day-search" for="salesDaySearch">
+                <span>${escapeHtml(t("calendarSearchPlaceholder"))}</span>
+                <input
+                  id="salesDaySearch"
+                  class="sales-day-search-input"
+                  type="text"
+                  inputmode="search"
+                  enterkeyhint="search"
+                  autocapitalize="off"
+                  autocomplete="off"
+                  autocorrect="off"
+                  spellcheck="false"
+                  value="${escapeHtml(salesDaySearchTerm)}"
+                  placeholder="${escapeHtml(t("calendarSearchPlaceholder"))}">
+              </label>
+            </div>
+            <div class="sales-payment-tools">
+              <section class="sales-payment-breakdown" aria-label="${escapeHtml(t("calendarPaymentBreakdown"))}">
+                <h5>${t("calendarPaymentBreakdown")}</h5>
+                <div class="sales-payment-cards">
+                  ${paymentBreakdownRows
+                    .map((row) => `
+                      <button
+                        type="button"
+                        class="sales-payment-card ${salesDayPaymentFilter === row.key ? "selected" : ""}"
+                        data-sales-payment-filter="${row.key}">
+                        <span>${escapeHtml(salesPaymentMethodLabel(row.key))}</span>
+                        <strong>${money(row.revenue)}</strong>
+                        <em>${row.count} ${t("calendarOrders")}</em>
+                      </button>
+                    `)
+                    .join("")}
+                </div>
+              </section>
+              <label class="sales-payment-filter" for="salesDayPaymentFilter">
+                <span>${t("calendarPaymentFilter")}</span>
+                <select id="salesDayPaymentFilter">
+                  ${paymentFilterOptions
+                    .map((option) => `
+                      <option value="${option.key}" ${salesDayPaymentFilter === option.key ? "selected" : ""}>
+                        ${escapeHtml(option.label)}
+                      </option>
+                    `)
+                    .join("")}
+                </select>
+              </label>
+            </div>
+            <div class="sales-day-list">
+              ${filteredDayOrders.length
+                ? filteredDayOrders
+                .map(
+                  (order) => `
+                    <article class="sales-day-row">
+                      <div>
+                        <strong>#${order.displayId || order.id.slice(0, 6)}</strong>
+                        <p>${t("customer")}: ${order.customer?.name || "-"} (${order.customer?.phone || "-"})</p>
+                        ${renderInvoiceRequestNotice(order)}
+                        <p><strong>${crmPaymentLine(order)}</strong></p>
+                        <p>${timeLabel(order.createdAt)} | ${money(order.total)}</p>
+                      </div>
+                      <button class="btn btn-outline" data-review-order="${order.id}">${t("review")}</button>
+                    </article>
+                  `
+                )
+                .join("")
+                : ""}
+              ${filteredDayOrders.length ? "" : `<p class="sales-day-empty">${t("calendarSearchEmpty")}</p>`}
+            </div>
+            <div class="sales-food-breakdown">
+              <h5>${t("calendarFoodBreakdown")}</h5>
+              ${
+                dayFoodRows.length
+                  ? `
+                    <ul>
+                      ${dayFoodRows
+                        .map(
+                          (row) => `
+                            <li>
+                              <span>${row.name}</span>
+                              <span>${t("qtySold")}: ${row.qty} | ${t("salesLabel")}: ${money(row.sales)}</span>
+                            </li>
+                          `
+                        )
+                        .join("")}
+                    </ul>
+                  `
+                  : `<p>${t("calendarNoSalesDay")}</p>`
+              }
+            </div>
+          `
+          : `
+            <div class="sales-day-head">
+              <div class="sales-day-copy">
+                <h4>${t("calendarDetailsTitle")}: ${selectedDateLabel}</h4>
+              </div>
+            </div>
+            <p>${t("calendarNoSalesDay")}</p>
+          `
+      }
+    </section>
+  `;
 
   salesCalendar.innerHTML = `
-    <article class="sales-calendar-card">
+    <article class="sales-calendar-card ${salesCalendarExpanded ? "is-expanded" : "is-collapsed"}">
       <header class="sales-calendar-head">
         <div>
           <h3>${t("calendarTitle")}</h3>
-          <p>${t("calendarSub")}</p>
+          <p>${salesCalendarExpanded ? t("calendarSub") : t("calendarCollapsedText")}</p>
         </div>
-        <div class="sales-calendar-nav">
-          <button class="btn btn-outline" data-calendar-shift="-1" aria-label="${t("calendarPrev")}">&lt;</button>
-          <strong>${monthLabel(calendarMonth)}</strong>
-          <button class="btn btn-outline" data-calendar-shift="1" aria-label="${t("calendarNext")}">&gt;</button>
+        <div class="sales-calendar-actions">
+          <span class="sales-calendar-pill">${t("calendarMonthSummary")}: ${monthSummary.count} ${t("calendarOrders")} | ${money(monthSummary.revenue)}</span>
+          <button
+            type="button"
+            class="btn btn-primary sales-calendar-toggle"
+            data-sales-calendar-toggle
+            aria-expanded="${salesCalendarExpanded ? "true" : "false"}">
+            ${salesCalendarExpanded ? t("calendarHide") : t("calendarShow")}
+          </button>
         </div>
       </header>
-      <div class="sales-calendar-grid">
-        ${calendarWeekdayLabels().map((label) => `<div class="calendar-cell weekday">${label}</div>`).join("")}
-        ${dayCells.join("")}
-      </div>
-      ${monthSales.size ? "" : `<p class="calendar-empty-month">${t("calendarNoSalesMonth")}</p>`}
-      <section class="sales-day-details">
-        ${
-          selectedBucket
-            ? `
-              <div class="sales-day-head">
-                <div class="sales-day-copy">
-                  <h4>${t("calendarDetailsTitle")}: ${selectedDateLabel}</h4>
-                  <p><strong>${t("calendarOrders")}:</strong> ${selectedBucket.count} | <strong>${t("calendarRevenue")}:</strong> ${money(selectedBucket.revenue)}</p>
-                  <p class="sales-payment-selected"><strong>${t("calendarPaymentSelected")}:</strong> ${salesPaymentMethodLabel(salesDayPaymentFilter)} | ${paymentFilteredDayOrders.length} ${t("calendarOrders")} | ${money(paymentFilteredRevenue)}</p>
-                </div>
-                <label class="sales-day-search" for="salesDaySearch">
-                  <span>${escapeHtml(t("calendarSearchPlaceholder"))}</span>
-                  <input
-                    id="salesDaySearch"
-                    class="sales-day-search-input"
-                    type="text"
-                    inputmode="search"
-                    enterkeyhint="search"
-                    autocapitalize="off"
-                    autocomplete="off"
-                    autocorrect="off"
-                    spellcheck="false"
-                    value="${escapeHtml(salesDaySearchTerm)}"
-                    placeholder="${escapeHtml(t("calendarSearchPlaceholder"))}">
-                </label>
-              </div>
-              <div class="sales-payment-tools">
-                <section class="sales-payment-breakdown" aria-label="${escapeHtml(t("calendarPaymentBreakdown"))}">
-                  <h5>${t("calendarPaymentBreakdown")}</h5>
-                  <div class="sales-payment-cards">
-                    ${paymentBreakdownRows
-                      .map((row) => `
-                        <button
-                          type="button"
-                          class="sales-payment-card ${salesDayPaymentFilter === row.key ? "selected" : ""}"
-                          data-sales-payment-filter="${row.key}">
-                          <span>${escapeHtml(salesPaymentMethodLabel(row.key))}</span>
-                          <strong>${money(row.revenue)}</strong>
-                          <em>${row.count} ${t("calendarOrders")}</em>
-                        </button>
-                      `)
-                      .join("")}
-                  </div>
-                </section>
-                <label class="sales-payment-filter" for="salesDayPaymentFilter">
-                  <span>${t("calendarPaymentFilter")}</span>
-                  <select id="salesDayPaymentFilter">
-                    ${paymentFilterOptions
-                      .map((option) => `
-                        <option value="${option.key}" ${salesDayPaymentFilter === option.key ? "selected" : ""}>
-                          ${escapeHtml(option.label)}
-                        </option>
-                      `)
-                      .join("")}
-                  </select>
-                </label>
-              </div>
-              <div class="sales-day-list">
-                ${filteredDayOrders.length
-                  ? filteredDayOrders
-                  .map(
-                    (order) => `
-                      <article class="sales-day-row">
-                        <div>
-                          <strong>#${order.displayId || order.id.slice(0, 6)}</strong>
-                          <p>${t("customer")}: ${order.customer?.name || "-"} (${order.customer?.phone || "-"})</p>
-                          ${renderInvoiceRequestNotice(order)}
-                          <p><strong>${crmPaymentLine(order)}</strong></p>
-                          <p>${timeLabel(order.createdAt)} | ${money(order.total)}</p>
-                        </div>
-                        <button class="btn btn-outline" data-review-order="${order.id}">${t("review")}</button>
-                      </article>
-                    `
-                  )
-                  .join("")
-                  : ""}
-                ${filteredDayOrders.length ? "" : `<p class="sales-day-empty">${t("calendarSearchEmpty")}</p>`}
-              </div>
-              <div class="sales-food-breakdown">
-                <h5>${t("calendarFoodBreakdown")}</h5>
-                ${
-                  dayFoodRows.length
-                    ? `
-                      <ul>
-                        ${dayFoodRows
-                          .map(
-                            (row) => `
-                              <li>
-                                <span>${row.name}</span>
-                                <span>${t("qtySold")}: ${row.qty} | ${t("salesLabel")}: ${money(row.sales)}</span>
-                              </li>
-                            `
-                          )
-                          .join("")}
-                      </ul>
-                    `
-                    : `<p>${t("calendarNoSalesDay")}</p>`
-                }
-              </div>
-            `
-            : `
-              <div class="sales-day-head">
-                <div class="sales-day-copy">
-                  <h4>${t("calendarDetailsTitle")}: ${selectedDateLabel}</h4>
-                </div>
-              </div>
-              <p>${t("calendarNoSalesDay")}</p>
-            `
-        }
-      </section>
+      ${salesCalendarExpanded ? expandedCalendarContent : ""}
     </article>
   `;
 }
@@ -2591,6 +2623,13 @@ if (salesCalendar) {
       event.stopPropagation();
       const searchInput = document.getElementById("salesDaySearch");
       if (searchInput) searchInput.focus({ preventScroll: true });
+      return;
+    }
+
+    const calendarToggle = event.target.closest("[data-sales-calendar-toggle]");
+    if (calendarToggle) {
+      salesCalendarExpanded = !salesCalendarExpanded;
+      renderSalesCalendar();
       return;
     }
 
