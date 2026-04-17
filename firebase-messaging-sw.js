@@ -1,30 +1,49 @@
-importScripts("https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/10.12.5/firebase-messaging-compat.js");
-
-firebase.initializeApp({
-  apiKey: "AIzaSyAkoY3Disr5BnZWorJaAKxP4HHQ4UcHKc4",
-  authDomain: "fridarestaurant-768ab.firebaseapp.com",
-  projectId: "fridarestaurant-768ab",
-  storageBucket: "fridarestaurant-768ab.firebasestorage.app",
-  messagingSenderId: "133167188727",
-  appId: "1:133167188727:web:d0233adab39ff54ce5a1f2"
+self.addEventListener("install", (event) => {
+  event.waitUntil(self.skipWaiting());
 });
 
-const messaging = firebase.messaging();
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
 
-messaging.onBackgroundMessage((payload) => {
+self.addEventListener("push", (event) => {
+  const payload = readPushPayload(event);
   const notification = payload.notification || {};
   const data = payload.data || {};
-  self.registration.showNotification(notification.title || "Frida Restaurant", {
-    body: notification.body || "Tu pedido tiene una actualizacion.",
-    icon: "/assets/icon.jpg",
-    badge: "/assets/icon.jpg",
-    data
-  });
+  const title = notification.title || data.title || "Frida Restaurant";
+  const body = notification.body || data.body || "Tu pedido tiene una actualizacion.";
+  const link = data.link ||
+    (payload.fcmOptions && payload.fcmOptions.link) ||
+    (payload.webpush && payload.webpush.fcmOptions && payload.webpush.fcmOptions.link) ||
+    "/";
+  const notificationData = Object.assign({}, data, { link });
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: "/assets/icon.jpg",
+      badge: "/assets/icon.jpg",
+      data: notificationData
+    })
+  );
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const targetUrl = event.notification.data?.link || "/";
-  event.waitUntil(clients.openWindow(targetUrl));
+  const targetUrl = (event.notification.data && event.notification.data.link) || "/";
+  event.waitUntil(self.clients.openWindow(targetUrl));
 });
+
+function readPushPayload(event) {
+  if (!event.data) return {};
+  try {
+    return event.data.json();
+  } catch (_error) {
+    return {
+      notification: {
+        title: "Frida Restaurant",
+        body: event.data.text()
+      }
+    };
+  }
+}
