@@ -10,6 +10,7 @@ const {
   httpError
 } = require("../../lib/server/http");
 const { supabaseFetch, requireStaff } = require("../../lib/server/supabase");
+const { sendToTokens } = require("../../lib/server/firebaseAdmin");
 
 module.exports = async function handler(req, res) {
   if (handleOptions(req, res, ["GET", "POST", "OPTIONS"])) return;
@@ -34,9 +35,12 @@ module.exports = async function handler(req, res) {
       admin: true,
       body: reservation
     });
+    const createdReservation = Array.isArray(inserted) ? inserted[0] : inserted;
+
+    await notifyStaffNewReservation(createdReservation).catch(() => null);
 
     sendJson(req, res, 201, {
-      reservation: Array.isArray(inserted) ? inserted[0] : inserted
+      reservation: createdReservation
     }, ["GET", "POST", "OPTIONS"]);
   } catch (error) {
     sendJson(req, res, error.statusCode || 500, errorPayload(error), ["GET", "POST", "OPTIONS"]);
@@ -62,4 +66,28 @@ function normalizeReservation(body) {
     notes: String(body.notes || "").trim() || null,
     status: "pending"
   };
+}
+
+async function notifyStaffNewReservation(reservation) {
+  const rows = await supabaseFetch("/rest/v1/staff_notification_tokens?active=eq.true&select=token", {
+    admin: true,
+    prefer: "return=representation"
+  });
+  const tokens = Array.isArray(rows) ? rows.map((row) => row.token) : [];
+  if (!tokens.length) return;
+
+  const when = [reservation.reservation_date, reservation.reservation_time].filter(Boolean).join(" ");
+  const partyText = `${Number(reservation.party_size || 1)} pax`;
+  await sendToTokens(tokens, {
+    title: "Nueva reserva recibida",
+    body: `${reservation.name || "Cliente"} | ${when || "Fecha por confirmar"} | ${partyText}`,
+    link: "https://fridarestauranthn.web.app/crm.html",
+    data: {
+      type: "new_reservation",
+      reservationId: reservation.id,
+      name: reservation.name || "",
+      date: reservation.reservation_date || "",
+      time: reservation.reservation_time || ""
+    }
+  });
 }

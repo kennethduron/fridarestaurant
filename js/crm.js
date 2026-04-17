@@ -14,7 +14,7 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260417b";
+} from "./firebase-config.js?v=20260417c";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 
 if (window.location.search === "?") {
@@ -446,7 +446,9 @@ let salesDaySearchTerm = "";
 let unsubscribeOrders = null;
 let unsubscribeReservations = null;
 let hasSeenInitialOrdersSnapshot = false;
+let hasSeenInitialReservationsSnapshot = false;
 let knownOrderIds = new Set();
+let knownReservationIds = new Set();
 let knownOrderPaymentStatus = new Map();
 let audioCtx = null;
 let audioUnlocked = false;
@@ -630,6 +632,22 @@ function notifyNewOrder(order) {
       : `${orderRef} | ${customerName} | ${totalText}`;
 
   showToast(`${title}: ${orderRef}`);
+  playNewOrderSound();
+  if (!canUseBrowserNotifications() || Notification.permission !== "granted") return;
+  try {
+    new Notification(title, { body });
+  } catch (_e) {
+    // Ignore notification errors and keep toast feedback.
+  }
+}
+
+function notifyNewReservation(reservation) {
+  const title = lang === "es" ? "Nueva reserva recibida" : "New reservation received";
+  const when = [reservation.date, reservation.time].filter(Boolean).join(" ");
+  const partyText = `${Number(reservation.party || 1)} pax`;
+  const body = `${reservation.name || "-"} | ${when || "-"} | ${partyText}`;
+
+  showToast(`${title}: ${reservation.name || partyText}`);
   playNewOrderSound();
   if (!canUseBrowserNotifications() || Notification.permission !== "granted") return;
   try {
@@ -2229,7 +2247,9 @@ function stopRealtime() {
   unsubscribeOrders = null;
   unsubscribeReservations = null;
   hasSeenInitialOrdersSnapshot = false;
+  hasSeenInitialReservationsSnapshot = false;
   knownOrderIds = new Set();
+  knownReservationIds = new Set();
   knownOrderPaymentStatus = new Map();
 }
 
@@ -2298,6 +2318,16 @@ function startRealtime() {
 
   unsubscribeReservations = listenReservations(
     (reservations) => {
+      const nextReservationIds = new Set(reservations.map((reservation) => reservation.id));
+      if (!hasSeenInitialReservationsSnapshot) {
+        knownReservationIds = nextReservationIds;
+        hasSeenInitialReservationsSnapshot = true;
+      } else {
+        const newReservations = reservations.filter((reservation) => !knownReservationIds.has(reservation.id));
+        newReservations.forEach(notifyNewReservation);
+        knownReservationIds = nextReservationIds;
+      }
+
       reservationsCache = reservations;
       renderStats();
       renderReservations();
