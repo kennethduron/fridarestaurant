@@ -15,6 +15,7 @@ const {
   initialOrderStatus,
   assertOrderType
 } = require("../../lib/server/supabase");
+const { sendToTokens } = require("../../lib/server/firebaseAdmin");
 
 module.exports = async function handler(req, res) {
   if (handleOptions(req, res, ["GET", "POST", "OPTIONS"])) return;
@@ -63,6 +64,8 @@ module.exports = async function handler(req, res) {
         note: "Order created"
       }
     });
+
+    await notifyStaffNewOrder(createdOrder).catch(() => null);
 
     sendJson(req, res, 201, { order: createdOrder }, ["GET", "POST", "OPTIONS"]);
   } catch (error) {
@@ -124,5 +127,27 @@ function normalizeItems(items) {
       total: Number(item.total || unitPrice * quantity),
       notes: item.notes || null
     };
+  });
+}
+
+async function notifyStaffNewOrder(order) {
+  const rows = await supabaseFetch("/rest/v1/staff_notification_tokens?active=eq.true&select=token", {
+    admin: true,
+    prefer: "return=representation"
+  });
+  const tokens = Array.isArray(rows) ? rows.map((row) => row.token) : [];
+  if (!tokens.length) return;
+
+  const orderRef = order.display_id ? `#${order.display_id}` : `#${String(order.id).slice(0, 6)}`;
+  await sendToTokens(tokens, {
+    title: "Nuevo pedido recibido",
+    body: `${orderRef} | ${order.customer_name || "Cliente"} | L ${Number(order.total || 0).toFixed(2)}`,
+    link: "https://fridarestauranthn.web.app/crm.html",
+    data: {
+      type: "new_order",
+      orderId: order.id,
+      status: order.status,
+      displayId: order.display_id || ""
+    }
   });
 }

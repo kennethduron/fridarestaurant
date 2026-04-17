@@ -12,8 +12,9 @@ import {
   getEmailByUsername,
   onAuthChange,
   signOutUser,
-  isStaffAuthorized
-} from "./firebase-config.js?v=20260309a";
+  isStaffAuthorized,
+  registerStaffNotificationToken
+} from "./firebase-config.js?v=20260417a";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 
 if (window.location.search === "?") {
@@ -192,6 +193,8 @@ const i18n = {
     paymentUpdated: "Pago actualizado",
     paymentMethodUpdated: "Metodo de pago actualizado",
     paymentReceived: "Pago recibido",
+    crmNotificationsReady: "Avisos del CRM activados.",
+    crmNotificationsUnavailable: "El CRM esta abierto, pero este navegador no pudo activar avisos push.",
     staffRole: "Rol",
     signOut: "Cerrar sesion",
     signOutShort: "Salir"
@@ -367,6 +370,8 @@ const i18n = {
     paymentUpdated: "Payment updated",
     paymentMethodUpdated: "Payment method updated",
     paymentReceived: "Payment received",
+    crmNotificationsReady: "CRM alerts enabled.",
+    crmNotificationsUnavailable: "The CRM is open, but this browser could not enable push alerts.",
     staffRole: "Role",
     signOut: "Sign out",
     signOutShort: "Out"
@@ -638,6 +643,16 @@ function notifyPaymentReceived(order) {
     new Notification(title, { body });
   } catch (_e) {
     // Ignore notification errors and keep toast feedback.
+  }
+}
+
+async function registerCRMPushNotifications() {
+  try {
+    const token = await registerStaffNotificationToken("web-crm");
+    if (token) showToast(t("crmNotificationsReady"));
+  } catch (error) {
+    console.warn("CRM push registration failed", error);
+    showToast(t("crmNotificationsUnavailable"));
   }
 }
 
@@ -2274,6 +2289,7 @@ async function unlockUI(user, profile) {
   await refreshFiscalSettings();
   ensureNotificationPermission();
   unlockNotificationSound();
+  registerCRMPushNotifications();
   startRealtime();
 }
 

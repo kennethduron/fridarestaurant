@@ -87,6 +87,17 @@ create table if not exists public.notification_tokens (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.staff_notification_tokens (
+  id uuid primary key default gen_random_uuid(),
+  staff_profile_id uuid references public.staff_profiles(id) on delete cascade,
+  username text,
+  token text not null unique,
+  platform text not null default 'web-crm',
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.app_settings (
   key text primary key,
   value jsonb not null default '{}'::jsonb,
@@ -101,6 +112,7 @@ alter table public.order_items enable row level security;
 alter table public.order_status_events enable row level security;
 alter table public.reservations enable row level security;
 alter table public.notification_tokens enable row level security;
+alter table public.staff_notification_tokens enable row level security;
 alter table public.app_settings enable row level security;
 
 -- The app backend uses the service role key, which bypasses RLS.
@@ -111,6 +123,7 @@ create index if not exists idx_orders_type_status on public.orders(order_type, s
 create index if not exists idx_order_items_order_id on public.order_items(order_id);
 create index if not exists idx_reservations_created_at on public.reservations(created_at desc);
 create index if not exists idx_notification_tokens_order_id on public.notification_tokens(order_id);
+create index if not exists idx_staff_notification_tokens_staff_profile_id on public.staff_notification_tokens(staff_profile_id);
 create unique index if not exists idx_staff_profiles_login_email_unique
   on public.staff_profiles (lower(login_email))
   where login_email is not null;

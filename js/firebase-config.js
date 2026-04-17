@@ -205,6 +205,40 @@ async function registerOrderNotificationToken(orderId, phone = "") {
   return token;
 }
 
+async function registerStaffNotificationToken(platform = "web-crm") {
+  const user = sessionUser();
+  if (!user || !user.accessToken) {
+    throw new Error("staff_session_required");
+  }
+
+  const setup = await setupFirebaseMessaging();
+  if (!setup) {
+    throw new Error("notifications_not_supported");
+  }
+
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    throw new Error("notifications_permission_denied");
+  }
+
+  const token = await setup.getToken(setup.messaging, {
+    vapidKey: FCM_VAPID_KEY,
+    serviceWorkerRegistration: setup.registration
+  });
+  if (!token) {
+    throw new Error("notifications_token_missing");
+  }
+
+  await apiRequest("/api/notifications/register-staff-token", {
+    method: "POST",
+    body: {
+      token,
+      platform
+    }
+  });
+  return token;
+}
+
 async function setupFirebaseMessaging() {
   if (messagingSetupPromise) return messagingSetupPromise;
   messagingSetupPromise = (async () => {
@@ -483,6 +517,7 @@ export {
   saveFiscalSettings,
   reserveNextFiscalInvoiceNumber,
   registerOrderNotificationToken,
+  registerStaffNotificationToken,
   getStaffProfile,
   isStaffAuthorized,
   signInWithEmailPassword,
