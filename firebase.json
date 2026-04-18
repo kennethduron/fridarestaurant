@@ -21,6 +21,7 @@
         "dataconnect/**",
         "public/**",
         "vercel.json",
+        ".vercel/**",
         ".env.example",
         ".codex-tools/**",
         ".git/**",

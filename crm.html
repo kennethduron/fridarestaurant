@@ -13,7 +13,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20260418b">
+    <link rel="stylesheet" href="css/style.css?v=20260418f">
     <link rel="icon" type="image/jpeg" href="assets/icon.jpg">
     <link rel="shortcut icon" href="assets/icon.jpg">
     <link rel="apple-touch-icon" href="assets/icon.jpg">
@@ -77,10 +77,6 @@
                 </div>
             </section>
             <section id="salesCalendar" class="sales-calendar"></section>
-            <section id="crmToolsWorkspace" class="crm-tools-workspace hidden" aria-live="polite">
-                <section id="orderCreator" class="order-creator hidden"></section>
-                <section id="productManager" class="product-manager hidden"></section>
-            </section>
 
             <section class="crm-controls">
                 <div class="menu-tabs">
@@ -155,6 +151,26 @@
                     <span data-i18n="crmToolsKitchenText">Vista dedicada para que cocina reciba y avance pedidos.</span>
                 </a>
             </div>
+        </div>
+    </div>
+
+    <div id="orderCreatorModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="orderCreatorModalTitle">
+        <div class="modal-card crm-work-modal-card">
+            <header class="crm-work-modal-head">
+                <h3 id="orderCreatorModalTitle" data-i18n="orderCreatorTitle">Crear pedido</h3>
+                <button id="closeOrderCreatorModal" class="btn btn-ghost" aria-label="Cerrar">X</button>
+            </header>
+            <section id="orderCreator" class="order-creator"></section>
+        </div>
+    </div>
+
+    <div id="productManagerModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="productManagerModalTitle">
+        <div class="modal-card crm-work-modal-card">
+            <header class="crm-work-modal-head">
+                <h3 id="productManagerModalTitle" data-i18n="productManagerTitle">Gestion de productos</h3>
+                <button id="closeProductManagerModal" class="btn btn-ghost" aria-label="Cerrar">X</button>
+            </header>
+            <section id="productManager" class="product-manager"></section>
         </div>
     </div>
 
@@ -246,7 +262,7 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <script type="module" src="js/crm.js?v=20260418b"></script>
+    <script type="module" src="js/crm.js?v=20260418e"></script>
 </body>
 
 </html>

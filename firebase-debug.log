@@ -18664,3 +18664,610 @@
 [debug] [2026-04-18T12:23:54.455Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases versionName=projects%2F133167188727%2Fsites%2Ffridarestauranthn%2Fversions%2F336f08363b7ad3c6
 [debug] [2026-04-18T12:23:54.455Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases {}
 [debug] [2026-04-18T12:23:55.150Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases 200
+[debug] [2026-04-18T12:28:25.463Z] ----------------------------------------------------------------------
+[debug] [2026-04-18T12:28:25.466Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\user\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting
+[debug] [2026-04-18T12:28:25.466Z] CLI Version:   15.8.0
+[debug] [2026-04-18T12:28:25.466Z] Platform:      win32
+[debug] [2026-04-18T12:28:25.466Z] Node Version:  v25.7.0
+[debug] [2026-04-18T12:28:25.466Z] Time:          Sat Apr 18 2026 06:28:25 GMT-0600 (Central Standard Time)
+[debug] [2026-04-18T12:28:25.466Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-18T12:28:26.614Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-18T12:28:26.614Z] > authorizing via signed-in user (kennethduron.paz@gmail.com)
+[debug] [2026-04-18T12:28:26.615Z] [iam] checking project fridarestaurant-768ab for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-04-18T12:28:26.616Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:26.616Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:26.617Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions [none]
+[debug] [2026-04-18T12:28:26.617Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions  x-goog-user-project=fridarestaurant-768ab
+[debug] [2026-04-18T12:28:26.617Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-18T12:28:26.898Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions 200
+[debug] [2026-04-18T12:28:26.898Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-18T12:28:26.899Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:26.900Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:26.900Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab [none]
+[debug] [2026-04-18T12:28:27.333Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab 200
+[debug] [2026-04-18T12:28:27.333Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab {"projectId":"fridarestaurant-768ab","projectNumber":"133167188727","displayName":"fridarestaurant","name":"projects/fridarestaurant-768ab","resources":{"hostingSite":"fridarestaurant-768ab"},"state":"ACTIVE","etag":"1_e5c007d8-0a0a-46de-8dec-036ddabf0f56"}
+[info] 
+[info] === Deploying to 'fridarestaurant-768ab'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2026-04-18T12:28:27.336Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:27.336Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:27.336Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions [none]
+[debug] [2026-04-18T12:28:27.336Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-04-18T12:28:28.435Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions 200
+[debug] [2026-04-18T12:28:28.436Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions {"name":"projects/133167188727/sites/fridarestauranthn/versions/c7f45046862e9d9c","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[fridarestauranthn]: beginning deploy... 
+[info] i  hosting[fridarestauranthn]: found 63 files in . 
+[debug] [2026-04-18T12:28:28.478Z] [hosting] uploading with 200 concurrency
+[debug] [2026-04-18T12:28:28.492Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:28.492Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:28.494Z] [hosting] hash cache [] stored for 63 files
+[debug] [2026-04-18T12:28:28.494Z] [hosting][hash queue][FINAL] {"max":12,"min":0,"avg":1.152918599449276,"active":0,"complete":63,"success":63,"errored":0,"retried":0,"total":63,"elapsed":15}
+[debug] [2026-04-18T12:28:28.495Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/c7f45046862e9d9c:populateFiles [none]
+[debug] [2026-04-18T12:28:28.495Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/c7f45046862e9d9c:populateFiles {"files":{"/kitchen.html":"c5249d8fac2adaa8dd18d92f4ad8631662620627ba785efebddd0848ba10bad5","/index.html":"47bbeab14208501c34834ff0f5175b192ce924538a9e80c5f80063389b4c47f3","/firebase-messaging-sw.js":"77dae16cad4c9a56847c95dfde51f0e8b3b9ba061e2ed4c8309ac1592b20e5a6","/debug-notifications.html":"124a64eda65f3c128cab821e843f6888aac66d4d8898e5d4121d0ad6fc1e6513","/js/menu-data.js":"f660e7280deb58c11185a5ea2d676de2b38a19c0e461235f9ecec27f3deb56f7","/js/kitchen.js":"59f6612d774f28f228baea80aecb5ede8532333b552314e5ed7431fb5ef2b54e","/js/fiscal-config.js":"8dd615bc26fd9f767c6dd41f1699a322ed6fbc04186fd7844c055036255d5034","/js/firebase-config.js":"0e944c30cd41179dbdbc9b3c428d936ba3750e3b11830fdaeab7e0c56f920494","/js/app.js":"cef3d5029da91f23dd3facebe9b12aa06daec734a9a2d56776656f89d585556c","/docs/vercel-supabase-setup.md":"b33ce51da194f684b6371e87436408b23ceb8ec166eec9c6b0fccb4d1c820410","/assets/vino-tinto-copa.jpg":"f9123d14ae013a728897705d5acaed7dd1ea61c87694105c9451ec148569a5ef","/assets/vino-blanco-copa.jpg":"2ee595c4e1b7a8203c44c1c9b60eb1a41388154e3c4d4effaf5776361a8f9024","/assets/tiramisu.jpg":"508d4d312a0b59caa32359131b846100993cb3637ece91d25f18e5c4ec9d7d59","/assets/te-herbal.webp":"2914a9db17dfd75fe002d7b1ceefa823a5884e05b4408dc71657be96ca52dc98","/assets/te-herbal.jpg":"d2f1263225321b3100b6a261dddc67bc34f05915cc2faa05f8af9620376b139b","/assets/tartar-de-atun.jpg":"7b8bd386488f05c9ffeeec4a94c33a7b0466d138e71501031968c23d113df432","/assets/tabla-de-quesos.jpg":"7a641dc7ec519941862849c385b274fc55427699d216a2a17a666562cdd56198","/assets/sopa-de-temporada.jpg":"2c98e3c2e29254b6e87a8c861891ed0bc399623b947e51c40bfd4bdc23c53cd5","/assets/salmon-glaseado.jpg":"8ee4ac82a8b81d56f54c85c269a98a1b92d4714dbdf8c6e19607ead6d0db54d3","/assets/ribeye-a-la-parrilla.jpg":"1a21f423f0135b345b9eeab96cddb779fac07bb29aeeba60c98047623934b267","/assets/pulpo-a-la-plancha.jpg":"2304c2bb28c0290dc79dfd8743e3098e957a3c1ee39825ca2923af4f74764caa","/assets/principales.svg":"f3ee4796894765bc72fa281d8cacf7fdabfc4c65ddf28831a625c64e80f54527","/assets/postres.svg":"e7c2bd4b49412a859c108912440a343f203804ba5d6e5a6c61c3106392668bc0","/assets/pollo-rostizado.jpg":"d637270f3e8c605b20f7a710e58e8f09fbacfa550b0220703c461fef8e15c5fa","/assets/pie-de-limon.jpg":"abf58fc645955d0dfc80c00c5692a097124016e062cd055a6b3a3e3f00b3e246","/assets/pasta-trufada.jpeg":"fdd3e5af2c21bd6ac98d8c269924b96444d61868e290d00f16d641ba05aa53cd","/assets/paella-de-mariscos.jpg":"1e80a6fa40ca50a78075551e396f021f3e90ad94bef155ccc218b74c99535755","/assets/mousse-de-chocolate.jpg":"07c38821d494a64d6061c663a9bc3a2f2408b0c71d024b930af43e57f2669053","/assets/mocktail-tropical.jpg":"13b8b1b4e15540831aa58a780fe2b6560780dcb232f01ac91dedeaec52379f2b","/assets/lomo-en-salsa.jpg":"98b3c45d120c13c67d8248aa9873dbb02d3197eeaa094877b69a9796b15b720d","/assets/limonada-natural.webp":"fad0da22fc05e6c5c140b0a7eea01ac0f9b8b97e5c964c7b9a408de1d118d0ce","/assets/lasagna-artesanal.jpg":"ce436c54e8cef99884c5208360ecb71c9be1d2a24766006822cb21b183e41978","/assets/jugo-verde.jpeg":"461ba7cb2f20927aab2e1ae293fa8dfd6bd148fbdfbd300a2cf4900bea0a2a1c","/assets/icon.jpg":"0cf31752228520e2af010191ba28acd929e822ff71aee86f2a77f713f843ea18","/assets/hero.svg":"0c438a08b9d0dd389e69b62eb0bc61d8bb9d24728aefc1329c8f577e791b1fb0","/assets/helado-artesanal.jpg":"b09ab1dc0854e364bc805aae2bc6411fad0059e6dd11a20109759ccc77f98a53","/assets/hamburguesa-premium.jpg":"7304db22004d75433b492dfe535065a8470555dadeea3052fafa9f2a4a007373","/assets/fruta-fresca.webp":"bd0268613b39c2005afbec8c62c3b891737444c967ad90b61df0b599c69b301f","/assets/food.svg":"96ffc49c93cf7414b3b15df00b2e459d2019e47bae178aeb90d2ababf2b06183","/assets/flan-casero.jpg":"d41d64998ec42d0b7d12c1746c4609cb3847cc2cfa3ae58295a343746b29eb6d","/assets/entradas.svg":"098126872a824928c666920bb91aeb29202462d6cf749fc651a956c21994b15d","/assets/ensalada-mediterranea.jpg":"99803b557daf5c78440b5c67df88bcbd34db18e5f14c2cec15f5811532a4c2b4","/assets/empanada-gourmet.webp":"2dc9822f9fffe96f3b457398422e3ec14f0b7948d0bd11259bf0685dfcda3ae6","/assets/croquetas-de-queso.jpg":"1598b31b695d29126caf35862b6defb6675e8a1cda71afacb85ade743d429d0a","/assets/creme-brulee.jpg":"61d3befc60bde8fe1c1da03010589c0e39607a4bdff63b4c143cbcccad54b778","/assets/coulant-de-cacao.jpg":"8b8f552fef9aeee0b3f3639bb8bb505e69efb0f860a82d858e41006300c4d1c7","/assets/costillas-bbq.jpg":"55f7ac6896914f113ed79422037ad81935dd2ea5848228e280ac081dffa0ebce","/assets/coctel-de-autor.jpg":"f2840fc791e6b7aec7c6c57e20be7140b36e598f8d83b1787ea9061333c031c1","/assets/cheesecake.jpg":"d766be6a7ee90144be1b6402374f746c85f5a7da94b9da7834816b6739ab5458","/assets/ceviche-de-pescado.webp":"00508dbea3e71daef7d3c94896e164211f55aa25cbf1f087fb8df55cead8ca24","/assets/cerveza-artesanal.jpg":"0d6e02c8dfd4684156a074f35f9017b5bf83400b79e4a5e15114afc7de1e3163","/assets/casa-brava.jpg":"599c1875a7bf7d96f4af42c3d748d5726a975d99f7106c92a45fbe4298398d29","/assets/casa-brava-logo.jpg":"24a19eb0defb9da554414e998aead9feac4cd8388252e6480e472b9f3aace425","/assets/carpaccio-de-res.webp":"c6cc9acfe15d3f37c9e6fa922cec9d14877e5eab430f28283e790911dde33feb","/assets/cafe-espresso.webp":"06800a8550a3716c432314d7cffcb0909c7996f57662e7be9b397fa1790b93df","/assets/bruschetta-clasica.jpg":"9c72e71a7fe79cc07b05ac9c6403af084578e9f81dc346263248e95cec718285","/assets/brownie-caliente.jpg":"32b19961d540418a7478573f68c7126e1d5f2c6ffbde4cdd9f3766ecd11b0f32","/assets/bebidas.svg":"11b26fc183a03f8153d4012d2a8e33cefd67a405e20ff4135f738b1066ad3d79","/assets/arroz-meloso.jpg":"0a80f2aa9d1adedf1d7a7a0c8a0f30c10753c66625e464a2a7d97e1ae63c265a","/assets/agua-mineral.jpg":"158e23d18364dd854587b62838339fca1763901d6e74c6aadfda700b306928f0","/crm.html":"120fb0381f5fabb64ff01b9655777f501aa108cf48ee6d2d7f578c0cd9fc8a2c","/css/style.css":"6403ab7e7ecf940c2403891651b4a328e481761392c3ec76c8b45fd751ba2d65","/js/crm.js":"344c4f21029f83291a82b9c9a48a8f859f43399cb76ca7096e1d03602d0aed71"}}
+[debug] [2026-04-18T12:28:29.287Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/c7f45046862e9d9c:populateFiles 200
+[debug] [2026-04-18T12:28:29.287Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/c7f45046862e9d9c:populateFiles {"uploadRequiredHashes":["344c4f21029f83291a82b9c9a48a8f859f43399cb76ca7096e1d03602d0aed71","120fb0381f5fabb64ff01b9655777f501aa108cf48ee6d2d7f578c0cd9fc8a2c","6403ab7e7ecf940c2403891651b4a328e481761392c3ec76c8b45fd751ba2d65"],"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files"}
+[debug] [2026-04-18T12:28:29.288Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:29.288Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:29.288Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:29.289Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:29.289Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:29.289Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:29.289Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/344c4f21029f83291a82b9c9a48a8f859f43399cb76ca7096e1d03602d0aed71 [none]
+[debug] [2026-04-18T12:28:29.289Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/344c4f21029f83291a82b9c9a48a8f859f43399cb76ca7096e1d03602d0aed71 [stream]
+[debug] [2026-04-18T12:28:29.291Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/120fb0381f5fabb64ff01b9655777f501aa108cf48ee6d2d7f578c0cd9fc8a2c [none]
+[debug] [2026-04-18T12:28:29.291Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/120fb0381f5fabb64ff01b9655777f501aa108cf48ee6d2d7f578c0cd9fc8a2c [stream]
+[debug] [2026-04-18T12:28:29.292Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/6403ab7e7ecf940c2403891651b4a328e481761392c3ec76c8b45fd751ba2d65 [none]
+[debug] [2026-04-18T12:28:29.292Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/6403ab7e7ecf940c2403891651b4a328e481761392c3ec76c8b45fd751ba2d65 [stream]
+[debug] [2026-04-18T12:28:29.293Z] [hosting][populate queue][FINAL] {"max":797,"min":797,"avg":797,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":801}
+[debug] [2026-04-18T12:28:29.294Z] [hosting] uploads queued: 3
+[debug] [2026-04-18T12:28:29.820Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/120fb0381f5fabb64ff01b9655777f501aa108cf48ee6d2d7f578c0cd9fc8a2c 200
+[debug] [2026-04-18T12:28:29.820Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/120fb0381f5fabb64ff01b9655777f501aa108cf48ee6d2d7f578c0cd9fc8a2c [stream]
+[debug] [2026-04-18T12:28:29.888Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/6403ab7e7ecf940c2403891651b4a328e481761392c3ec76c8b45fd751ba2d65 200
+[debug] [2026-04-18T12:28:29.888Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/6403ab7e7ecf940c2403891651b4a328e481761392c3ec76c8b45fd751ba2d65 [stream]
+[debug] [2026-04-18T12:28:29.980Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/344c4f21029f83291a82b9c9a48a8f859f43399cb76ca7096e1d03602d0aed71 200
+[debug] [2026-04-18T12:28:29.980Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c7f45046862e9d9c/files/344c4f21029f83291a82b9c9a48a8f859f43399cb76ca7096e1d03602d0aed71 [stream]
+[debug] [2026-04-18T12:28:29.980Z] [hosting][upload queue][FINAL] {"max":692,"min":533,"avg":608.3333333333334,"active":0,"complete":3,"success":3,"errored":0,"retried":0,"total":3,"elapsed":692}
+[info] i  hosting: upload complete 
+[info] +  hosting[fridarestauranthn]: file upload complete 
+[debug] [2026-04-18T12:28:29.980Z] [hosting] deploy completed after 1536ms
+[debug] [2026-04-18T12:28:29.981Z] [
+  {
+    "config": {
+      "site": "fridarestauranthn",
+      "public": ".",
+      "ignore": [
+        "firebase.json",
+        "firestore.rules",
+        "README.md",
+        "package.json",
+        "package-lock.json",
+        "firebase-debug.log",
+        "functions/**",
+        "api/**",
+        "lib/**",
+        "supabase/**",
+        "src/**",
+        "dataconnect/**",
+        "public/**",
+        "vercel.json",
+        ".env.example",
+        ".codex-tools/**",
+        ".git/**",
+        ".git",
+        ".gitignore",
+        ".firebaserc",
+        ".env",
+        ".env.*",
+        ".github/**",
+        ".vscode/**",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    },
+    "version": "projects/133167188727/sites/fridarestauranthn/versions/c7f45046862e9d9c"
+  }
+]
+[info] i  hosting[fridarestauranthn]: finalizing version... 
+[debug] [2026-04-18T12:28:29.982Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:29.982Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:29.983Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/c7f45046862e9d9c updateMask=status%2Cconfig
+[debug] [2026-04-18T12:28:29.983Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/c7f45046862e9d9c {"status":"FINALIZED","config":{}}
+[debug] [2026-04-18T12:28:30.522Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/c7f45046862e9d9c 200
+[debug] [2026-04-18T12:28:30.522Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/c7f45046862e9d9c {"name":"projects/133167188727/sites/fridarestauranthn/versions/c7f45046862e9d9c","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-04-18T12:28:23.384301Z","createUser":{"email":"kennethduron.paz@gmail.com"},"finalizeTime":"2026-04-18T12:28:25.970979Z","finalizeUser":{"email":"kennethduron.paz@gmail.com"}}
+[debug] [2026-04-18T12:28:30.522Z] [hosting] finalized version for fridarestauranthn:[object Object]
+[info] +  hosting[fridarestauranthn]: version finalized 
+[info] i  hosting[fridarestauranthn]: releasing new version... 
+[debug] [2026-04-18T12:28:30.522Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:30.522Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:28:30.523Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases versionName=projects%2F133167188727%2Fsites%2Ffridarestauranthn%2Fversions%2Fc7f45046862e9d9c
+[debug] [2026-04-18T12:28:30.523Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases {}
+[debug] [2026-04-18T12:28:31.123Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases 200
+[debug] [2026-04-18T12:32:29.837Z] ----------------------------------------------------------------------
+[debug] [2026-04-18T12:32:29.841Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\user\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting
+[debug] [2026-04-18T12:32:29.841Z] CLI Version:   15.8.0
+[debug] [2026-04-18T12:32:29.841Z] Platform:      win32
+[debug] [2026-04-18T12:32:29.842Z] Node Version:  v25.7.0
+[debug] [2026-04-18T12:32:29.842Z] Time:          Sat Apr 18 2026 06:32:29 GMT-0600 (Central Standard Time)
+[debug] [2026-04-18T12:32:29.842Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-18T12:32:30.989Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-18T12:32:30.989Z] > authorizing via signed-in user (kennethduron.paz@gmail.com)
+[debug] [2026-04-18T12:32:30.990Z] [iam] checking project fridarestaurant-768ab for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-04-18T12:32:30.991Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:30.991Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:30.992Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions [none]
+[debug] [2026-04-18T12:32:30.992Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions  x-goog-user-project=fridarestaurant-768ab
+[debug] [2026-04-18T12:32:30.992Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-18T12:32:31.320Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions 200
+[debug] [2026-04-18T12:32:31.321Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-18T12:32:31.321Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:31.321Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:31.322Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab [none]
+[debug] [2026-04-18T12:32:31.624Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab 200
+[debug] [2026-04-18T12:32:31.624Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab {"projectId":"fridarestaurant-768ab","projectNumber":"133167188727","displayName":"fridarestaurant","name":"projects/fridarestaurant-768ab","resources":{"hostingSite":"fridarestaurant-768ab"},"state":"ACTIVE","etag":"1_e5c007d8-0a0a-46de-8dec-036ddabf0f56"}
+[info] 
+[info] === Deploying to 'fridarestaurant-768ab'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2026-04-18T12:32:31.629Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:31.629Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:31.630Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions [none]
+[debug] [2026-04-18T12:32:31.630Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-04-18T12:32:32.939Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions 200
+[debug] [2026-04-18T12:32:32.939Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions {"name":"projects/133167188727/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[fridarestauranthn]: beginning deploy... 
+[info] i  hosting[fridarestauranthn]: found 63 files in . 
+[debug] [2026-04-18T12:32:32.970Z] [hosting] uploading with 200 concurrency
+[debug] [2026-04-18T12:32:32.980Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:32.981Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:32.982Z] [hosting] hash cache [] stored for 63 files
+[debug] [2026-04-18T12:32:32.982Z] [hosting][hash queue][FINAL] {"max":7,"min":0,"avg":0.3038802082730847,"active":0,"complete":63,"success":63,"errored":0,"retried":0,"total":63,"elapsed":11}
+[debug] [2026-04-18T12:32:32.983Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9:populateFiles [none]
+[debug] [2026-04-18T12:32:32.983Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9:populateFiles {"files":{"/kitchen.html":"c5249d8fac2adaa8dd18d92f4ad8631662620627ba785efebddd0848ba10bad5","/index.html":"47bbeab14208501c34834ff0f5175b192ce924538a9e80c5f80063389b4c47f3","/firebase-messaging-sw.js":"77dae16cad4c9a56847c95dfde51f0e8b3b9ba061e2ed4c8309ac1592b20e5a6","/debug-notifications.html":"124a64eda65f3c128cab821e843f6888aac66d4d8898e5d4121d0ad6fc1e6513","/js/menu-data.js":"f660e7280deb58c11185a5ea2d676de2b38a19c0e461235f9ecec27f3deb56f7","/js/kitchen.js":"59f6612d774f28f228baea80aecb5ede8532333b552314e5ed7431fb5ef2b54e","/js/fiscal-config.js":"8dd615bc26fd9f767c6dd41f1699a322ed6fbc04186fd7844c055036255d5034","/js/firebase-config.js":"0e944c30cd41179dbdbc9b3c428d936ba3750e3b11830fdaeab7e0c56f920494","/js/crm.js":"344c4f21029f83291a82b9c9a48a8f859f43399cb76ca7096e1d03602d0aed71","/js/app.js":"cef3d5029da91f23dd3facebe9b12aa06daec734a9a2d56776656f89d585556c","/docs/vercel-supabase-setup.md":"b33ce51da194f684b6371e87436408b23ceb8ec166eec9c6b0fccb4d1c820410","/assets/vino-tinto-copa.jpg":"f9123d14ae013a728897705d5acaed7dd1ea61c87694105c9451ec148569a5ef","/assets/vino-blanco-copa.jpg":"2ee595c4e1b7a8203c44c1c9b60eb1a41388154e3c4d4effaf5776361a8f9024","/assets/tiramisu.jpg":"508d4d312a0b59caa32359131b846100993cb3637ece91d25f18e5c4ec9d7d59","/assets/te-herbal.webp":"2914a9db17dfd75fe002d7b1ceefa823a5884e05b4408dc71657be96ca52dc98","/assets/te-herbal.jpg":"d2f1263225321b3100b6a261dddc67bc34f05915cc2faa05f8af9620376b139b","/assets/tartar-de-atun.jpg":"7b8bd386488f05c9ffeeec4a94c33a7b0466d138e71501031968c23d113df432","/assets/tabla-de-quesos.jpg":"7a641dc7ec519941862849c385b274fc55427699d216a2a17a666562cdd56198","/assets/sopa-de-temporada.jpg":"2c98e3c2e29254b6e87a8c861891ed0bc399623b947e51c40bfd4bdc23c53cd5","/assets/salmon-glaseado.jpg":"8ee4ac82a8b81d56f54c85c269a98a1b92d4714dbdf8c6e19607ead6d0db54d3","/assets/ribeye-a-la-parrilla.jpg":"1a21f423f0135b345b9eeab96cddb779fac07bb29aeeba60c98047623934b267","/assets/pulpo-a-la-plancha.jpg":"2304c2bb28c0290dc79dfd8743e3098e957a3c1ee39825ca2923af4f74764caa","/assets/principales.svg":"f3ee4796894765bc72fa281d8cacf7fdabfc4c65ddf28831a625c64e80f54527","/assets/postres.svg":"e7c2bd4b49412a859c108912440a343f203804ba5d6e5a6c61c3106392668bc0","/assets/pollo-rostizado.jpg":"d637270f3e8c605b20f7a710e58e8f09fbacfa550b0220703c461fef8e15c5fa","/assets/pie-de-limon.jpg":"abf58fc645955d0dfc80c00c5692a097124016e062cd055a6b3a3e3f00b3e246","/assets/pasta-trufada.jpeg":"fdd3e5af2c21bd6ac98d8c269924b96444d61868e290d00f16d641ba05aa53cd","/assets/paella-de-mariscos.jpg":"1e80a6fa40ca50a78075551e396f021f3e90ad94bef155ccc218b74c99535755","/assets/mousse-de-chocolate.jpg":"07c38821d494a64d6061c663a9bc3a2f2408b0c71d024b930af43e57f2669053","/assets/mocktail-tropical.jpg":"13b8b1b4e15540831aa58a780fe2b6560780dcb232f01ac91dedeaec52379f2b","/assets/lomo-en-salsa.jpg":"98b3c45d120c13c67d8248aa9873dbb02d3197eeaa094877b69a9796b15b720d","/assets/limonada-natural.webp":"fad0da22fc05e6c5c140b0a7eea01ac0f9b8b97e5c964c7b9a408de1d118d0ce","/assets/lasagna-artesanal.jpg":"ce436c54e8cef99884c5208360ecb71c9be1d2a24766006822cb21b183e41978","/assets/jugo-verde.jpeg":"461ba7cb2f20927aab2e1ae293fa8dfd6bd148fbdfbd300a2cf4900bea0a2a1c","/assets/icon.jpg":"0cf31752228520e2af010191ba28acd929e822ff71aee86f2a77f713f843ea18","/assets/hero.svg":"0c438a08b9d0dd389e69b62eb0bc61d8bb9d24728aefc1329c8f577e791b1fb0","/assets/helado-artesanal.jpg":"b09ab1dc0854e364bc805aae2bc6411fad0059e6dd11a20109759ccc77f98a53","/assets/hamburguesa-premium.jpg":"7304db22004d75433b492dfe535065a8470555dadeea3052fafa9f2a4a007373","/assets/fruta-fresca.webp":"bd0268613b39c2005afbec8c62c3b891737444c967ad90b61df0b599c69b301f","/assets/food.svg":"96ffc49c93cf7414b3b15df00b2e459d2019e47bae178aeb90d2ababf2b06183","/assets/flan-casero.jpg":"d41d64998ec42d0b7d12c1746c4609cb3847cc2cfa3ae58295a343746b29eb6d","/assets/entradas.svg":"098126872a824928c666920bb91aeb29202462d6cf749fc651a956c21994b15d","/assets/ensalada-mediterranea.jpg":"99803b557daf5c78440b5c67df88bcbd34db18e5f14c2cec15f5811532a4c2b4","/assets/empanada-gourmet.webp":"2dc9822f9fffe96f3b457398422e3ec14f0b7948d0bd11259bf0685dfcda3ae6","/assets/croquetas-de-queso.jpg":"1598b31b695d29126caf35862b6defb6675e8a1cda71afacb85ade743d429d0a","/assets/creme-brulee.jpg":"61d3befc60bde8fe1c1da03010589c0e39607a4bdff63b4c143cbcccad54b778","/assets/coulant-de-cacao.jpg":"8b8f552fef9aeee0b3f3639bb8bb505e69efb0f860a82d858e41006300c4d1c7","/assets/costillas-bbq.jpg":"55f7ac6896914f113ed79422037ad81935dd2ea5848228e280ac081dffa0ebce","/assets/coctel-de-autor.jpg":"f2840fc791e6b7aec7c6c57e20be7140b36e598f8d83b1787ea9061333c031c1","/assets/cheesecake.jpg":"d766be6a7ee90144be1b6402374f746c85f5a7da94b9da7834816b6739ab5458","/assets/ceviche-de-pescado.webp":"00508dbea3e71daef7d3c94896e164211f55aa25cbf1f087fb8df55cead8ca24","/assets/cerveza-artesanal.jpg":"0d6e02c8dfd4684156a074f35f9017b5bf83400b79e4a5e15114afc7de1e3163","/assets/casa-brava.jpg":"599c1875a7bf7d96f4af42c3d748d5726a975d99f7106c92a45fbe4298398d29","/assets/casa-brava-logo.jpg":"24a19eb0defb9da554414e998aead9feac4cd8388252e6480e472b9f3aace425","/assets/carpaccio-de-res.webp":"c6cc9acfe15d3f37c9e6fa922cec9d14877e5eab430f28283e790911dde33feb","/assets/cafe-espresso.webp":"06800a8550a3716c432314d7cffcb0909c7996f57662e7be9b397fa1790b93df","/assets/bruschetta-clasica.jpg":"9c72e71a7fe79cc07b05ac9c6403af084578e9f81dc346263248e95cec718285","/assets/brownie-caliente.jpg":"32b19961d540418a7478573f68c7126e1d5f2c6ffbde4cdd9f3766ecd11b0f32","/assets/bebidas.svg":"11b26fc183a03f8153d4012d2a8e33cefd67a405e20ff4135f738b1066ad3d79","/assets/arroz-meloso.jpg":"0a80f2aa9d1adedf1d7a7a0c8a0f30c10753c66625e464a2a7d97e1ae63c265a","/assets/agua-mineral.jpg":"158e23d18364dd854587b62838339fca1763901d6e74c6aadfda700b306928f0","/crm.html":"36b8aa80655a119c4b32530a76c6a80020c6639302844395d8999b10167314e4","/css/style.css":"e5b452429ff01990c56ad850c307faac214b218e0f29085cdad3534423689121"}}
+[debug] [2026-04-18T12:32:33.740Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9:populateFiles 200
+[debug] [2026-04-18T12:32:33.740Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9:populateFiles {"uploadRequiredHashes":["36b8aa80655a119c4b32530a76c6a80020c6639302844395d8999b10167314e4","e5b452429ff01990c56ad850c307faac214b218e0f29085cdad3534423689121"],"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9/files"}
+[debug] [2026-04-18T12:32:33.741Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:33.741Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:33.741Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:33.741Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:33.742Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9/files/36b8aa80655a119c4b32530a76c6a80020c6639302844395d8999b10167314e4 [none]
+[debug] [2026-04-18T12:32:33.742Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9/files/36b8aa80655a119c4b32530a76c6a80020c6639302844395d8999b10167314e4 [stream]
+[debug] [2026-04-18T12:32:33.744Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9/files/e5b452429ff01990c56ad850c307faac214b218e0f29085cdad3534423689121 [none]
+[debug] [2026-04-18T12:32:33.744Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9/files/e5b452429ff01990c56ad850c307faac214b218e0f29085cdad3534423689121 [stream]
+[debug] [2026-04-18T12:32:33.746Z] [hosting][populate queue][FINAL] {"max":762,"min":762,"avg":762,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":766}
+[debug] [2026-04-18T12:32:33.746Z] [hosting] uploads queued: 2
+[debug] [2026-04-18T12:32:34.450Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9/files/e5b452429ff01990c56ad850c307faac214b218e0f29085cdad3534423689121 200
+[debug] [2026-04-18T12:32:34.450Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9/files/e5b452429ff01990c56ad850c307faac214b218e0f29085cdad3534423689121 [stream]
+[debug] [2026-04-18T12:32:34.587Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9/files/36b8aa80655a119c4b32530a76c6a80020c6639302844395d8999b10167314e4 200
+[debug] [2026-04-18T12:32:34.588Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9/files/36b8aa80655a119c4b32530a76c6a80020c6639302844395d8999b10167314e4 [stream]
+[debug] [2026-04-18T12:32:34.588Z] [hosting][upload queue][FINAL] {"max":848,"min":709,"avg":778.5,"active":0,"complete":2,"success":2,"errored":0,"retried":0,"total":2,"elapsed":848}
+[info] i  hosting: upload complete 
+[info] +  hosting[fridarestauranthn]: file upload complete 
+[debug] [2026-04-18T12:32:34.588Z] [hosting] deploy completed after 1645ms
+[debug] [2026-04-18T12:32:34.588Z] [
+  {
+    "config": {
+      "site": "fridarestauranthn",
+      "public": ".",
+      "ignore": [
+        "firebase.json",
+        "firestore.rules",
+        "README.md",
+        "package.json",
+        "package-lock.json",
+        "firebase-debug.log",
+        "functions/**",
+        "api/**",
+        "lib/**",
+        "supabase/**",
+        "src/**",
+        "dataconnect/**",
+        "public/**",
+        "vercel.json",
+        ".env.example",
+        ".codex-tools/**",
+        ".git/**",
+        ".git",
+        ".gitignore",
+        ".firebaserc",
+        ".env",
+        ".env.*",
+        ".github/**",
+        ".vscode/**",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    },
+    "version": "projects/133167188727/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9"
+  }
+]
+[info] i  hosting[fridarestauranthn]: finalizing version... 
+[debug] [2026-04-18T12:32:34.589Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:34.589Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:34.590Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9 updateMask=status%2Cconfig
+[debug] [2026-04-18T12:32:34.590Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9 {"status":"FINALIZED","config":{}}
+[debug] [2026-04-18T12:32:35.089Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9 200
+[debug] [2026-04-18T12:32:35.090Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9 {"name":"projects/133167188727/sites/fridarestauranthn/versions/c9c05bf8d9ec50f9","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-04-18T12:32:27.962362Z","createUser":{"email":"kennethduron.paz@gmail.com"},"finalizeTime":"2026-04-18T12:32:30.554986Z","finalizeUser":{"email":"kennethduron.paz@gmail.com"}}
+[debug] [2026-04-18T12:32:35.090Z] [hosting] finalized version for fridarestauranthn:[object Object]
+[info] +  hosting[fridarestauranthn]: version finalized 
+[info] i  hosting[fridarestauranthn]: releasing new version... 
+[debug] [2026-04-18T12:32:35.090Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:35.090Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:32:35.090Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases versionName=projects%2F133167188727%2Fsites%2Ffridarestauranthn%2Fversions%2Fc9c05bf8d9ec50f9
+[debug] [2026-04-18T12:32:35.091Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases {}
+[debug] [2026-04-18T12:32:35.707Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases 200
+[debug] [2026-04-18T12:33:58.884Z] ----------------------------------------------------------------------
+[debug] [2026-04-18T12:33:58.886Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\user\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting
+[debug] [2026-04-18T12:33:58.887Z] CLI Version:   15.8.0
+[debug] [2026-04-18T12:33:58.887Z] Platform:      win32
+[debug] [2026-04-18T12:33:58.887Z] Node Version:  v25.7.0
+[debug] [2026-04-18T12:33:58.887Z] Time:          Sat Apr 18 2026 06:33:58 GMT-0600 (Central Standard Time)
+[debug] [2026-04-18T12:33:58.887Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-18T12:34:00.031Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-18T12:34:00.032Z] > authorizing via signed-in user (kennethduron.paz@gmail.com)
+[debug] [2026-04-18T12:34:00.032Z] [iam] checking project fridarestaurant-768ab for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-04-18T12:34:00.033Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:00.034Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:00.035Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions [none]
+[debug] [2026-04-18T12:34:00.035Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions  x-goog-user-project=fridarestaurant-768ab
+[debug] [2026-04-18T12:34:00.035Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-18T12:34:00.239Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions 200
+[debug] [2026-04-18T12:34:00.239Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-18T12:34:00.240Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:00.240Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:00.240Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab [none]
+[debug] [2026-04-18T12:34:00.606Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab 200
+[debug] [2026-04-18T12:34:00.606Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab {"projectId":"fridarestaurant-768ab","projectNumber":"133167188727","displayName":"fridarestaurant","name":"projects/fridarestaurant-768ab","resources":{"hostingSite":"fridarestaurant-768ab"},"state":"ACTIVE","etag":"1_e5c007d8-0a0a-46de-8dec-036ddabf0f56"}
+[info] 
+[info] === Deploying to 'fridarestaurant-768ab'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2026-04-18T12:34:00.610Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:00.610Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:00.610Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions [none]
+[debug] [2026-04-18T12:34:00.610Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-04-18T12:34:01.601Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions 200
+[debug] [2026-04-18T12:34:01.601Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions {"name":"projects/133167188727/sites/fridarestauranthn/versions/da22106feafeef4a","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[fridarestauranthn]: beginning deploy... 
+[info] i  hosting[fridarestauranthn]: found 63 files in . 
+[debug] [2026-04-18T12:34:01.644Z] [hosting] uploading with 200 concurrency
+[debug] [2026-04-18T12:34:01.654Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:01.654Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:01.655Z] [hosting] hash cache [] stored for 63 files
+[debug] [2026-04-18T12:34:01.655Z] [hosting][hash queue][FINAL] {"max":6,"min":0,"avg":0.23827433187902083,"active":0,"complete":63,"success":63,"errored":0,"retried":0,"total":63,"elapsed":10}
+[debug] [2026-04-18T12:34:01.656Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/da22106feafeef4a:populateFiles [none]
+[debug] [2026-04-18T12:34:01.656Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/da22106feafeef4a:populateFiles {"files":{"/kitchen.html":"c5249d8fac2adaa8dd18d92f4ad8631662620627ba785efebddd0848ba10bad5","/index.html":"47bbeab14208501c34834ff0f5175b192ce924538a9e80c5f80063389b4c47f3","/firebase-messaging-sw.js":"77dae16cad4c9a56847c95dfde51f0e8b3b9ba061e2ed4c8309ac1592b20e5a6","/debug-notifications.html":"124a64eda65f3c128cab821e843f6888aac66d4d8898e5d4121d0ad6fc1e6513","/js/menu-data.js":"f660e7280deb58c11185a5ea2d676de2b38a19c0e461235f9ecec27f3deb56f7","/js/kitchen.js":"59f6612d774f28f228baea80aecb5ede8532333b552314e5ed7431fb5ef2b54e","/js/fiscal-config.js":"8dd615bc26fd9f767c6dd41f1699a322ed6fbc04186fd7844c055036255d5034","/js/firebase-config.js":"0e944c30cd41179dbdbc9b3c428d936ba3750e3b11830fdaeab7e0c56f920494","/js/crm.js":"344c4f21029f83291a82b9c9a48a8f859f43399cb76ca7096e1d03602d0aed71","/js/app.js":"cef3d5029da91f23dd3facebe9b12aa06daec734a9a2d56776656f89d585556c","/docs/vercel-supabase-setup.md":"b33ce51da194f684b6371e87436408b23ceb8ec166eec9c6b0fccb4d1c820410","/assets/vino-tinto-copa.jpg":"f9123d14ae013a728897705d5acaed7dd1ea61c87694105c9451ec148569a5ef","/assets/vino-blanco-copa.jpg":"2ee595c4e1b7a8203c44c1c9b60eb1a41388154e3c4d4effaf5776361a8f9024","/assets/tiramisu.jpg":"508d4d312a0b59caa32359131b846100993cb3637ece91d25f18e5c4ec9d7d59","/assets/te-herbal.webp":"2914a9db17dfd75fe002d7b1ceefa823a5884e05b4408dc71657be96ca52dc98","/assets/te-herbal.jpg":"d2f1263225321b3100b6a261dddc67bc34f05915cc2faa05f8af9620376b139b","/assets/tartar-de-atun.jpg":"7b8bd386488f05c9ffeeec4a94c33a7b0466d138e71501031968c23d113df432","/assets/tabla-de-quesos.jpg":"7a641dc7ec519941862849c385b274fc55427699d216a2a17a666562cdd56198","/assets/sopa-de-temporada.jpg":"2c98e3c2e29254b6e87a8c861891ed0bc399623b947e51c40bfd4bdc23c53cd5","/assets/salmon-glaseado.jpg":"8ee4ac82a8b81d56f54c85c269a98a1b92d4714dbdf8c6e19607ead6d0db54d3","/assets/ribeye-a-la-parrilla.jpg":"1a21f423f0135b345b9eeab96cddb779fac07bb29aeeba60c98047623934b267","/assets/pulpo-a-la-plancha.jpg":"2304c2bb28c0290dc79dfd8743e3098e957a3c1ee39825ca2923af4f74764caa","/assets/principales.svg":"f3ee4796894765bc72fa281d8cacf7fdabfc4c65ddf28831a625c64e80f54527","/assets/postres.svg":"e7c2bd4b49412a859c108912440a343f203804ba5d6e5a6c61c3106392668bc0","/assets/pollo-rostizado.jpg":"d637270f3e8c605b20f7a710e58e8f09fbacfa550b0220703c461fef8e15c5fa","/assets/pie-de-limon.jpg":"abf58fc645955d0dfc80c00c5692a097124016e062cd055a6b3a3e3f00b3e246","/assets/pasta-trufada.jpeg":"fdd3e5af2c21bd6ac98d8c269924b96444d61868e290d00f16d641ba05aa53cd","/assets/paella-de-mariscos.jpg":"1e80a6fa40ca50a78075551e396f021f3e90ad94bef155ccc218b74c99535755","/assets/mousse-de-chocolate.jpg":"07c38821d494a64d6061c663a9bc3a2f2408b0c71d024b930af43e57f2669053","/assets/mocktail-tropical.jpg":"13b8b1b4e15540831aa58a780fe2b6560780dcb232f01ac91dedeaec52379f2b","/assets/lomo-en-salsa.jpg":"98b3c45d120c13c67d8248aa9873dbb02d3197eeaa094877b69a9796b15b720d","/assets/limonada-natural.webp":"fad0da22fc05e6c5c140b0a7eea01ac0f9b8b97e5c964c7b9a408de1d118d0ce","/assets/lasagna-artesanal.jpg":"ce436c54e8cef99884c5208360ecb71c9be1d2a24766006822cb21b183e41978","/assets/jugo-verde.jpeg":"461ba7cb2f20927aab2e1ae293fa8dfd6bd148fbdfbd300a2cf4900bea0a2a1c","/assets/icon.jpg":"0cf31752228520e2af010191ba28acd929e822ff71aee86f2a77f713f843ea18","/assets/hero.svg":"0c438a08b9d0dd389e69b62eb0bc61d8bb9d24728aefc1329c8f577e791b1fb0","/assets/helado-artesanal.jpg":"b09ab1dc0854e364bc805aae2bc6411fad0059e6dd11a20109759ccc77f98a53","/assets/hamburguesa-premium.jpg":"7304db22004d75433b492dfe535065a8470555dadeea3052fafa9f2a4a007373","/assets/fruta-fresca.webp":"bd0268613b39c2005afbec8c62c3b891737444c967ad90b61df0b599c69b301f","/assets/food.svg":"96ffc49c93cf7414b3b15df00b2e459d2019e47bae178aeb90d2ababf2b06183","/assets/flan-casero.jpg":"d41d64998ec42d0b7d12c1746c4609cb3847cc2cfa3ae58295a343746b29eb6d","/assets/entradas.svg":"098126872a824928c666920bb91aeb29202462d6cf749fc651a956c21994b15d","/assets/ensalada-mediterranea.jpg":"99803b557daf5c78440b5c67df88bcbd34db18e5f14c2cec15f5811532a4c2b4","/assets/empanada-gourmet.webp":"2dc9822f9fffe96f3b457398422e3ec14f0b7948d0bd11259bf0685dfcda3ae6","/assets/croquetas-de-queso.jpg":"1598b31b695d29126caf35862b6defb6675e8a1cda71afacb85ade743d429d0a","/assets/creme-brulee.jpg":"61d3befc60bde8fe1c1da03010589c0e39607a4bdff63b4c143cbcccad54b778","/assets/coulant-de-cacao.jpg":"8b8f552fef9aeee0b3f3639bb8bb505e69efb0f860a82d858e41006300c4d1c7","/assets/costillas-bbq.jpg":"55f7ac6896914f113ed79422037ad81935dd2ea5848228e280ac081dffa0ebce","/assets/coctel-de-autor.jpg":"f2840fc791e6b7aec7c6c57e20be7140b36e598f8d83b1787ea9061333c031c1","/assets/cheesecake.jpg":"d766be6a7ee90144be1b6402374f746c85f5a7da94b9da7834816b6739ab5458","/assets/ceviche-de-pescado.webp":"00508dbea3e71daef7d3c94896e164211f55aa25cbf1f087fb8df55cead8ca24","/assets/cerveza-artesanal.jpg":"0d6e02c8dfd4684156a074f35f9017b5bf83400b79e4a5e15114afc7de1e3163","/assets/casa-brava.jpg":"599c1875a7bf7d96f4af42c3d748d5726a975d99f7106c92a45fbe4298398d29","/assets/casa-brava-logo.jpg":"24a19eb0defb9da554414e998aead9feac4cd8388252e6480e472b9f3aace425","/assets/carpaccio-de-res.webp":"c6cc9acfe15d3f37c9e6fa922cec9d14877e5eab430f28283e790911dde33feb","/assets/cafe-espresso.webp":"06800a8550a3716c432314d7cffcb0909c7996f57662e7be9b397fa1790b93df","/assets/bruschetta-clasica.jpg":"9c72e71a7fe79cc07b05ac9c6403af084578e9f81dc346263248e95cec718285","/assets/brownie-caliente.jpg":"32b19961d540418a7478573f68c7126e1d5f2c6ffbde4cdd9f3766ecd11b0f32","/assets/bebidas.svg":"11b26fc183a03f8153d4012d2a8e33cefd67a405e20ff4135f738b1066ad3d79","/assets/arroz-meloso.jpg":"0a80f2aa9d1adedf1d7a7a0c8a0f30c10753c66625e464a2a7d97e1ae63c265a","/assets/agua-mineral.jpg":"158e23d18364dd854587b62838339fca1763901d6e74c6aadfda700b306928f0","/crm.html":"ce43289611d79bb72a4afb3d3e9d345cefdd2cb248824888f427809f71740016","/css/style.css":"a9e6a040471f4931dfee5a00f99fddae72690561356a4f8fc3578f08585aff18"}}
+[debug] [2026-04-18T12:34:02.490Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/da22106feafeef4a:populateFiles 200
+[debug] [2026-04-18T12:34:02.490Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/da22106feafeef4a:populateFiles {"uploadRequiredHashes":["ce43289611d79bb72a4afb3d3e9d345cefdd2cb248824888f427809f71740016","a9e6a040471f4931dfee5a00f99fddae72690561356a4f8fc3578f08585aff18"],"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/da22106feafeef4a/files"}
+[debug] [2026-04-18T12:34:02.492Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:02.492Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:02.493Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:02.493Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:02.493Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/da22106feafeef4a/files/ce43289611d79bb72a4afb3d3e9d345cefdd2cb248824888f427809f71740016 [none]
+[debug] [2026-04-18T12:34:02.494Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/da22106feafeef4a/files/ce43289611d79bb72a4afb3d3e9d345cefdd2cb248824888f427809f71740016 [stream]
+[debug] [2026-04-18T12:34:02.496Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/da22106feafeef4a/files/a9e6a040471f4931dfee5a00f99fddae72690561356a4f8fc3578f08585aff18 [none]
+[debug] [2026-04-18T12:34:02.496Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/da22106feafeef4a/files/a9e6a040471f4931dfee5a00f99fddae72690561356a4f8fc3578f08585aff18 [stream]
+[debug] [2026-04-18T12:34:02.497Z] [hosting][populate queue][FINAL] {"max":840,"min":840,"avg":840,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":844}
+[debug] [2026-04-18T12:34:02.498Z] [hosting] uploads queued: 2
+[debug] [2026-04-18T12:34:03.493Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/da22106feafeef4a/files/a9e6a040471f4931dfee5a00f99fddae72690561356a4f8fc3578f08585aff18 200
+[debug] [2026-04-18T12:34:03.493Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/da22106feafeef4a/files/a9e6a040471f4931dfee5a00f99fddae72690561356a4f8fc3578f08585aff18 [stream]
+[debug] [2026-04-18T12:34:03.577Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/da22106feafeef4a/files/ce43289611d79bb72a4afb3d3e9d345cefdd2cb248824888f427809f71740016 200
+[debug] [2026-04-18T12:34:03.577Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/da22106feafeef4a/files/ce43289611d79bb72a4afb3d3e9d345cefdd2cb248824888f427809f71740016 [stream]
+[debug] [2026-04-18T12:34:03.577Z] [hosting][upload queue][FINAL] {"max":1086,"min":1001,"avg":1043.5,"active":0,"complete":2,"success":2,"errored":0,"retried":0,"total":2,"elapsed":1086}
+[info] i  hosting: upload complete 
+[info] +  hosting[fridarestauranthn]: file upload complete 
+[debug] [2026-04-18T12:34:03.578Z] [hosting] deploy completed after 1970ms
+[debug] [2026-04-18T12:34:03.578Z] [
+  {
+    "config": {
+      "site": "fridarestauranthn",
+      "public": ".",
+      "ignore": [
+        "firebase.json",
+        "firestore.rules",
+        "README.md",
+        "package.json",
+        "package-lock.json",
+        "firebase-debug.log",
+        "functions/**",
+        "api/**",
+        "lib/**",
+        "supabase/**",
+        "src/**",
+        "dataconnect/**",
+        "public/**",
+        "vercel.json",
+        ".env.example",
+        ".codex-tools/**",
+        ".git/**",
+        ".git",
+        ".gitignore",
+        ".firebaserc",
+        ".env",
+        ".env.*",
+        ".github/**",
+        ".vscode/**",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    },
+    "version": "projects/133167188727/sites/fridarestauranthn/versions/da22106feafeef4a"
+  }
+]
+[info] i  hosting[fridarestauranthn]: finalizing version... 
+[debug] [2026-04-18T12:34:03.580Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:03.580Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:03.580Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/da22106feafeef4a updateMask=status%2Cconfig
+[debug] [2026-04-18T12:34:03.580Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/da22106feafeef4a {"status":"FINALIZED","config":{}}
+[debug] [2026-04-18T12:34:04.138Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/da22106feafeef4a 200
+[debug] [2026-04-18T12:34:04.139Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/da22106feafeef4a {"name":"projects/133167188727/sites/fridarestauranthn/versions/da22106feafeef4a","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-04-18T12:33:56.665750Z","createUser":{"email":"kennethduron.paz@gmail.com"},"finalizeTime":"2026-04-18T12:33:59.597781Z","finalizeUser":{"email":"kennethduron.paz@gmail.com"}}
+[debug] [2026-04-18T12:34:04.139Z] [hosting] finalized version for fridarestauranthn:[object Object]
+[info] +  hosting[fridarestauranthn]: version finalized 
+[info] i  hosting[fridarestauranthn]: releasing new version... 
+[debug] [2026-04-18T12:34:04.139Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:04.139Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:34:04.139Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases versionName=projects%2F133167188727%2Fsites%2Ffridarestauranthn%2Fversions%2Fda22106feafeef4a
+[debug] [2026-04-18T12:34:04.140Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases {}
+[debug] [2026-04-18T12:34:04.722Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases 200
+[debug] [2026-04-18T12:47:13.409Z] ----------------------------------------------------------------------
+[debug] [2026-04-18T12:47:13.412Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\user\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting
+[debug] [2026-04-18T12:47:13.412Z] CLI Version:   15.8.0
+[debug] [2026-04-18T12:47:13.412Z] Platform:      win32
+[debug] [2026-04-18T12:47:13.412Z] Node Version:  v25.7.0
+[debug] [2026-04-18T12:47:13.413Z] Time:          Sat Apr 18 2026 06:47:13 GMT-0600 (Central Standard Time)
+[debug] [2026-04-18T12:47:13.413Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-18T12:47:14.613Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-18T12:47:14.614Z] > authorizing via signed-in user (kennethduron.paz@gmail.com)
+[debug] [2026-04-18T12:47:14.614Z] [iam] checking project fridarestaurant-768ab for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-04-18T12:47:14.615Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:14.615Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:14.616Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions [none]
+[debug] [2026-04-18T12:47:14.616Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions  x-goog-user-project=fridarestaurant-768ab
+[debug] [2026-04-18T12:47:14.616Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-18T12:47:14.936Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions 200
+[debug] [2026-04-18T12:47:14.936Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-18T12:47:14.937Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:14.937Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:14.938Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab [none]
+[debug] [2026-04-18T12:47:15.396Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab 200
+[debug] [2026-04-18T12:47:15.396Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab {"projectId":"fridarestaurant-768ab","projectNumber":"133167188727","displayName":"fridarestaurant","name":"projects/fridarestaurant-768ab","resources":{"hostingSite":"fridarestaurant-768ab"},"state":"ACTIVE","etag":"1_e5c007d8-0a0a-46de-8dec-036ddabf0f56"}
+[info] 
+[info] === Deploying to 'fridarestaurant-768ab'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2026-04-18T12:47:15.409Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:15.409Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:15.409Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions [none]
+[debug] [2026-04-18T12:47:15.410Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-04-18T12:47:16.574Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions 200
+[debug] [2026-04-18T12:47:16.575Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions {"name":"projects/133167188727/sites/fridarestauranthn/versions/1c960186a1b399d9","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[fridarestauranthn]: beginning deploy... 
+[info] i  hosting[fridarestauranthn]: found 65 files in . 
+[debug] [2026-04-18T12:47:16.611Z] [hosting] uploading with 200 concurrency
+[debug] [2026-04-18T12:47:16.628Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:16.628Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:16.629Z] [hosting] hash cache [] stored for 65 files
+[debug] [2026-04-18T12:47:16.629Z] [hosting][hash queue][FINAL] {"max":13,"min":0,"avg":1.123076923076923,"active":0,"complete":65,"success":65,"errored":0,"retried":0,"total":65,"elapsed":17}
+[debug] [2026-04-18T12:47:16.630Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/1c960186a1b399d9:populateFiles [none]
+[debug] [2026-04-18T12:47:16.630Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/1c960186a1b399d9:populateFiles {"files":{"/firebase-messaging-sw.js":"77dae16cad4c9a56847c95dfde51f0e8b3b9ba061e2ed4c8309ac1592b20e5a6","/debug-notifications.html":"124a64eda65f3c128cab821e843f6888aac66d4d8898e5d4121d0ad6fc1e6513","/js/menu-data.js":"f660e7280deb58c11185a5ea2d676de2b38a19c0e461235f9ecec27f3deb56f7","/js/fiscal-config.js":"8dd615bc26fd9f767c6dd41f1699a322ed6fbc04186fd7844c055036255d5034","/docs/vercel-supabase-setup.md":"b33ce51da194f684b6371e87436408b23ceb8ec166eec9c6b0fccb4d1c820410","/css/style.css":"a9e6a040471f4931dfee5a00f99fddae72690561356a4f8fc3578f08585aff18","/assets/vino-tinto-copa.jpg":"f9123d14ae013a728897705d5acaed7dd1ea61c87694105c9451ec148569a5ef","/assets/vino-blanco-copa.jpg":"2ee595c4e1b7a8203c44c1c9b60eb1a41388154e3c4d4effaf5776361a8f9024","/assets/tiramisu.jpg":"508d4d312a0b59caa32359131b846100993cb3637ece91d25f18e5c4ec9d7d59","/assets/te-herbal.webp":"2914a9db17dfd75fe002d7b1ceefa823a5884e05b4408dc71657be96ca52dc98","/assets/te-herbal.jpg":"d2f1263225321b3100b6a261dddc67bc34f05915cc2faa05f8af9620376b139b","/assets/tartar-de-atun.jpg":"7b8bd386488f05c9ffeeec4a94c33a7b0466d138e71501031968c23d113df432","/assets/tabla-de-quesos.jpg":"7a641dc7ec519941862849c385b274fc55427699d216a2a17a666562cdd56198","/assets/sopa-de-temporada.jpg":"2c98e3c2e29254b6e87a8c861891ed0bc399623b947e51c40bfd4bdc23c53cd5","/assets/salmon-glaseado.jpg":"8ee4ac82a8b81d56f54c85c269a98a1b92d4714dbdf8c6e19607ead6d0db54d3","/assets/ribeye-a-la-parrilla.jpg":"1a21f423f0135b345b9eeab96cddb779fac07bb29aeeba60c98047623934b267","/assets/pulpo-a-la-plancha.jpg":"2304c2bb28c0290dc79dfd8743e3098e957a3c1ee39825ca2923af4f74764caa","/assets/principales.svg":"f3ee4796894765bc72fa281d8cacf7fdabfc4c65ddf28831a625c64e80f54527","/assets/postres.svg":"e7c2bd4b49412a859c108912440a343f203804ba5d6e5a6c61c3106392668bc0","/assets/pollo-rostizado.jpg":"d637270f3e8c605b20f7a710e58e8f09fbacfa550b0220703c461fef8e15c5fa","/assets/pie-de-limon.jpg":"abf58fc645955d0dfc80c00c5692a097124016e062cd055a6b3a3e3f00b3e246","/assets/pasta-trufada.jpeg":"fdd3e5af2c21bd6ac98d8c269924b96444d61868e290d00f16d641ba05aa53cd","/assets/paella-de-mariscos.jpg":"1e80a6fa40ca50a78075551e396f021f3e90ad94bef155ccc218b74c99535755","/assets/mousse-de-chocolate.jpg":"07c38821d494a64d6061c663a9bc3a2f2408b0c71d024b930af43e57f2669053","/assets/mocktail-tropical.jpg":"13b8b1b4e15540831aa58a780fe2b6560780dcb232f01ac91dedeaec52379f2b","/assets/lomo-en-salsa.jpg":"98b3c45d120c13c67d8248aa9873dbb02d3197eeaa094877b69a9796b15b720d","/assets/limonada-natural.webp":"fad0da22fc05e6c5c140b0a7eea01ac0f9b8b97e5c964c7b9a408de1d118d0ce","/assets/lasagna-artesanal.jpg":"ce436c54e8cef99884c5208360ecb71c9be1d2a24766006822cb21b183e41978","/assets/jugo-verde.jpeg":"461ba7cb2f20927aab2e1ae293fa8dfd6bd148fbdfbd300a2cf4900bea0a2a1c","/assets/icon.jpg":"0cf31752228520e2af010191ba28acd929e822ff71aee86f2a77f713f843ea18","/assets/hero.svg":"0c438a08b9d0dd389e69b62eb0bc61d8bb9d24728aefc1329c8f577e791b1fb0","/assets/helado-artesanal.jpg":"b09ab1dc0854e364bc805aae2bc6411fad0059e6dd11a20109759ccc77f98a53","/assets/hamburguesa-premium.jpg":"7304db22004d75433b492dfe535065a8470555dadeea3052fafa9f2a4a007373","/assets/fruta-fresca.webp":"bd0268613b39c2005afbec8c62c3b891737444c967ad90b61df0b599c69b301f","/assets/food.svg":"96ffc49c93cf7414b3b15df00b2e459d2019e47bae178aeb90d2ababf2b06183","/assets/flan-casero.jpg":"d41d64998ec42d0b7d12c1746c4609cb3847cc2cfa3ae58295a343746b29eb6d","/assets/entradas.svg":"098126872a824928c666920bb91aeb29202462d6cf749fc651a956c21994b15d","/assets/ensalada-mediterranea.jpg":"99803b557daf5c78440b5c67df88bcbd34db18e5f14c2cec15f5811532a4c2b4","/assets/empanada-gourmet.webp":"2dc9822f9fffe96f3b457398422e3ec14f0b7948d0bd11259bf0685dfcda3ae6","/assets/croquetas-de-queso.jpg":"1598b31b695d29126caf35862b6defb6675e8a1cda71afacb85ade743d429d0a","/assets/creme-brulee.jpg":"61d3befc60bde8fe1c1da03010589c0e39607a4bdff63b4c143cbcccad54b778","/assets/coulant-de-cacao.jpg":"8b8f552fef9aeee0b3f3639bb8bb505e69efb0f860a82d858e41006300c4d1c7","/assets/costillas-bbq.jpg":"55f7ac6896914f113ed79422037ad81935dd2ea5848228e280ac081dffa0ebce","/assets/coctel-de-autor.jpg":"f2840fc791e6b7aec7c6c57e20be7140b36e598f8d83b1787ea9061333c031c1","/assets/cheesecake.jpg":"d766be6a7ee90144be1b6402374f746c85f5a7da94b9da7834816b6739ab5458","/assets/ceviche-de-pescado.webp":"00508dbea3e71daef7d3c94896e164211f55aa25cbf1f087fb8df55cead8ca24","/assets/cerveza-artesanal.jpg":"0d6e02c8dfd4684156a074f35f9017b5bf83400b79e4a5e15114afc7de1e3163","/assets/casa-brava.jpg":"599c1875a7bf7d96f4af42c3d748d5726a975d99f7106c92a45fbe4298398d29","/assets/casa-brava-logo.jpg":"24a19eb0defb9da554414e998aead9feac4cd8388252e6480e472b9f3aace425","/assets/carpaccio-de-res.webp":"c6cc9acfe15d3f37c9e6fa922cec9d14877e5eab430f28283e790911dde33feb","/assets/cafe-espresso.webp":"06800a8550a3716c432314d7cffcb0909c7996f57662e7be9b397fa1790b93df","/assets/bruschetta-clasica.jpg":"9c72e71a7fe79cc07b05ac9c6403af084578e9f81dc346263248e95cec718285","/assets/brownie-caliente.jpg":"32b19961d540418a7478573f68c7126e1d5f2c6ffbde4cdd9f3766ecd11b0f32","/assets/bebidas.svg":"11b26fc183a03f8153d4012d2a8e33cefd67a405e20ff4135f738b1066ad3d79","/assets/arroz-meloso.jpg":"0a80f2aa9d1adedf1d7a7a0c8a0f30c10753c66625e464a2a7d97e1ae63c265a","/assets/agua-mineral.jpg":"158e23d18364dd854587b62838339fca1763901d6e74c6aadfda700b306928f0","/kitchen.html":"c7b603b3b295c47157fdd8f89f2999c71e65fdc2a3440c5b9409c1c9a3a35d4b","/js/kitchen.js":"95b5c7c4935e25714927ec893c0141d3ecde091b78f9bbe735d3855a689949fa","/index.html":"d7cee514c5a96991c4464e3eac2986ce948709ac755590321a952ebcc64c6871","/crm.html":"fc0e8d2d5e1bd26036de48f4dcf97702763e71707b24629798685b0a87b19bf3","/js/firebase-config.js":"82060236e70c90ff3b34424baaeee958e77e80a1c7e57cfda7a2fec0ecbc1fbf","/.vercel/README.txt":"17190a6405df36feb9538f0081f12d4a513371102404a2f72577759481ea172a","/.vercel/project.json":"63134d70fa1a7d23cdc48b5dc3ce6a6940f3a4d91e472c632ef9549f14b180e4","/js/app.js":"bc6d55ce9ad07416348ede5f761d39b00b703b8d19e5de1499491a77fac06c3a","/js/crm.js":"53708687b881b9f418f7e23df9fa44908b728e3cdef5b657a8776c63d101dc8a"}}
+[debug] [2026-04-18T12:47:17.285Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/1c960186a1b399d9:populateFiles 200
+[debug] [2026-04-18T12:47:17.285Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/1c960186a1b399d9:populateFiles {"uploadRequiredHashes":["c7b603b3b295c47157fdd8f89f2999c71e65fdc2a3440c5b9409c1c9a3a35d4b","63134d70fa1a7d23cdc48b5dc3ce6a6940f3a4d91e472c632ef9549f14b180e4","82060236e70c90ff3b34424baaeee958e77e80a1c7e57cfda7a2fec0ecbc1fbf","17190a6405df36feb9538f0081f12d4a513371102404a2f72577759481ea172a","95b5c7c4935e25714927ec893c0141d3ecde091b78f9bbe735d3855a689949fa","fc0e8d2d5e1bd26036de48f4dcf97702763e71707b24629798685b0a87b19bf3","bc6d55ce9ad07416348ede5f761d39b00b703b8d19e5de1499491a77fac06c3a","d7cee514c5a96991c4464e3eac2986ce948709ac755590321a952ebcc64c6871","53708687b881b9f418f7e23df9fa44908b728e3cdef5b657a8776c63d101dc8a"],"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files"}
+[debug] [2026-04-18T12:47:17.286Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.286Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.286Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.286Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.287Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.287Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.287Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.287Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.287Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.287Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.288Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.288Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.288Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.288Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.289Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.289Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.289Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.289Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:17.290Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/c7b603b3b295c47157fdd8f89f2999c71e65fdc2a3440c5b9409c1c9a3a35d4b [none]
+[debug] [2026-04-18T12:47:17.290Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/c7b603b3b295c47157fdd8f89f2999c71e65fdc2a3440c5b9409c1c9a3a35d4b [stream]
+[debug] [2026-04-18T12:47:17.292Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/63134d70fa1a7d23cdc48b5dc3ce6a6940f3a4d91e472c632ef9549f14b180e4 [none]
+[debug] [2026-04-18T12:47:17.292Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/63134d70fa1a7d23cdc48b5dc3ce6a6940f3a4d91e472c632ef9549f14b180e4 [stream]
+[debug] [2026-04-18T12:47:17.293Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/82060236e70c90ff3b34424baaeee958e77e80a1c7e57cfda7a2fec0ecbc1fbf [none]
+[debug] [2026-04-18T12:47:17.293Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/82060236e70c90ff3b34424baaeee958e77e80a1c7e57cfda7a2fec0ecbc1fbf [stream]
+[debug] [2026-04-18T12:47:17.294Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/17190a6405df36feb9538f0081f12d4a513371102404a2f72577759481ea172a [none]
+[debug] [2026-04-18T12:47:17.294Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/17190a6405df36feb9538f0081f12d4a513371102404a2f72577759481ea172a [stream]
+[debug] [2026-04-18T12:47:17.295Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/95b5c7c4935e25714927ec893c0141d3ecde091b78f9bbe735d3855a689949fa [none]
+[debug] [2026-04-18T12:47:17.295Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/95b5c7c4935e25714927ec893c0141d3ecde091b78f9bbe735d3855a689949fa [stream]
+[debug] [2026-04-18T12:47:17.297Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/fc0e8d2d5e1bd26036de48f4dcf97702763e71707b24629798685b0a87b19bf3 [none]
+[debug] [2026-04-18T12:47:17.297Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/fc0e8d2d5e1bd26036de48f4dcf97702763e71707b24629798685b0a87b19bf3 [stream]
+[debug] [2026-04-18T12:47:17.298Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/bc6d55ce9ad07416348ede5f761d39b00b703b8d19e5de1499491a77fac06c3a [none]
+[debug] [2026-04-18T12:47:17.298Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/bc6d55ce9ad07416348ede5f761d39b00b703b8d19e5de1499491a77fac06c3a [stream]
+[debug] [2026-04-18T12:47:17.299Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/d7cee514c5a96991c4464e3eac2986ce948709ac755590321a952ebcc64c6871 [none]
+[debug] [2026-04-18T12:47:17.299Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/d7cee514c5a96991c4464e3eac2986ce948709ac755590321a952ebcc64c6871 [stream]
+[debug] [2026-04-18T12:47:17.300Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/53708687b881b9f418f7e23df9fa44908b728e3cdef5b657a8776c63d101dc8a [none]
+[debug] [2026-04-18T12:47:17.300Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/53708687b881b9f418f7e23df9fa44908b728e3cdef5b657a8776c63d101dc8a [stream]
+[debug] [2026-04-18T12:47:17.301Z] [hosting][populate queue][FINAL] {"max":662,"min":662,"avg":662,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":674}
+[debug] [2026-04-18T12:47:17.301Z] [hosting] uploads queued: 9
+[debug] [2026-04-18T12:47:17.902Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/95b5c7c4935e25714927ec893c0141d3ecde091b78f9bbe735d3855a689949fa 200
+[debug] [2026-04-18T12:47:17.903Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/95b5c7c4935e25714927ec893c0141d3ecde091b78f9bbe735d3855a689949fa [stream]
+[debug] [2026-04-18T12:47:17.913Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/17190a6405df36feb9538f0081f12d4a513371102404a2f72577759481ea172a 200
+[debug] [2026-04-18T12:47:17.913Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/17190a6405df36feb9538f0081f12d4a513371102404a2f72577759481ea172a [stream]
+[debug] [2026-04-18T12:47:17.933Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/bc6d55ce9ad07416348ede5f761d39b00b703b8d19e5de1499491a77fac06c3a 200
+[debug] [2026-04-18T12:47:17.933Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/bc6d55ce9ad07416348ede5f761d39b00b703b8d19e5de1499491a77fac06c3a [stream]
+[debug] [2026-04-18T12:47:17.953Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/d7cee514c5a96991c4464e3eac2986ce948709ac755590321a952ebcc64c6871 200
+[debug] [2026-04-18T12:47:17.954Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/d7cee514c5a96991c4464e3eac2986ce948709ac755590321a952ebcc64c6871 [stream]
+[debug] [2026-04-18T12:47:18.025Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/c7b603b3b295c47157fdd8f89f2999c71e65fdc2a3440c5b9409c1c9a3a35d4b 200
+[debug] [2026-04-18T12:47:18.025Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/c7b603b3b295c47157fdd8f89f2999c71e65fdc2a3440c5b9409c1c9a3a35d4b [stream]
+[debug] [2026-04-18T12:47:18.036Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/53708687b881b9f418f7e23df9fa44908b728e3cdef5b657a8776c63d101dc8a 200
+[debug] [2026-04-18T12:47:18.036Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/53708687b881b9f418f7e23df9fa44908b728e3cdef5b657a8776c63d101dc8a [stream]
+[debug] [2026-04-18T12:47:18.037Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/fc0e8d2d5e1bd26036de48f4dcf97702763e71707b24629798685b0a87b19bf3 200
+[debug] [2026-04-18T12:47:18.037Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/fc0e8d2d5e1bd26036de48f4dcf97702763e71707b24629798685b0a87b19bf3 [stream]
+[debug] [2026-04-18T12:47:18.053Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/63134d70fa1a7d23cdc48b5dc3ce6a6940f3a4d91e472c632ef9549f14b180e4 200
+[debug] [2026-04-18T12:47:18.053Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/63134d70fa1a7d23cdc48b5dc3ce6a6940f3a4d91e472c632ef9549f14b180e4 [stream]
+[debug] [2026-04-18T12:47:18.054Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/82060236e70c90ff3b34424baaeee958e77e80a1c7e57cfda7a2fec0ecbc1fbf 200
+[debug] [2026-04-18T12:47:18.054Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/1c960186a1b399d9/files/82060236e70c90ff3b34424baaeee958e77e80a1c7e57cfda7a2fec0ecbc1fbf [stream]
+[debug] [2026-04-18T12:47:18.054Z] [hosting][upload queue][FINAL] {"max":767,"min":616,"avg":702.7777777777778,"active":0,"complete":9,"success":9,"errored":0,"retried":0,"total":9,"elapsed":769}
+[info] i  hosting: upload complete 
+[info] +  hosting[fridarestauranthn]: file upload complete 
+[debug] [2026-04-18T12:47:18.054Z] [hosting] deploy completed after 1472ms
+[debug] [2026-04-18T12:47:18.055Z] [
+  {
+    "config": {
+      "site": "fridarestauranthn",
+      "public": ".",
+      "ignore": [
+        "firebase.json",
+        "firestore.rules",
+        "README.md",
+        "package.json",
+        "package-lock.json",
+        "firebase-debug.log",
+        "functions/**",
+        "api/**",
+        "lib/**",
+        "supabase/**",
+        "src/**",
+        "dataconnect/**",
+        "public/**",
+        "vercel.json",
+        ".env.example",
+        ".codex-tools/**",
+        ".git/**",
+        ".git",
+        ".gitignore",
+        ".firebaserc",
+        ".env",
+        ".env.*",
+        ".github/**",
+        ".vscode/**",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    },
+    "version": "projects/133167188727/sites/fridarestauranthn/versions/1c960186a1b399d9"
+  }
+]
+[info] i  hosting[fridarestauranthn]: finalizing version... 
+[debug] [2026-04-18T12:47:18.056Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:18.056Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:18.056Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/1c960186a1b399d9 updateMask=status%2Cconfig
+[debug] [2026-04-18T12:47:18.056Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/1c960186a1b399d9 {"status":"FINALIZED","config":{}}
+[debug] [2026-04-18T12:47:18.674Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/1c960186a1b399d9 200
+[debug] [2026-04-18T12:47:18.674Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/1c960186a1b399d9 {"name":"projects/133167188727/sites/fridarestauranthn/versions/1c960186a1b399d9","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-04-18T12:47:11.497691Z","createUser":{"email":"kennethduron.paz@gmail.com"},"finalizeTime":"2026-04-18T12:47:14.138612Z","finalizeUser":{"email":"kennethduron.paz@gmail.com"}}
+[debug] [2026-04-18T12:47:18.674Z] [hosting] finalized version for fridarestauranthn:[object Object]
+[info] +  hosting[fridarestauranthn]: version finalized 
+[info] i  hosting[fridarestauranthn]: releasing new version... 
+[debug] [2026-04-18T12:47:18.675Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:18.675Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:18.675Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases versionName=projects%2F133167188727%2Fsites%2Ffridarestauranthn%2Fversions%2F1c960186a1b399d9
+[debug] [2026-04-18T12:47:18.675Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases {}
+[debug] [2026-04-18T12:47:19.303Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases 200
+[debug] [2026-04-18T12:47:42.053Z] ----------------------------------------------------------------------
+[debug] [2026-04-18T12:47:42.055Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\user\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting
+[debug] [2026-04-18T12:47:42.056Z] CLI Version:   15.8.0
+[debug] [2026-04-18T12:47:42.056Z] Platform:      win32
+[debug] [2026-04-18T12:47:42.056Z] Node Version:  v25.7.0
+[debug] [2026-04-18T12:47:42.056Z] Time:          Sat Apr 18 2026 06:47:42 GMT-0600 (Central Standard Time)
+[debug] [2026-04-18T12:47:42.056Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-18T12:47:43.246Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-18T12:47:43.246Z] > authorizing via signed-in user (kennethduron.paz@gmail.com)
+[debug] [2026-04-18T12:47:43.247Z] [iam] checking project fridarestaurant-768ab for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-04-18T12:47:43.248Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:43.248Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:43.249Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions [none]
+[debug] [2026-04-18T12:47:43.249Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions  x-goog-user-project=fridarestaurant-768ab
+[debug] [2026-04-18T12:47:43.249Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-18T12:47:43.520Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions 200
+[debug] [2026-04-18T12:47:43.520Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fridarestaurant-768ab:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-04-18T12:47:43.521Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:43.521Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:43.521Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab [none]
+[debug] [2026-04-18T12:47:43.864Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab 200
+[debug] [2026-04-18T12:47:43.865Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fridarestaurant-768ab {"projectId":"fridarestaurant-768ab","projectNumber":"133167188727","displayName":"fridarestaurant","name":"projects/fridarestaurant-768ab","resources":{"hostingSite":"fridarestaurant-768ab"},"state":"ACTIVE","etag":"1_e5c007d8-0a0a-46de-8dec-036ddabf0f56"}
+[info] 
+[info] === Deploying to 'fridarestaurant-768ab'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2026-04-18T12:47:43.867Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:43.867Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:43.867Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions [none]
+[debug] [2026-04-18T12:47:43.867Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-04-18T12:47:44.948Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions 200
+[debug] [2026-04-18T12:47:44.948Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions {"name":"projects/133167188727/sites/fridarestauranthn/versions/f2679ba4c1a5cbad","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[fridarestauranthn]: beginning deploy... 
+[info] i  hosting[fridarestauranthn]: found 63 files in . 
+[debug] [2026-04-18T12:47:44.986Z] [hosting] uploading with 200 concurrency
+[debug] [2026-04-18T12:47:44.991Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:44.991Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:44.992Z] [hosting] hash cache [] stored for 63 files
+[debug] [2026-04-18T12:47:44.992Z] [hosting][hash queue][FINAL] {"max":3,"min":0,"avg":0.7730325250800552,"active":0,"complete":63,"success":63,"errored":0,"retried":0,"total":63,"elapsed":5}
+[debug] [2026-04-18T12:47:44.993Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/f2679ba4c1a5cbad:populateFiles [none]
+[debug] [2026-04-18T12:47:44.993Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/f2679ba4c1a5cbad:populateFiles {"files":{"/kitchen.html":"c7b603b3b295c47157fdd8f89f2999c71e65fdc2a3440c5b9409c1c9a3a35d4b","/index.html":"d7cee514c5a96991c4464e3eac2986ce948709ac755590321a952ebcc64c6871","/firebase-messaging-sw.js":"77dae16cad4c9a56847c95dfde51f0e8b3b9ba061e2ed4c8309ac1592b20e5a6","/debug-notifications.html":"124a64eda65f3c128cab821e843f6888aac66d4d8898e5d4121d0ad6fc1e6513","/crm.html":"fc0e8d2d5e1bd26036de48f4dcf97702763e71707b24629798685b0a87b19bf3","/js/menu-data.js":"f660e7280deb58c11185a5ea2d676de2b38a19c0e461235f9ecec27f3deb56f7","/js/kitchen.js":"95b5c7c4935e25714927ec893c0141d3ecde091b78f9bbe735d3855a689949fa","/js/fiscal-config.js":"8dd615bc26fd9f767c6dd41f1699a322ed6fbc04186fd7844c055036255d5034","/js/firebase-config.js":"82060236e70c90ff3b34424baaeee958e77e80a1c7e57cfda7a2fec0ecbc1fbf","/js/crm.js":"53708687b881b9f418f7e23df9fa44908b728e3cdef5b657a8776c63d101dc8a","/js/app.js":"bc6d55ce9ad07416348ede5f761d39b00b703b8d19e5de1499491a77fac06c3a","/docs/vercel-supabase-setup.md":"b33ce51da194f684b6371e87436408b23ceb8ec166eec9c6b0fccb4d1c820410","/css/style.css":"a9e6a040471f4931dfee5a00f99fddae72690561356a4f8fc3578f08585aff18","/assets/vino-tinto-copa.jpg":"f9123d14ae013a728897705d5acaed7dd1ea61c87694105c9451ec148569a5ef","/assets/vino-blanco-copa.jpg":"2ee595c4e1b7a8203c44c1c9b60eb1a41388154e3c4d4effaf5776361a8f9024","/assets/tiramisu.jpg":"508d4d312a0b59caa32359131b846100993cb3637ece91d25f18e5c4ec9d7d59","/assets/te-herbal.webp":"2914a9db17dfd75fe002d7b1ceefa823a5884e05b4408dc71657be96ca52dc98","/assets/te-herbal.jpg":"d2f1263225321b3100b6a261dddc67bc34f05915cc2faa05f8af9620376b139b","/assets/tartar-de-atun.jpg":"7b8bd386488f05c9ffeeec4a94c33a7b0466d138e71501031968c23d113df432","/assets/tabla-de-quesos.jpg":"7a641dc7ec519941862849c385b274fc55427699d216a2a17a666562cdd56198","/assets/sopa-de-temporada.jpg":"2c98e3c2e29254b6e87a8c861891ed0bc399623b947e51c40bfd4bdc23c53cd5","/assets/salmon-glaseado.jpg":"8ee4ac82a8b81d56f54c85c269a98a1b92d4714dbdf8c6e19607ead6d0db54d3","/assets/ribeye-a-la-parrilla.jpg":"1a21f423f0135b345b9eeab96cddb779fac07bb29aeeba60c98047623934b267","/assets/pulpo-a-la-plancha.jpg":"2304c2bb28c0290dc79dfd8743e3098e957a3c1ee39825ca2923af4f74764caa","/assets/principales.svg":"f3ee4796894765bc72fa281d8cacf7fdabfc4c65ddf28831a625c64e80f54527","/assets/postres.svg":"e7c2bd4b49412a859c108912440a343f203804ba5d6e5a6c61c3106392668bc0","/assets/pollo-rostizado.jpg":"d637270f3e8c605b20f7a710e58e8f09fbacfa550b0220703c461fef8e15c5fa","/assets/pie-de-limon.jpg":"abf58fc645955d0dfc80c00c5692a097124016e062cd055a6b3a3e3f00b3e246","/assets/pasta-trufada.jpeg":"fdd3e5af2c21bd6ac98d8c269924b96444d61868e290d00f16d641ba05aa53cd","/assets/paella-de-mariscos.jpg":"1e80a6fa40ca50a78075551e396f021f3e90ad94bef155ccc218b74c99535755","/assets/mousse-de-chocolate.jpg":"07c38821d494a64d6061c663a9bc3a2f2408b0c71d024b930af43e57f2669053","/assets/mocktail-tropical.jpg":"13b8b1b4e15540831aa58a780fe2b6560780dcb232f01ac91dedeaec52379f2b","/assets/lomo-en-salsa.jpg":"98b3c45d120c13c67d8248aa9873dbb02d3197eeaa094877b69a9796b15b720d","/assets/limonada-natural.webp":"fad0da22fc05e6c5c140b0a7eea01ac0f9b8b97e5c964c7b9a408de1d118d0ce","/assets/lasagna-artesanal.jpg":"ce436c54e8cef99884c5208360ecb71c9be1d2a24766006822cb21b183e41978","/assets/jugo-verde.jpeg":"461ba7cb2f20927aab2e1ae293fa8dfd6bd148fbdfbd300a2cf4900bea0a2a1c","/assets/icon.jpg":"0cf31752228520e2af010191ba28acd929e822ff71aee86f2a77f713f843ea18","/assets/hero.svg":"0c438a08b9d0dd389e69b62eb0bc61d8bb9d24728aefc1329c8f577e791b1fb0","/assets/helado-artesanal.jpg":"b09ab1dc0854e364bc805aae2bc6411fad0059e6dd11a20109759ccc77f98a53","/assets/hamburguesa-premium.jpg":"7304db22004d75433b492dfe535065a8470555dadeea3052fafa9f2a4a007373","/assets/fruta-fresca.webp":"bd0268613b39c2005afbec8c62c3b891737444c967ad90b61df0b599c69b301f","/assets/food.svg":"96ffc49c93cf7414b3b15df00b2e459d2019e47bae178aeb90d2ababf2b06183","/assets/flan-casero.jpg":"d41d64998ec42d0b7d12c1746c4609cb3847cc2cfa3ae58295a343746b29eb6d","/assets/entradas.svg":"098126872a824928c666920bb91aeb29202462d6cf749fc651a956c21994b15d","/assets/ensalada-mediterranea.jpg":"99803b557daf5c78440b5c67df88bcbd34db18e5f14c2cec15f5811532a4c2b4","/assets/empanada-gourmet.webp":"2dc9822f9fffe96f3b457398422e3ec14f0b7948d0bd11259bf0685dfcda3ae6","/assets/croquetas-de-queso.jpg":"1598b31b695d29126caf35862b6defb6675e8a1cda71afacb85ade743d429d0a","/assets/creme-brulee.jpg":"61d3befc60bde8fe1c1da03010589c0e39607a4bdff63b4c143cbcccad54b778","/assets/coulant-de-cacao.jpg":"8b8f552fef9aeee0b3f3639bb8bb505e69efb0f860a82d858e41006300c4d1c7","/assets/costillas-bbq.jpg":"55f7ac6896914f113ed79422037ad81935dd2ea5848228e280ac081dffa0ebce","/assets/coctel-de-autor.jpg":"f2840fc791e6b7aec7c6c57e20be7140b36e598f8d83b1787ea9061333c031c1","/assets/cheesecake.jpg":"d766be6a7ee90144be1b6402374f746c85f5a7da94b9da7834816b6739ab5458","/assets/ceviche-de-pescado.webp":"00508dbea3e71daef7d3c94896e164211f55aa25cbf1f087fb8df55cead8ca24","/assets/cerveza-artesanal.jpg":"0d6e02c8dfd4684156a074f35f9017b5bf83400b79e4a5e15114afc7de1e3163","/assets/casa-brava.jpg":"599c1875a7bf7d96f4af42c3d748d5726a975d99f7106c92a45fbe4298398d29","/assets/casa-brava-logo.jpg":"24a19eb0defb9da554414e998aead9feac4cd8388252e6480e472b9f3aace425","/assets/carpaccio-de-res.webp":"c6cc9acfe15d3f37c9e6fa922cec9d14877e5eab430f28283e790911dde33feb","/assets/cafe-espresso.webp":"06800a8550a3716c432314d7cffcb0909c7996f57662e7be9b397fa1790b93df","/assets/bruschetta-clasica.jpg":"9c72e71a7fe79cc07b05ac9c6403af084578e9f81dc346263248e95cec718285","/assets/brownie-caliente.jpg":"32b19961d540418a7478573f68c7126e1d5f2c6ffbde4cdd9f3766ecd11b0f32","/assets/bebidas.svg":"11b26fc183a03f8153d4012d2a8e33cefd67a405e20ff4135f738b1066ad3d79","/assets/arroz-meloso.jpg":"0a80f2aa9d1adedf1d7a7a0c8a0f30c10753c66625e464a2a7d97e1ae63c265a","/assets/agua-mineral.jpg":"158e23d18364dd854587b62838339fca1763901d6e74c6aadfda700b306928f0"}}
+[debug] [2026-04-18T12:47:45.677Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/f2679ba4c1a5cbad:populateFiles 200
+[debug] [2026-04-18T12:47:45.677Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/133167188727/sites/fridarestauranthn/versions/f2679ba4c1a5cbad:populateFiles {"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/fridarestauranthn/versions/f2679ba4c1a5cbad/files"}
+[debug] [2026-04-18T12:47:45.677Z] [hosting][populate queue][FINAL] {"max":687,"min":687,"avg":687,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":687}
+[debug] [2026-04-18T12:47:45.678Z] [hosting] uploads queued: 0
+[debug] [2026-04-18T12:47:45.678Z] [hosting][upload queue][FINAL] {"max":0,"min":9999999999,"avg":0,"active":0,"complete":0,"success":0,"errored":0,"retried":0,"total":0,"elapsed":1776516465678}
+[info] i  hosting: upload complete 
+[info] +  hosting[fridarestauranthn]: file upload complete 
+[debug] [2026-04-18T12:47:45.678Z] [hosting] deploy completed after 724ms
+[debug] [2026-04-18T12:47:45.679Z] [
+  {
+    "config": {
+      "site": "fridarestauranthn",
+      "public": ".",
+      "ignore": [
+        "firebase.json",
+        "firestore.rules",
+        "README.md",
+        "package.json",
+        "package-lock.json",
+        "firebase-debug.log",
+        "functions/**",
+        "api/**",
+        "lib/**",
+        "supabase/**",
+        "src/**",
+        "dataconnect/**",
+        "public/**",
+        "vercel.json",
+        ".vercel/**",
+        ".env.example",
+        ".codex-tools/**",
+        ".git/**",
+        ".git",
+        ".gitignore",
+        ".firebaserc",
+        ".env",
+        ".env.*",
+        ".github/**",
+        ".vscode/**",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    },
+    "version": "projects/133167188727/sites/fridarestauranthn/versions/f2679ba4c1a5cbad"
+  }
+]
+[info] i  hosting[fridarestauranthn]: finalizing version... 
+[debug] [2026-04-18T12:47:45.680Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:45.680Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:45.681Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/f2679ba4c1a5cbad updateMask=status%2Cconfig
+[debug] [2026-04-18T12:47:45.681Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/f2679ba4c1a5cbad {"status":"FINALIZED","config":{}}
+[debug] [2026-04-18T12:47:46.209Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/f2679ba4c1a5cbad 200
+[debug] [2026-04-18T12:47:46.209Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/versions/f2679ba4c1a5cbad {"name":"projects/133167188727/sites/fridarestauranthn/versions/f2679ba4c1a5cbad","status":"FINALIZED","config":{},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-04-18T12:47:39.951760Z","createUser":{"email":"kennethduron.paz@gmail.com"},"finalizeTime":"2026-04-18T12:47:41.691364Z","finalizeUser":{"email":"kennethduron.paz@gmail.com"}}
+[debug] [2026-04-18T12:47:46.209Z] [hosting] finalized version for fridarestauranthn:[object Object]
+[info] +  hosting[fridarestauranthn]: version finalized 
+[info] i  hosting[fridarestauranthn]: releasing new version... 
+[debug] [2026-04-18T12:47:46.210Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:46.210Z] Checked if tokens are valid: true, expires at: 1776518268192
+[debug] [2026-04-18T12:47:46.210Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases versionName=projects%2F133167188727%2Fsites%2Ffridarestauranthn%2Fversions%2Ff2679ba4c1a5cbad
+[debug] [2026-04-18T12:47:46.211Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases {}
+[debug] [2026-04-18T12:47:46.899Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/fridarestauranthn/channels/live/releases 200

@@ -17,7 +17,7 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260418a";
+} from "./firebase-config.js?v=20260418b";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260417a";
 
@@ -547,8 +547,11 @@ const foodStats = document.getElementById("foodStats");
 const salesCalendar = document.getElementById("salesCalendar");
 const crmSettingsModal = document.getElementById("crmSettingsModal");
 const closeCrmSettingsBtn = document.getElementById("closeCrmSettings");
-const crmToolsWorkspace = document.getElementById("crmToolsWorkspace");
 const crmSettingsLinks = Array.from(document.querySelectorAll("[data-open-crm-settings]"));
+const orderCreatorModal = document.getElementById("orderCreatorModal");
+const closeOrderCreatorModalBtn = document.getElementById("closeOrderCreatorModal");
+const productManagerModal = document.getElementById("productManagerModal");
+const closeProductManagerModalBtn = document.getElementById("closeProductManagerModal");
 const productManager = document.getElementById("productManager");
 const orderCreator = document.getElementById("orderCreator");
 const viewButtons = Array.from(document.querySelectorAll(".chip[data-view]"));
@@ -1621,25 +1624,39 @@ function closeCrmSettingsModal() {
   crmSettingsModal.classList.add("hidden");
 }
 
+function closeOrderCreatorModal() {
+  if (!orderCreatorModal) return;
+  updateOrderCreatorDraftFromForm();
+  orderCreatorModal.classList.add("hidden");
+}
+
+function closeProductManagerModal() {
+  if (!productManagerModal) return;
+  productManagerModal.classList.add("hidden");
+}
+
+function closeCrmWorkModals() {
+  closeOrderCreatorModal();
+  closeProductManagerModal();
+}
+
 function showCrmWorkspaceTool(tool) {
-  if (!crmToolsWorkspace) return;
-  crmToolsWorkspace.classList.remove("hidden");
-  orderCreator?.classList.toggle("hidden", tool !== "order");
-  productManager?.classList.toggle("hidden", tool !== "products");
   closeCrmSettingsModal();
 
   if (tool === "order") {
     updateOrderCreatorDraftFromForm();
     orderCreatorExpanded = true;
     renderOrderCreator();
-    requestAnimationFrame(() => orderCreator?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    closeProductManagerModal();
+    orderCreatorModal?.classList.remove("hidden");
     return;
   }
 
   if (tool === "products") {
     productManagerExpanded = true;
     renderProductManager();
-    requestAnimationFrame(() => productManager?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    closeOrderCreatorModal();
+    productManagerModal?.classList.remove("hidden");
   }
 }
 
@@ -3241,6 +3258,7 @@ function lockUI() {
   staffBadge.textContent = "";
   updateFiscalRangeAlert();
   closeCrmSettingsModal();
+  closeCrmWorkModals();
   closeFiscalSettingsModal();
   stopRealtime();
 }
@@ -3376,6 +3394,17 @@ if (crmSettingsModal) {
     const toolButton = event.target.closest("[data-open-crm-tool]");
     if (!toolButton) return;
     showCrmWorkspaceTool(toolButton.dataset.openCrmTool);
+  });
+}
+
+if (orderCreatorModal) {
+  orderCreatorModal.addEventListener("click", (event) => {
+    if (event.target === orderCreatorModal) closeOrderCreatorModal();
+  });
+}
+if (productManagerModal) {
+  productManagerModal.addEventListener("click", (event) => {
+    if (event.target === productManagerModal) closeProductManagerModal();
   });
 }
 
@@ -3518,6 +3547,8 @@ if (fiscalRangeAlertButton) {
 }
 if (closeFiscalSettingsBtn) closeFiscalSettingsBtn.addEventListener("click", closeFiscalSettingsModal);
 if (closeCrmSettingsBtn) closeCrmSettingsBtn.addEventListener("click", closeCrmSettingsModal);
+if (closeOrderCreatorModalBtn) closeOrderCreatorModalBtn.addEventListener("click", closeOrderCreatorModal);
+if (closeProductManagerModalBtn) closeProductManagerModalBtn.addEventListener("click", closeProductManagerModal);
 if (crmNavToggle) crmNavToggle.addEventListener("click", toggleCRMHeaderNav);
 if (crmHeaderNav) {
   crmHeaderNav.addEventListener("click", (event) => {

@@ -1,7 +1,7 @@
 const API_BASE_URL = (
   window.FRIDA_API_BASE_URL ||
   localStorage.getItem("frida_api_base_url") ||
-  "https://fridarestaurant-git-main-kennethduronpaz-7247s-projects.vercel.app"
+  "https://fridarestaurant.vercel.app"
 ).replace(/\/$/, "");
 
 const SESSION_KEY = "frida_staff_session_v1";

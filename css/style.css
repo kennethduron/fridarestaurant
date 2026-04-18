@@ -1988,12 +1988,6 @@ textarea:focus {
   line-height: 1.35;
 }
 
-.crm-tools-workspace {
-  display: grid;
-  gap: 12px;
-  margin: 0 0 16px;
-}
-
 .crm-settings-card {
   width: min(920px, 94%);
   max-height: min(88vh, 900px);
@@ -2013,16 +2007,39 @@ textarea:focus {
   margin: 16px 0 0;
 }
 
+.modal .crm-work-modal-card {
+  width: min(1540px, calc(100vw - 48px));
+  max-width: none;
+  height: min(94vh, 980px);
+  min-height: min(760px, calc(100vh - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+
+.crm-work-modal-head {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #e1cfbb;
+}
+
+.crm-work-modal-head h3 {
+  margin: 0;
+}
+
+.crm-work-modal-card .order-product-grid {
+  max-height: 600px;
+}
+
 .product-manager {
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .product-manager-card {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  padding: 14px;
-  box-shadow: 0 8px 20px rgba(31, 24, 12, 0.05);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
   overflow: hidden;
 }
 
@@ -2165,7 +2182,7 @@ textarea:focus {
 
 .product-row-fields {
   display: grid;
-  grid-template-columns: minmax(118px, 160px) minmax(210px, 1fr) minmax(210px, 1fr) minmax(142px, 170px) minmax(150px, 180px);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 8px;
   align-items: end;
   min-width: 0;
@@ -2212,15 +2229,15 @@ textarea:focus {
 }
 
 .order-creator {
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .order-creator-card {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  padding: 14px;
-  box-shadow: 0 8px 20px rgba(31, 24, 12, 0.05);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
 }
 
 .order-creator-head {
@@ -3682,6 +3699,13 @@ textarea:focus {
   .modal-card {
     width: min(700px, 96%);
     padding: 12px;
+  }
+
+  .modal .crm-work-modal-card {
+    width: calc(100vw - 16px);
+    height: calc(100vh - 16px);
+    min-height: 0;
+    max-height: calc(100vh - 16px);
   }
 
   .invoice-editor-grid {

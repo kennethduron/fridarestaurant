@@ -1,4 +1,4 @@
-import { addOrder, addReservation, listenOrderById, loadMenuSettings, registerOrderNotificationToken } from "./firebase-config.js?v=20260418a";
+import { addOrder, addReservation, listenOrderById, loadMenuSettings, registerOrderNotificationToken } from "./firebase-config.js?v=20260418b";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260417a";
 
 const STORAGE = {
