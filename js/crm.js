@@ -1,4 +1,5 @@
 import {
+  addOrder,
   listenOrders,
   listenReservations,
   updateOrderStatus,
@@ -16,7 +17,7 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260417d";
+} from "./firebase-config.js?v=20260417e";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260417a";
 
@@ -197,6 +198,38 @@ const i18n = {
     calendarPrev: "Mes anterior",
     calendarNext: "Mes siguiente",
     calendarFoodBreakdown: "Comida vendida ese dia",
+    orderCreatorTitle: "Crear pedido",
+    orderCreatorText: "Toma pedidos desde el CRM con productos, datos del cliente y forma de pago.",
+    orderCreatorCollapsedText: "Crea pedidos internos para mesa, recoger o delivery sin salir del CRM.",
+    orderCreatorShow: "Crear pedido",
+    orderCreatorHide: "Ocultar pedido",
+    orderCreatorSearchLabel: "Buscar producto",
+    orderCreatorSearchPlaceholder: "Buscar por nombre o categoria",
+    orderCreatorCategoryLabel: "Categoria",
+    orderCreatorCartTitle: "Pedido actual",
+    orderCreatorEmptyCart: "Agrega productos para crear el pedido.",
+    orderCreatorCustomerTitle: "Datos del cliente",
+    orderCreatorTypeLabel: "Tipo de pedido",
+    orderTypeDineIn: "Comer en restaurante",
+    orderTypeTakeaway: "Recoger",
+    orderTypeDelivery: "Delivery",
+    orderCreatorNameLabel: "Nombre del cliente",
+    orderCreatorPhoneLabel: "Telefono",
+    orderCreatorTableLabel: "Mesa o referencia",
+    orderCreatorAddressLabel: "Direccion de delivery",
+    orderCreatorNotesLabel: "Notas del pedido",
+    orderCreatorPaymentMethodLabel: "Forma de pago",
+    orderCreatorPaymentStatusLabel: "Estado del pago",
+    orderCreatorPaymentUnpaid: "Pendiente de pago",
+    orderCreatorPaymentPaid: "Pagado",
+    orderCreatorRoutingHint: "Mesa entra directo a cocina. Recoger y delivery pasan por pendientes.",
+    orderCreatorSubmit: "Crear pedido",
+    orderCreatorReset: "Limpiar",
+    orderCreatorNeedItems: "Agrega al menos un producto.",
+    orderCreatorNeedCustomer: "Escribe el nombre del cliente.",
+    orderCreatorNeedAddress: "Escribe la direccion para delivery.",
+    orderCreatorCreated: "Pedido creado",
+    orderCreatorError: "No se pudo crear el pedido.",
     productManagerTitle: "Gestion de productos",
     productManagerText: "Cambia precios, agrega comentarios visibles y marca productos nuevos.",
     productManagerCollapsedText: "Ajustes de menu listos. Abre esta seccion para editar productos.",
@@ -405,6 +438,38 @@ const i18n = {
     calendarPrev: "Previous month",
     calendarNext: "Next month",
     calendarFoodBreakdown: "Food sold that day",
+    orderCreatorTitle: "Create order",
+    orderCreatorText: "Take CRM orders with products, customer details, and payment method.",
+    orderCreatorCollapsedText: "Create internal dine-in, pickup, or delivery orders without leaving the CRM.",
+    orderCreatorShow: "Create order",
+    orderCreatorHide: "Hide order",
+    orderCreatorSearchLabel: "Search product",
+    orderCreatorSearchPlaceholder: "Search by name or category",
+    orderCreatorCategoryLabel: "Category",
+    orderCreatorCartTitle: "Current order",
+    orderCreatorEmptyCart: "Add products to create the order.",
+    orderCreatorCustomerTitle: "Customer details",
+    orderCreatorTypeLabel: "Order type",
+    orderTypeDineIn: "Dine in",
+    orderTypeTakeaway: "Pickup",
+    orderTypeDelivery: "Delivery",
+    orderCreatorNameLabel: "Customer name",
+    orderCreatorPhoneLabel: "Phone",
+    orderCreatorTableLabel: "Table or reference",
+    orderCreatorAddressLabel: "Delivery address",
+    orderCreatorNotesLabel: "Order notes",
+    orderCreatorPaymentMethodLabel: "Payment method",
+    orderCreatorPaymentStatusLabel: "Payment status",
+    orderCreatorPaymentUnpaid: "Payment pending",
+    orderCreatorPaymentPaid: "Paid",
+    orderCreatorRoutingHint: "Dine-in goes straight to kitchen. Pickup and delivery go to pending.",
+    orderCreatorSubmit: "Create order",
+    orderCreatorReset: "Clear",
+    orderCreatorNeedItems: "Add at least one product.",
+    orderCreatorNeedCustomer: "Enter the customer name.",
+    orderCreatorNeedAddress: "Enter the delivery address.",
+    orderCreatorCreated: "Order created",
+    orderCreatorError: "Could not create the order.",
     productManagerTitle: "Product management",
     productManagerText: "Change prices, add visible notes, and mark new products.",
     productManagerCollapsedText: "Menu settings are ready. Open this section to edit products.",
@@ -462,6 +527,7 @@ const statsGrid = document.getElementById("statsGrid");
 const foodStats = document.getElementById("foodStats");
 const salesCalendar = document.getElementById("salesCalendar");
 const productManager = document.getElementById("productManager");
+const orderCreator = document.getElementById("orderCreator");
 const viewButtons = Array.from(document.querySelectorAll(".chip[data-view]"));
 const filterButtons = Array.from(document.querySelectorAll(".chip[data-filter]"));
 const periodButtons = Array.from(document.querySelectorAll(".chip[data-period]"));
@@ -510,6 +576,20 @@ let menuSettings = { items: {} };
 let productManagerExpanded = false;
 let productManagerSearchTerm = "";
 let productManagerCategory = "all";
+let orderCreatorExpanded = false;
+let orderCreatorSearchTerm = "";
+let orderCreatorCategory = "all";
+let orderCreatorType = "dine_in";
+let orderCreatorCart = [];
+let orderCreatorDraft = {
+  customerName: "",
+  phone: "",
+  table: "",
+  address: "",
+  notes: "",
+  paymentMethod: "cash",
+  paymentStatus: "unpaid"
+};
 let unsubscribeOrders = null;
 let unsubscribeReservations = null;
 let hasSeenInitialOrdersSnapshot = false;
@@ -995,6 +1075,8 @@ async function refreshMenuSettings() {
     menuSettings = normalizeMenuSettings({ items: {} });
     showToast(t("productSettingsError"));
   }
+  syncOrderCreatorCartWithMenu();
+  renderOrderCreator();
   renderProductManager();
 }
 
@@ -1130,6 +1212,306 @@ async function saveProductSettings(productId) {
     renderProductManager();
   } catch (_error) {
     showToast("Error");
+  }
+}
+
+function orderCreatorItems() {
+  return BASE_MENU_ITEMS.map(productItem);
+}
+
+function filteredOrderCreatorItems() {
+  const search = orderCreatorSearchTerm.trim().toLowerCase();
+  return orderCreatorItems()
+    .filter((item) => orderCreatorCategory === "all" || item.category === orderCreatorCategory)
+    .filter((item) => {
+      if (!search) return true;
+      return [
+        item.title.es,
+        item.title.en,
+        menuCategoryLabel(item.category),
+        item.note?.es,
+        item.note?.en
+      ].some((value) => String(value || "").toLowerCase().includes(search));
+    });
+}
+
+function orderCreatorTotal() {
+  return roundMoney(orderCreatorCart.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0), 0));
+}
+
+function orderCreatorItemCount() {
+  return orderCreatorCart.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+}
+
+function syncOrderCreatorCartWithMenu() {
+  const itemsById = new Map(orderCreatorItems().map((item) => [item.id, item]));
+  orderCreatorCart = orderCreatorCart
+    .map((cartItem) => {
+      const freshItem = itemsById.get(cartItem.id);
+      if (!freshItem) return cartItem;
+      return {
+        ...cartItem,
+        title: { ...freshItem.title },
+        name: freshItem.title.es,
+        category: freshItem.category,
+        image: freshItem.image,
+        price: freshItem.price
+      };
+    })
+    .filter((cartItem) => Number(cartItem.qty || 0) > 0);
+}
+
+function updateOrderCreatorDraftFromForm() {
+  if (!orderCreator) return;
+  const form = orderCreator.querySelector("#orderCreatorForm");
+  if (!form) return;
+  orderCreatorDraft = {
+    customerName: String(form.elements.customerName?.value || "").trimStart(),
+    phone: String(form.elements.phone?.value || "").trimStart(),
+    table: String(form.elements.table?.value || "").trimStart(),
+    address: String(form.elements.address?.value || "").trimStart(),
+    notes: String(form.elements.notes?.value || "").trimStart(),
+    paymentMethod: String(form.elements.paymentMethod?.value || "cash"),
+    paymentStatus: String(form.elements.paymentStatus?.value || "unpaid")
+  };
+}
+
+function addOrderCreatorItem(productId) {
+  updateOrderCreatorDraftFromForm();
+  const item = orderCreatorItems().find((row) => row.id === productId);
+  if (!item) return;
+  const existing = orderCreatorCart.find((row) => row.id === productId);
+  if (existing) existing.qty += 1;
+  else {
+    orderCreatorCart.push({
+      id: item.id,
+      name: item.title.es,
+      title: { ...item.title },
+      category: item.category,
+      image: item.image,
+      price: item.price,
+      qty: 1
+    });
+  }
+  renderOrderCreator();
+}
+
+function changeOrderCreatorQty(productId, delta) {
+  updateOrderCreatorDraftFromForm();
+  orderCreatorCart = orderCreatorCart
+    .map((row) => row.id === productId ? { ...row, qty: Number(row.qty || 0) + delta } : row)
+    .filter((row) => Number(row.qty || 0) > 0);
+  renderOrderCreator();
+}
+
+function clearOrderCreator() {
+  orderCreatorCart = [];
+  orderCreatorSearchTerm = "";
+  orderCreatorCategory = "all";
+  orderCreatorType = "dine_in";
+  orderCreatorDraft = {
+    customerName: "",
+    phone: "",
+    table: "",
+    address: "",
+    notes: "",
+    paymentMethod: "cash",
+    paymentStatus: "unpaid"
+  };
+  renderOrderCreator();
+}
+
+function renderOrderCreator() {
+  if (!orderCreator) return;
+  const categories = Array.from(new Set(BASE_MENU_ITEMS.map((item) => item.category)));
+  const rows = filteredOrderCreatorItems();
+  const total = orderCreatorTotal();
+  const count = orderCreatorItemCount();
+  const addressHidden = orderCreatorType !== "delivery";
+  const tableHidden = orderCreatorType === "delivery";
+
+  orderCreator.innerHTML = `
+    <article class="order-creator-card ${orderCreatorExpanded ? "is-expanded" : "is-collapsed"}">
+      <header class="order-creator-head">
+        <div>
+          <h3>${t("orderCreatorTitle")}</h3>
+          <p>${orderCreatorExpanded ? t("orderCreatorText") : t("orderCreatorCollapsedText")}</p>
+        </div>
+        <div class="order-creator-actions">
+          <span class="order-creator-pill">${count} ${lang === "es" ? "items" : "items"} | ${money(total)}</span>
+          <button
+            type="button"
+            class="btn btn-primary order-creator-toggle"
+            data-order-creator-toggle
+            aria-expanded="${orderCreatorExpanded ? "true" : "false"}">
+            ${orderCreatorExpanded ? t("orderCreatorHide") : t("orderCreatorShow")}
+          </button>
+        </div>
+      </header>
+      ${orderCreatorExpanded ? `
+        <div class="order-creator-layout">
+          <section class="order-product-panel" aria-label="${escapeHtml(t("orderCreatorTitle"))}">
+            <div class="order-creator-toolbar">
+              <label>
+                <span>${t("orderCreatorSearchLabel")}</span>
+                <input id="orderCreatorSearch" type="search" value="${escapeHtml(orderCreatorSearchTerm)}" placeholder="${escapeHtml(t("orderCreatorSearchPlaceholder"))}">
+              </label>
+              <label>
+                <span>${t("orderCreatorCategoryLabel")}</span>
+                <select id="orderCreatorCategory">
+                  <option value="all" ${orderCreatorCategory === "all" ? "selected" : ""}>${t("productAllCategories")}</option>
+                  ${categories.map((category) => `
+                    <option value="${category}" ${orderCreatorCategory === category ? "selected" : ""}>${menuCategoryLabel(category)}</option>
+                  `).join("")}
+                </select>
+              </label>
+            </div>
+            <div class="order-product-grid">
+              ${rows.length ? rows.map((item) => `
+                <button type="button" class="order-product-card" data-order-add="${item.id}">
+                  <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title[lang])}" loading="lazy" onerror="this.onerror=null;this.src='assets/food.svg';">
+                  <span>
+                    <strong>${escapeHtml(item.title[lang])}</strong>
+                    <small>${escapeHtml(menuCategoryLabel(item.category))} | ${escapeHtml(money(item.price))}</small>
+                  </span>
+                </button>
+              `).join("") : `<p class="order-creator-empty">${t("productNoResults")}</p>`}
+            </div>
+          </section>
+
+          <section class="order-cart-panel">
+            <h4>${t("orderCreatorCartTitle")}</h4>
+            <div class="order-creator-cart">
+              ${orderCreatorCart.length ? orderCreatorCart.map((item) => `
+                <div class="order-creator-cart-row">
+                  <div>
+                    <strong>${escapeHtml(item.title?.[lang] || item.name)}</strong>
+                    <p>${escapeHtml(money(item.price))} x ${Number(item.qty || 0)}</p>
+                  </div>
+                  <div class="order-creator-qty">
+                    <button type="button" class="btn btn-outline" data-order-qty="${item.id}" data-delta="-1">-</button>
+                    <span>${Number(item.qty || 0)}</span>
+                    <button type="button" class="btn btn-outline" data-order-qty="${item.id}" data-delta="1">+</button>
+                  </div>
+                </div>
+              `).join("") : `<p class="order-creator-empty">${t("orderCreatorEmptyCart")}</p>`}
+            </div>
+            <div class="order-creator-total">
+              <span>${t("subtotal")}</span>
+              <strong>${money(total)}</strong>
+            </div>
+
+            <form id="orderCreatorForm" class="order-creator-form" novalidate>
+              <h4>${t("orderCreatorCustomerTitle")}</h4>
+              <p class="order-creator-hint">${t("orderCreatorRoutingHint")}</p>
+              <label class="full">
+                <span>${t("orderCreatorTypeLabel")}</span>
+                <select name="orderType" id="orderCreatorType">
+                  <option value="dine_in" ${orderCreatorType === "dine_in" ? "selected" : ""}>${t("orderTypeDineIn")}</option>
+                  <option value="takeaway" ${orderCreatorType === "takeaway" ? "selected" : ""}>${t("orderTypeTakeaway")}</option>
+                  <option value="delivery" ${orderCreatorType === "delivery" ? "selected" : ""}>${t("orderTypeDelivery")}</option>
+                </select>
+              </label>
+              <label>
+                <span>${t("orderCreatorNameLabel")}</span>
+                <input name="customerName" value="${escapeHtml(orderCreatorDraft.customerName)}" required>
+              </label>
+              <label>
+                <span>${t("orderCreatorPhoneLabel")}</span>
+                <input name="phone" value="${escapeHtml(orderCreatorDraft.phone)}" inputmode="tel">
+              </label>
+              <label class="${tableHidden ? "hidden" : ""}">
+                <span>${t("orderCreatorTableLabel")}</span>
+                <input name="table" value="${escapeHtml(orderCreatorDraft.table)}">
+              </label>
+              <label class="${addressHidden ? "hidden" : ""}">
+                <span>${t("orderCreatorAddressLabel")}</span>
+                <input name="address" value="${escapeHtml(orderCreatorDraft.address)}">
+              </label>
+              <label>
+                <span>${t("orderCreatorPaymentMethodLabel")}</span>
+                <select name="paymentMethod">
+                  <option value="cash" ${orderCreatorDraft.paymentMethod === "cash" ? "selected" : ""}>${paymentMethodLabel("cash")}</option>
+                  <option value="card" ${orderCreatorDraft.paymentMethod === "card" ? "selected" : ""}>${paymentMethodLabel("card")}</option>
+                  <option value="bank_transfer" ${orderCreatorDraft.paymentMethod === "bank_transfer" ? "selected" : ""}>${paymentMethodLabel("bank_transfer")}</option>
+                </select>
+              </label>
+              <label>
+                <span>${t("orderCreatorPaymentStatusLabel")}</span>
+                <select name="paymentStatus">
+                  <option value="unpaid" ${orderCreatorDraft.paymentStatus === "unpaid" ? "selected" : ""}>${t("orderCreatorPaymentUnpaid")}</option>
+                  <option value="paid" ${orderCreatorDraft.paymentStatus === "paid" ? "selected" : ""}>${t("orderCreatorPaymentPaid")}</option>
+                </select>
+              </label>
+              <label class="full">
+                <span>${t("orderCreatorNotesLabel")}</span>
+                <textarea name="notes">${escapeHtml(orderCreatorDraft.notes)}</textarea>
+              </label>
+              <div class="order-creator-submit full">
+                <button type="button" class="btn btn-outline" data-order-clear>${t("orderCreatorReset")}</button>
+                <button type="submit" class="btn btn-primary">${t("orderCreatorSubmit")}</button>
+              </div>
+            </form>
+          </section>
+        </div>
+      ` : ""}
+    </article>
+  `;
+}
+
+async function submitCRMOrder() {
+  updateOrderCreatorDraftFromForm();
+  if (!orderCreatorCart.length) {
+    showToast(t("orderCreatorNeedItems"));
+    return;
+  }
+  if (!orderCreatorDraft.customerName.trim()) {
+    showToast(t("orderCreatorNeedCustomer"));
+    return;
+  }
+  if (orderCreatorType === "delivery" && !orderCreatorDraft.address.trim()) {
+    showToast(t("orderCreatorNeedAddress"));
+    return;
+  }
+
+  const items = orderCreatorCart.map((item) => ({
+    id: item.id,
+    name: item.title?.es || item.name,
+    title: item.title?.[lang] || item.title?.es || item.name,
+    category: item.category,
+    qty: Number(item.qty || 0),
+    price: Number(item.price || 0),
+    total: roundMoney(Number(item.qty || 0) * Number(item.price || 0))
+  }));
+  const total = orderCreatorTotal();
+  const payload = {
+    language: lang,
+    order_type: orderCreatorType,
+    customer: {
+      name: orderCreatorDraft.customerName.trim(),
+      phone: orderCreatorDraft.phone.trim(),
+      table: orderCreatorDraft.table.trim(),
+      deliveryAddress: orderCreatorDraft.address.trim(),
+      comments: orderCreatorDraft.notes.trim(),
+      pickup: orderCreatorType === "takeaway",
+      delivery: orderCreatorType === "delivery"
+    },
+    items,
+    subtotal: total,
+    total,
+    payment: {
+      method: orderCreatorDraft.paymentMethod || "cash",
+      status: orderCreatorDraft.paymentStatus || "unpaid"
+    }
+  };
+
+  try {
+    const orderId = await withSlowBusyScreen(t("savingAction"), () => addOrder(payload));
+    showToast(`${t("orderCreatorCreated")} #${String(orderId).slice(0, 6)}`);
+    clearOrderCreator();
+  } catch (error) {
+    console.warn("CRM order create failed", error);
+    showToast(t("orderCreatorError"));
   }
 }
 
@@ -1913,6 +2295,7 @@ function applyI18n() {
   renderStats();
   renderFoodStats();
   renderSalesCalendar();
+  renderOrderCreator();
   renderProductManager();
   renderOrders();
   renderReservations();
@@ -2941,6 +3324,80 @@ if (productManager) {
     if (!categorySelect) return;
     productManagerCategory = categorySelect.value || "all";
     renderProductManager();
+  });
+}
+
+if (orderCreator) {
+  orderCreator.addEventListener("click", (event) => {
+    const toggle = event.target.closest("[data-order-creator-toggle]");
+    if (toggle) {
+      updateOrderCreatorDraftFromForm();
+      orderCreatorExpanded = !orderCreatorExpanded;
+      renderOrderCreator();
+      return;
+    }
+
+    const addBtn = event.target.closest("[data-order-add]");
+    if (addBtn) {
+      addOrderCreatorItem(addBtn.dataset.orderAdd);
+      return;
+    }
+
+    const qtyBtn = event.target.closest("[data-order-qty]");
+    if (qtyBtn) {
+      changeOrderCreatorQty(qtyBtn.dataset.orderQty, Number(qtyBtn.dataset.delta || 0));
+      return;
+    }
+
+    const clearBtn = event.target.closest("[data-order-clear]");
+    if (clearBtn) clearOrderCreator();
+  });
+
+  orderCreator.addEventListener("input", (event) => {
+    const searchInput = event.target.closest("#orderCreatorSearch");
+    if (searchInput) {
+      orderCreatorSearchTerm = searchInput.value || "";
+      updateOrderCreatorDraftFromForm();
+      renderOrderCreator();
+      const nextSearchInput = document.getElementById("orderCreatorSearch");
+      if (nextSearchInput) {
+        nextSearchInput.focus({ preventScroll: true });
+        nextSearchInput.setSelectionRange(nextSearchInput.value.length, nextSearchInput.value.length);
+      }
+      return;
+    }
+
+    if (event.target.closest("#orderCreatorForm")) {
+      updateOrderCreatorDraftFromForm();
+    }
+  });
+
+  orderCreator.addEventListener("change", (event) => {
+    const categorySelect = event.target.closest("#orderCreatorCategory");
+    if (categorySelect) {
+      orderCreatorCategory = categorySelect.value || "all";
+      updateOrderCreatorDraftFromForm();
+      renderOrderCreator();
+      return;
+    }
+
+    const typeSelect = event.target.closest("#orderCreatorType");
+    if (typeSelect) {
+      orderCreatorType = typeSelect.value || "dine_in";
+      updateOrderCreatorDraftFromForm();
+      renderOrderCreator();
+      return;
+    }
+
+    if (event.target.closest("#orderCreatorForm")) {
+      updateOrderCreatorDraftFromForm();
+    }
+  });
+
+  orderCreator.addEventListener("submit", (event) => {
+    if (!event.target.closest("#orderCreatorForm")) return;
+    event.preventDefault();
+    submitCRMOrder();
   });
 }
 

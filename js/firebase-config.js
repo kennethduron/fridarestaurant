@@ -280,6 +280,10 @@ function mapOrder(row) {
   const items = Array.isArray(row.order_items) ? row.order_items.map((item) => ({
     id: item.menu_item_id || item.id,
     name: item.name,
+    title: {
+      es: item.name,
+      en: item.name
+    },
     qty: Number(item.quantity || 0),
     quantity: Number(item.quantity || 0),
     price: Number(item.unit_price || 0),
