@@ -1,4 +1,5 @@
-import { addOrder, addReservation, listenOrderById, registerOrderNotificationToken } from "./firebase-config.js";
+import { addOrder, addReservation, listenOrderById, loadMenuSettings, registerOrderNotificationToken } from "./firebase-config.js?v=20260417d";
+import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260417a";
 
 const STORAGE = {
   cart: "restaurant_cart_v1",
@@ -34,6 +35,7 @@ const i18n = {
     strip3Text: "Solicita tu mesa en segundos desde celular, tablet o computadora.",
     menuTitle: "Menu por categorias",
     menuText: "Categorias formales: Entradas, Platos principales, Bebidas y Postres.",
+    menuNewBadge: "Nuevo",
     tabAll: "Todo",
     tabAppetizers: "Entradas",
     tabMain: "Platos principales",
@@ -177,6 +179,7 @@ const i18n = {
     strip3Text: "Book your table in seconds from your phone, tablet, or computer.",
     menuTitle: "Menu by category",
     menuText: "Formal categories: Appetizers, Main Courses, Beverages, and Desserts.",
+    menuNewBadge: "New",
     tabAll: "All",
     tabAppetizers: "Appetizers",
     tabMain: "Main Courses",
@@ -296,52 +299,7 @@ const i18n = {
   }
 };
 
-// Optional per-item image:
-// Add `image: "assets/menu/your-photo.jpg"` inside any item below.
-// Example:
-// { id: "a1", ..., price: 8.5, image: "assets/menu/bruschetta.jpg" }
-const menuItems = [
-  { id: "a1", category: "appetizers", title: { es: "Bruschetta clasica", en: "Classic bruschetta" }, price: 195, image: "assets/bruschetta-clasica.jpg" },
-  { id: "a2", category: "appetizers", title: { es: "Ceviche de pescado", en: "Fish ceviche" }, price: 280, image: "assets/ceviche-de-pescado.webp" },
-  { id: "a3", category: "appetizers", title: { es: "Carpaccio de res", en: "Beef carpaccio" }, price: 320, image: "assets/carpaccio-de-res.webp" },
-  { id: "a4", category: "appetizers", title: { es: "Croquetas de queso", en: "Cheese croquettes" }, price: 175, image: "assets/croquetas-de-queso.jpg" },
-  { id: "a5", category: "appetizers", title: { es: "Empanadas gourmet", en: "Gourmet empanadas" }, price: 190, image: "assets/empanada-gourmet.webp" },
-  { id: "a6", category: "appetizers", title: { es: "Tartar de atun", en: "Tuna tartare" }, price: 340, image: "assets/tartar-de-atun.jpg" },
-  { id: "a7", category: "appetizers", title: { es: "Ensalada mediterranea", en: "Mediterranean salad" }, price: 210, image: "assets/ensalada-mediterranea.jpg" },
-  { id: "a8", category: "appetizers", title: { es: "Sopa de temporada", en: "Seasonal soup" }, price: 165, image: "assets/sopa-de-temporada.jpg" },
-  { id: "a9", category: "appetizers", title: { es: "Tabla de quesos", en: "Cheese board" }, price: 360, image: "assets/tabla-de-quesos.jpg" },
-  { id: "a10", category: "appetizers", title: { es: "Pulpo a la plancha", en: "Grilled octopus" }, price: 395, image: "assets/pulpo-a-la-plancha.jpg" },
-  { id: "m1", category: "main_courses", title: { es: "Ribeye a la parrilla", en: "Grilled ribeye" }, price: 780, image: "assets/ribeye-a-la-parrilla.jpg" },
-  { id: "m2", category: "main_courses", title: { es: "Salmon glaseado", en: "Glazed salmon" }, price: 620, image: "assets/salmon-glaseado.jpg" },
-  { id: "m3", category: "main_courses", title: { es: "Pasta trufada", en: "Truffle pasta" }, price: 450, image: "assets/pasta-trufada.jpeg" },
-  { id: "m4", category: "main_courses", title: { es: "Pollo rostizado", en: "Roasted chicken" }, price: 390, image: "assets/pollo-rostizado.jpg" },
-  { id: "m5", category: "main_courses", title: { es: "Paella de mariscos", en: "Seafood paella" }, price: 690, image: "assets/paella-de-mariscos.jpg" },
-  { id: "m6", category: "main_courses", title: { es: "Lasagna artesanal", en: "Artisan lasagna" }, price: 360, image: "assets/lasagna-artesanal.jpg" },
-  { id: "m7", category: "main_courses", title: { es: "Hamburguesa premium", en: "Premium burger" }, price: 340, image: "assets/hamburguesa-premium.jpg" },
-  { id: "m8", category: "main_courses", title: { es: "Lomo en salsa", en: "Tenderloin in sauce" }, price: 640, image: "assets/lomo-en-salsa.jpg" },
-  { id: "m9", category: "main_courses", title: { es: "Arroz meloso", en: "Creamy rice" }, price: 430, image: "assets/arroz-meloso.jpg" },
-  { id: "m10", category: "main_courses", title: { es: "Costillas BBQ", en: "BBQ ribs" }, price: 590, image: "assets/costillas-bbq.jpg" },
-  { id: "b1", category: "beverages", title: { es: "Agua mineral", en: "Mineral water" }, price: 55, image: "assets/agua-mineral.jpg" },
-  { id: "b2", category: "beverages", title: { es: "Limonada natural", en: "Fresh lemonade" }, price: 95, image: "assets/limonada-natural.webp" },
-  { id: "b3", category: "beverages", title: { es: "Jugo verde", en: "Green juice" }, price: 120, image: "assets/jugo-verde.jpeg" },
-  { id: "b4", category: "beverages", title: { es: "Cafe espresso", en: "Espresso" }, price: 80, image: "assets/cafe-espresso.webp" },
-  { id: "b5", category: "beverages", title: { es: "Te herbal", en: "Herbal tea" }, price: 75, image: "assets/te-herbal.jpg" },
-  { id: "b6", category: "beverages", title: { es: "Cerveza artesanal", en: "Craft beer" }, price: 140, image: "assets/cerveza-artesanal.jpg" },
-  { id: "b7", category: "beverages", title: { es: "Vino tinto copa", en: "Red wine glass" }, price: 190, image: "assets/vino-tinto-copa.jpg" },
-  { id: "b8", category: "beverages", title: { es: "Vino blanco copa", en: "White wine glass" }, price: 190, image: "assets/vino-blanco-copa.jpg" },
-  { id: "b9", category: "beverages", title: { es: "Coctel de autor", en: "Signature cocktail" }, price: 240, image: "assets/coctel-de-autor.jpg" },
-  { id: "b10", category: "beverages", title: { es: "Mocktail tropical", en: "Tropical mocktail" }, price: 180, image: "assets/mocktail-tropical.jpg" },
-  { id: "d1", category: "desserts", title: { es: "Tiramisu", en: "Tiramisu" }, price: 180, image: "assets/tiramisu.jpg" },
-  { id: "d2", category: "desserts", title: { es: "Cheesecake", en: "Cheesecake" }, price: 165, image: "assets/cheesecake.jpg" },
-  { id: "d3", category: "desserts", title: { es: "Brownie caliente", en: "Warm brownie" }, price: 150, image: "assets/brownie-caliente.jpg" },
-  { id: "d4", category: "desserts", title: { es: "Helado artesanal", en: "Artisan ice cream" }, price: 130, image: "assets/helado-artesanal.jpg" },
-  { id: "d5", category: "desserts", title: { es: "Flan casero", en: "Homemade flan" }, price: 120, image: "assets/flan-casero.jpg" },
-  { id: "d6", category: "desserts", title: { es: "Pie de limon", en: "Lemon pie" }, price: 145, image: "assets/pie-de-limon.jpg" },
-  { id: "d7", category: "desserts", title: { es: "Creme brulee", en: "Creme brulee" }, price: 170, image: "assets/creme-brulee.jpg" },
-  { id: "d8", category: "desserts", title: { es: "Mousse de chocolate", en: "Chocolate mousse" }, price: 155, image: "assets/mousse-de-chocolate.jpg" },
-  { id: "d9", category: "desserts", title: { es: "Fruta fresca", en: "Fresh fruit" }, price: 110, image: "assets/fruta-fresca.webp" },
-  { id: "d10", category: "desserts", title: { es: "Coulant de cacao", en: "Chocolate coulant" }, price: 185, image: "assets/coulant-de-cacao.jpg" }
-];
+const menuItems = BASE_MENU_ITEMS.map((item) => ({ ...item, title: { ...item.title } }));
 const categoryImageMap = {
   appetizers: "assets/entradas.svg",
   main_courses: "assets/principales.svg",
@@ -833,6 +791,56 @@ function itemImage(item) {
   return item.image || categoryImageMap[item.category] || "assets/food.svg";
 }
 
+function applyMenuSettings(settings) {
+  const overrides = settings?.items && typeof settings.items === "object" ? settings.items : {};
+  menuItems.splice(0, menuItems.length, ...BASE_MENU_ITEMS.map((baseItem) => {
+    const override = overrides[baseItem.id] || {};
+    const price = Number(override.price);
+    const note = override.note && typeof override.note === "object" ? override.note : {};
+    return {
+      ...baseItem,
+      title: { ...baseItem.title },
+      price: Number.isFinite(price) && price >= 0 ? price : baseItem.price,
+      note: {
+        es: String(note.es || "").trim(),
+        en: String(note.en || "").trim()
+      },
+      isNew: Boolean(override.isNew)
+    };
+  }));
+}
+
+function syncCartWithMenu() {
+  let changed = false;
+  cart = cart
+    .map((row) => {
+      const item = menuItems.find((menuItem) => menuItem.id === row.id);
+      if (!item) return row;
+      if (row.price === item.price && row.title?.es === item.title.es && row.title?.en === item.title.en) return row;
+      changed = true;
+      return {
+        ...row,
+        title: item.title,
+        price: item.price,
+        image: item.image,
+        category: item.category
+      };
+    });
+  if (changed) write(STORAGE.cart, cart);
+}
+
+async function refreshMenuSettings() {
+  try {
+    const settings = await loadMenuSettings();
+    applyMenuSettings(settings);
+    syncCartWithMenu();
+  } catch (_error) {
+    applyMenuSettings({ items: {} });
+  }
+  renderMenu();
+  renderCart();
+}
+
 function renderMenu() {
   const items = filteredMenu();
   menuGrid.innerHTML = items
@@ -841,8 +849,10 @@ function renderMenu() {
         <figure class="menu-photo-wrap">
           <img class="menu-photo" src="${itemImage(item)}" alt="${item.title[lang]}" loading="lazy" onerror="this.onerror=null;this.src='assets/postres.svg';">
         </figure>
+        ${item.isNew ? `<div class="menu-badges"><span class="menu-new-badge">${t("menuNewBadge")}</span></div>` : ""}
         <h3>${item.title[lang]}</h3>
         <p class="menu-category">${categoryLabel(item.category)}</p>
+        ${item.note?.[lang] ? `<p class="menu-note">${escapeHtml(item.note[lang])}</p>` : ""}
         <div class="meta">
           <span class="price">${money(item.price)}</span>
           <button class="btn btn-primary add-item" data-id="${item.id}">${t("add")}</button>
@@ -1773,4 +1783,5 @@ if (!recentOrderIds.length) {
 }
 syncTrackerSubscriptions();
 applyI18n();
+refreshMenuSettings();
 startHondurasLiveInfo();

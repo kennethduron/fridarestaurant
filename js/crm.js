@@ -6,7 +6,9 @@ import {
   updateOrderPaymentMethod,
   updateOrderInvoiceData,
   loadFiscalSettings,
+  loadMenuSettings,
   saveFiscalSettings,
+  saveMenuSettings,
   reserveNextFiscalInvoiceNumber,
   signInWithEmailPassword,
   getEmailByUsername,
@@ -14,8 +16,9 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260417c";
+} from "./firebase-config.js?v=20260417d";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
+import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260417a";
 
 if (window.location.search === "?") {
   window.history.replaceState({}, "", `${window.location.pathname}${window.location.hash}`);
@@ -194,6 +197,24 @@ const i18n = {
     calendarPrev: "Mes anterior",
     calendarNext: "Mes siguiente",
     calendarFoodBreakdown: "Comida vendida ese dia",
+    productManagerTitle: "Gestion de productos",
+    productManagerText: "Cambia precios, agrega comentarios visibles y marca productos nuevos.",
+    productManagerCollapsedText: "Ajustes de menu listos. Abre esta seccion para editar productos.",
+    productManagerShow: "Mostrar productos",
+    productManagerHide: "Ocultar productos",
+    productManagerSummary: "Productos",
+    productSearchLabel: "Buscar producto",
+    productSearchPlaceholder: "Buscar por nombre o categoria",
+    productCategoryLabel: "Categoria",
+    productAllCategories: "Todas las categorias",
+    productPriceLabel: "Precio",
+    productNoteEsLabel: "Comentario visible en espanol",
+    productNoteEnLabel: "Comentario visible en ingles",
+    productNewLabel: "Producto nuevo",
+    productSave: "Guardar producto",
+    productSaved: "Producto actualizado",
+    productNoResults: "No hay productos con ese filtro.",
+    productSettingsError: "No se pudieron cargar los productos.",
     qtySold: "Cantidad",
     salesLabel: "Ventas",
     period_day: "Hoy",
@@ -384,6 +405,24 @@ const i18n = {
     calendarPrev: "Previous month",
     calendarNext: "Next month",
     calendarFoodBreakdown: "Food sold that day",
+    productManagerTitle: "Product management",
+    productManagerText: "Change prices, add visible notes, and mark new products.",
+    productManagerCollapsedText: "Menu settings are ready. Open this section to edit products.",
+    productManagerShow: "Show products",
+    productManagerHide: "Hide products",
+    productManagerSummary: "Products",
+    productSearchLabel: "Search product",
+    productSearchPlaceholder: "Search by name or category",
+    productCategoryLabel: "Category",
+    productAllCategories: "All categories",
+    productPriceLabel: "Price",
+    productNoteEsLabel: "Visible Spanish note",
+    productNoteEnLabel: "Visible English note",
+    productNewLabel: "New product",
+    productSave: "Save product",
+    productSaved: "Product updated",
+    productNoResults: "No products match that filter.",
+    productSettingsError: "Could not load products.",
     qtySold: "Qty",
     salesLabel: "Sales",
     period_day: "Today",
@@ -422,6 +461,7 @@ const reservationsList = document.getElementById("reservationsList");
 const statsGrid = document.getElementById("statsGrid");
 const foodStats = document.getElementById("foodStats");
 const salesCalendar = document.getElementById("salesCalendar");
+const productManager = document.getElementById("productManager");
 const viewButtons = Array.from(document.querySelectorAll(".chip[data-view]"));
 const filterButtons = Array.from(document.querySelectorAll(".chip[data-filter]"));
 const periodButtons = Array.from(document.querySelectorAll(".chip[data-period]"));
@@ -466,6 +506,10 @@ let selectedCalendarDate = null;
 let salesDaySearchTerm = "";
 let salesDayPaymentFilter = "all";
 let salesCalendarExpanded = false;
+let menuSettings = { items: {} };
+let productManagerExpanded = false;
+let productManagerSearchTerm = "";
+let productManagerCategory = "all";
 let unsubscribeOrders = null;
 let unsubscribeReservations = null;
 let hasSeenInitialOrdersSnapshot = false;
@@ -903,6 +947,190 @@ function salesPaymentBreakdown(orders) {
   });
 
   return breakdown;
+}
+
+function menuCategoryLabel(category) {
+  const labels = {
+    appetizers: lang === "es" ? "Entradas" : "Appetizers",
+    main_courses: lang === "es" ? "Platos principales" : "Main courses",
+    beverages: lang === "es" ? "Bebidas" : "Beverages",
+    desserts: lang === "es" ? "Postres" : "Desserts"
+  };
+  return labels[category] || String(category || "").replace(/_/g, " ");
+}
+
+function normalizeMenuSettings(settings) {
+  const rawItems = settings?.items && typeof settings.items === "object" ? settings.items : {};
+  const items = {};
+  BASE_MENU_ITEMS.forEach((baseItem) => {
+    const override = rawItems[baseItem.id] || {};
+    const price = Number(override.price);
+    const note = override.note && typeof override.note === "object" ? override.note : {};
+    items[baseItem.id] = {
+      price: Number.isFinite(price) && price >= 0 ? price : baseItem.price,
+      note: {
+        es: String(note.es || "").trim(),
+        en: String(note.en || "").trim()
+      },
+      isNew: Boolean(override.isNew)
+    };
+  });
+  return { items };
+}
+
+function productItem(baseItem) {
+  const override = menuSettings.items?.[baseItem.id] || {};
+  return {
+    ...baseItem,
+    price: Number.isFinite(Number(override.price)) ? Number(override.price) : baseItem.price,
+    note: override.note || { es: "", en: "" },
+    isNew: Boolean(override.isNew)
+  };
+}
+
+async function refreshMenuSettings() {
+  try {
+    menuSettings = normalizeMenuSettings(await loadMenuSettings());
+  } catch (_error) {
+    menuSettings = normalizeMenuSettings({ items: {} });
+    showToast(t("productSettingsError"));
+  }
+  renderProductManager();
+}
+
+function filteredProductItems() {
+  const search = productManagerSearchTerm.trim().toLowerCase();
+  return BASE_MENU_ITEMS
+    .map(productItem)
+    .filter((item) => productManagerCategory === "all" || item.category === productManagerCategory)
+    .filter((item) => {
+      if (!search) return true;
+      return [
+        item.title.es,
+        item.title.en,
+        menuCategoryLabel(item.category),
+        item.note?.es,
+        item.note?.en
+      ].some((value) => String(value || "").toLowerCase().includes(search));
+    });
+}
+
+function renderProductManager() {
+  if (!productManager) return;
+  const categories = Array.from(new Set(BASE_MENU_ITEMS.map((item) => item.category)));
+  const changedCount = BASE_MENU_ITEMS.filter((item) => {
+    const override = menuSettings.items?.[item.id];
+    if (!override) return false;
+    return Number(override.price) !== Number(item.price)
+      || Boolean(override.isNew)
+      || Boolean(override.note?.es)
+      || Boolean(override.note?.en);
+  }).length;
+  const rows = filteredProductItems();
+
+  productManager.innerHTML = `
+    <article class="product-manager-card ${productManagerExpanded ? "is-expanded" : "is-collapsed"}">
+      <header class="product-manager-head">
+        <div>
+          <h3>${t("productManagerTitle")}</h3>
+          <p>${productManagerExpanded ? t("productManagerText") : t("productManagerCollapsedText")}</p>
+        </div>
+        <div class="product-manager-actions">
+          <span class="product-manager-pill">${t("productManagerSummary")}: ${BASE_MENU_ITEMS.length} | ${changedCount} ${lang === "es" ? "editados" : "edited"}</span>
+          <button
+            type="button"
+            class="btn btn-primary product-manager-toggle"
+            data-product-manager-toggle
+            aria-expanded="${productManagerExpanded ? "true" : "false"}">
+            ${productManagerExpanded ? t("productManagerHide") : t("productManagerShow")}
+          </button>
+        </div>
+      </header>
+      ${productManagerExpanded ? `
+        <div class="product-manager-toolbar">
+          <label>
+            <span>${t("productSearchLabel")}</span>
+            <input id="productManagerSearch" type="search" value="${escapeHtml(productManagerSearchTerm)}" placeholder="${escapeHtml(t("productSearchPlaceholder"))}">
+          </label>
+          <label>
+            <span>${t("productCategoryLabel")}</span>
+            <select id="productManagerCategory">
+              <option value="all" ${productManagerCategory === "all" ? "selected" : ""}>${t("productAllCategories")}</option>
+              ${categories.map((category) => `
+                <option value="${category}" ${productManagerCategory === category ? "selected" : ""}>${menuCategoryLabel(category)}</option>
+              `).join("")}
+            </select>
+          </label>
+        </div>
+        <div class="product-manager-list">
+          ${rows.length ? rows.map((item) => `
+            <article class="product-row" data-product-id="${item.id}">
+              <div class="product-row-main">
+                <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title[lang])}" loading="lazy" onerror="this.onerror=null;this.src='assets/food.svg';">
+                <div>
+                  <strong>${escapeHtml(item.title[lang])}</strong>
+                  <span>${escapeHtml(menuCategoryLabel(item.category))}</span>
+                </div>
+              </div>
+              <div class="product-row-fields">
+                <label>
+                  <span>${t("productPriceLabel")}</span>
+                  <input class="product-price-input" type="number" min="0" step="0.01" value="${Number(item.price).toFixed(2)}">
+                </label>
+                <label>
+                  <span>${t("productNoteEsLabel")}</span>
+                  <textarea class="product-note-es" maxlength="180">${escapeHtml(item.note?.es || "")}</textarea>
+                </label>
+                <label>
+                  <span>${t("productNoteEnLabel")}</span>
+                  <textarea class="product-note-en" maxlength="180">${escapeHtml(item.note?.en || "")}</textarea>
+                </label>
+                <label class="product-new-toggle">
+                  <input class="product-new-input" type="checkbox" ${item.isNew ? "checked" : ""}>
+                  <span>${t("productNewLabel")}</span>
+                </label>
+                <button type="button" class="btn btn-outline product-save" data-product-save="${item.id}">${t("productSave")}</button>
+              </div>
+            </article>
+          `).join("") : `<p class="product-manager-empty">${t("productNoResults")}</p>`}
+        </div>
+      ` : ""}
+    </article>
+  `;
+}
+
+function readProductRowValues(productId) {
+  const row = productManager?.querySelector(`[data-product-id="${productId}"]`);
+  if (!row) return null;
+  const baseItem = BASE_MENU_ITEMS.find((item) => item.id === productId);
+  if (!baseItem) return null;
+  const price = Number(row.querySelector(".product-price-input")?.value || baseItem.price);
+  return {
+    price: Number.isFinite(price) && price >= 0 ? price : baseItem.price,
+    note: {
+      es: String(row.querySelector(".product-note-es")?.value || "").trim().slice(0, 180),
+      en: String(row.querySelector(".product-note-en")?.value || "").trim().slice(0, 180)
+    },
+    isNew: Boolean(row.querySelector(".product-new-input")?.checked)
+  };
+}
+
+async function saveProductSettings(productId) {
+  const values = readProductRowValues(productId);
+  if (!values) return;
+  menuSettings = normalizeMenuSettings({
+    items: {
+      ...(menuSettings.items || {}),
+      [productId]: values
+    }
+  });
+  try {
+    menuSettings = normalizeMenuSettings(await withSlowBusyScreen(t("savingAction"), () => saveMenuSettings(menuSettings)));
+    showToast(t("productSaved"));
+    renderProductManager();
+  } catch (_error) {
+    showToast("Error");
+  }
 }
 
 async function refreshFiscalSettings() {
@@ -1685,6 +1913,7 @@ function applyI18n() {
   renderStats();
   renderFoodStats();
   renderSalesCalendar();
+  renderProductManager();
   renderOrders();
   renderReservations();
 }
@@ -2571,6 +2800,7 @@ async function unlockUI(user, profile) {
   signOutBtn.classList.remove("hidden");
   staffBadge.textContent = `${user.email} | ${t("staffRole")}: ${profile.role}`;
   await refreshFiscalSettings();
+  await refreshMenuSettings();
   ensureNotificationPermission();
   unlockNotificationSound();
   registerCRMPushNotifications();
@@ -2676,6 +2906,41 @@ if (salesCalendar) {
     if (!paymentFilterSelect) return;
     salesDayPaymentFilter = paymentFilterSelect.value || "all";
     renderSalesCalendar();
+  });
+}
+
+if (productManager) {
+  productManager.addEventListener("click", (event) => {
+    const toggle = event.target.closest("[data-product-manager-toggle]");
+    if (toggle) {
+      productManagerExpanded = !productManagerExpanded;
+      renderProductManager();
+      return;
+    }
+
+    const saveBtn = event.target.closest("[data-product-save]");
+    if (saveBtn) {
+      saveProductSettings(saveBtn.dataset.productSave);
+    }
+  });
+
+  productManager.addEventListener("input", (event) => {
+    const searchInput = event.target.closest("#productManagerSearch");
+    if (!searchInput) return;
+    productManagerSearchTerm = searchInput.value || "";
+    renderProductManager();
+    const nextSearchInput = document.getElementById("productManagerSearch");
+    if (nextSearchInput) {
+      nextSearchInput.focus({ preventScroll: true });
+      nextSearchInput.setSelectionRange(nextSearchInput.value.length, nextSearchInput.value.length);
+    }
+  });
+
+  productManager.addEventListener("change", (event) => {
+    const categorySelect = event.target.closest("#productManagerCategory");
+    if (!categorySelect) return;
+    productManagerCategory = categorySelect.value || "all";
+    renderProductManager();
   });
 }
 

@@ -424,8 +424,21 @@ async function loadFiscalSettings() {
   return result.settings || null;
 }
 
+async function loadMenuSettings() {
+  const result = await apiRequest("/api/settings/menu");
+  return result.settings || { items: {} };
+}
+
 async function saveFiscalSettings(settings) {
   const result = await apiRequest("/api/settings/fiscal", {
+    method: "PATCH",
+    body: { settings }
+  });
+  return result.settings;
+}
+
+async function saveMenuSettings(settings) {
+  const result = await apiRequest("/api/settings/menu", {
     method: "PATCH",
     body: { settings }
   });
@@ -514,7 +527,9 @@ export {
   updateOrderPaymentMethod,
   updateOrderInvoiceData,
   loadFiscalSettings,
+  loadMenuSettings,
   saveFiscalSettings,
+  saveMenuSettings,
   reserveNextFiscalInvoiceNumber,
   registerOrderNotificationToken,
   registerStaffNotificationToken,
