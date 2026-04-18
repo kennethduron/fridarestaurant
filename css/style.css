@@ -3025,56 +3025,89 @@ textarea:focus {
 
   .nav-wrap {
     width: min(var(--maxw), 92%);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "brand lang toggle"
+      "nav nav nav";
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 10px;
     min-height: 0;
     padding: 12px 0;
     margin: 0 auto;
   }
 
   .brand {
-    order: 1;
-    font-size: calc(2rem - 8px);
+    grid-area: brand;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1;
+    font-size: clamp(1.5rem, 5vw, 1.9rem);
   }
 
   .nav-toggle {
-    order: 3;
+    grid-area: toggle;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 46px;
-    min-height: 38px;
+    width: 58px;
+    min-width: 58px;
+    min-height: 52px;
+    padding: 0;
+    border-radius: 8px;
+    font-size: 1.35rem;
+    line-height: 1;
   }
 
-  .site-header nav {
-    order: 4;
+  #primaryNav {
+    grid-area: nav;
     position: static;
     top: auto;
     left: auto;
     transform: none;
     width: 100%;
     display: none;
+    margin: 0;
   }
 
-  .site-header nav.open {
+  #primaryNav.open {
     display: block;
   }
 
   .nav-list {
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 6px;
-    padding: 8px 0 2px;
+    padding: 8px;
+    border: 1px solid #e1cfbb;
+    border-radius: 8px;
+    background: #fffdf8;
+    box-shadow: 0 12px 28px rgba(37, 29, 17, 0.1);
   }
 
   .nav-list a {
+    display: flex;
+    align-items: center;
     width: 100%;
-    padding: 8px 12px;
-    font-size: 0.9rem;
+    min-height: 42px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 0.94rem;
+    font-weight: 800;
+    background: #fff9f1;
+    border: 1px solid transparent;
+  }
+
+  .nav-list a:hover,
+  .nav-list a:focus-visible {
+    background: #fff3e5;
+    border-color: #d8bea0;
+    box-shadow: none;
+    transform: none;
   }
 
   .crm-head-actions {
@@ -3084,14 +3117,14 @@ textarea:focus {
   }
 
   #langToggle {
-    order: 2;
-    margin-left: auto;
+    grid-area: lang;
+    margin-left: 0;
     width: auto;
     min-width: 56px;
-    min-height: 42px;
+    min-height: 52px;
     padding: 8px 14px;
-    border-radius: 14px;
-    font-size: 0.9rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
     border: 1px solid #dac6af;
     background: var(--surface);
   }
@@ -3562,6 +3595,23 @@ textarea:focus {
     min-height: 38px;
     padding: 8px 12px;
     font-size: 0.9rem;
+  }
+
+  body:not(.crm-page):not(.kitchen-page) #langToggle {
+    min-width: 54px;
+    min-height: 48px;
+    padding: 8px 12px;
+    border-radius: 8px;
+  }
+
+  body:not(.crm-page):not(.kitchen-page) .nav-toggle {
+    width: 54px;
+    min-width: 54px;
+    min-height: 48px;
+  }
+
+  body:not(.crm-page):not(.kitchen-page) .brand {
+    font-size: clamp(1.34rem, 7vw, 1.72rem);
   }
 
   .crm-top {
