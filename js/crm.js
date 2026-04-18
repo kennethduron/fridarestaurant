@@ -17,7 +17,7 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260417e";
+} from "./firebase-config.js?v=20260418a";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260417a";
 
@@ -41,7 +41,7 @@ const i18n = {
     authUnauthorizedDomain: "Este dominio no esta autorizado para el backend. Revisa WEB_ORIGINS en Vercel.",
     authNetworkError: "No se pudo conectar con la API. Revisa tu conexion e intenta de nuevo.",
     authPermissionError: "La API bloqueo la validacion del usuario. Revisa roles y variables privadas.",
-    authSessionExpired: "Tu sesion expiro. Ingresa de nuevo.",
+    authSessionExpired: "No se pudo renovar la conexion. El CRM seguira abierto; cierra sesion solo si deseas salir.",
     kitchenScreen: "Pantalla cocina",
     fiscalSettingsPage: "Ajustes fiscales",
     fiscalModalTitle: "Ajustes fiscales",
@@ -290,7 +290,7 @@ const i18n = {
     authUnauthorizedDomain: "This domain is not authorized for the backend. Check WEB_ORIGINS in Vercel.",
     authNetworkError: "The API could not be reached. Check the connection and try again.",
     authPermissionError: "The API blocked user validation. Check roles and private variables.",
-    authSessionExpired: "Your session expired. Please sign in again.",
+    authSessionExpired: "The connection could not be refreshed. The CRM will stay open; sign out only when you want to leave.",
     kitchenScreen: "Kitchen screen",
     fiscalSettingsPage: "Fiscal settings",
     fiscalModalTitle: "Fiscal settings",
@@ -545,7 +545,9 @@ const reservationsList = document.getElementById("reservationsList");
 const statsGrid = document.getElementById("statsGrid");
 const foodStats = document.getElementById("foodStats");
 const salesCalendar = document.getElementById("salesCalendar");
-const crmTools = document.getElementById("crmTools");
+const crmSettingsModal = document.getElementById("crmSettingsModal");
+const closeCrmSettingsBtn = document.getElementById("closeCrmSettings");
+const crmToolsWorkspace = document.getElementById("crmToolsWorkspace");
 const crmSettingsLinks = Array.from(document.querySelectorAll("[data-open-crm-settings]"));
 const productManager = document.getElementById("productManager");
 const orderCreator = document.getElementById("orderCreator");
@@ -1607,6 +1609,38 @@ function getFiscalFormValues() {
       desserts: Number(fiscalSettingsForm.elements.tax_desserts.value || 0) / 100
     }
   };
+}
+
+function openCrmSettingsModal() {
+  if (!crmSettingsModal) return;
+  crmSettingsModal.classList.remove("hidden");
+}
+
+function closeCrmSettingsModal() {
+  if (!crmSettingsModal) return;
+  crmSettingsModal.classList.add("hidden");
+}
+
+function showCrmWorkspaceTool(tool) {
+  if (!crmToolsWorkspace) return;
+  crmToolsWorkspace.classList.remove("hidden");
+  orderCreator?.classList.toggle("hidden", tool !== "order");
+  productManager?.classList.toggle("hidden", tool !== "products");
+  closeCrmSettingsModal();
+
+  if (tool === "order") {
+    updateOrderCreatorDraftFromForm();
+    orderCreatorExpanded = true;
+    renderOrderCreator();
+    requestAnimationFrame(() => orderCreator?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    return;
+  }
+
+  if (tool === "products") {
+    productManagerExpanded = true;
+    renderProductManager();
+    requestAnimationFrame(() => productManager?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }
 }
 
 async function openFiscalSettingsModal() {
@@ -3138,13 +3172,7 @@ async function handleRealtimeError(error, fallbackKey) {
   if (isAuthRealtimeError(error)) {
     if (realtimeAuthExpiredHandled) return;
     realtimeAuthExpiredHandled = true;
-    pendingAuthMessage = t("authSessionExpired");
     showToast(t("authSessionExpired"));
-    try {
-      await signOutUser();
-    } catch (_signOutError) {
-      lockUI();
-    }
     return;
   }
   showToast(t(fallbackKey));
@@ -3212,6 +3240,7 @@ function lockUI() {
   signOutBtn.classList.add("hidden");
   staffBadge.textContent = "";
   updateFiscalRangeAlert();
+  closeCrmSettingsModal();
   closeFiscalSettingsModal();
   stopRealtime();
 }
@@ -3332,33 +3361,21 @@ if (salesCalendar) {
 crmSettingsLinks.forEach((link) => {
   link.addEventListener("click", (event) => {
     event.preventDefault();
-    if (crmTools) {
-      crmTools.open = true;
-      requestAnimationFrame(() => crmTools.scrollIntoView({ behavior: "smooth", block: "start" }));
-    }
+    openCrmSettingsModal();
     closeCRMHeaderNav();
   });
 });
 
-if (crmTools) {
-  crmTools.addEventListener("click", (event) => {
-    const toolButton = event.target.closest("[data-open-crm-tool]");
-    if (!toolButton) return;
-    crmTools.open = true;
-
-    if (toolButton.dataset.openCrmTool === "order") {
-      updateOrderCreatorDraftFromForm();
-      orderCreatorExpanded = true;
-      renderOrderCreator();
-      requestAnimationFrame(() => orderCreator?.scrollIntoView({ behavior: "smooth", block: "start" }));
+if (crmSettingsModal) {
+  crmSettingsModal.addEventListener("click", (event) => {
+    if (event.target === crmSettingsModal) {
+      closeCrmSettingsModal();
       return;
     }
 
-    if (toolButton.dataset.openCrmTool === "products") {
-      productManagerExpanded = true;
-      renderProductManager();
-      requestAnimationFrame(() => productManager?.scrollIntoView({ behavior: "smooth", block: "start" }));
-    }
+    const toolButton = event.target.closest("[data-open-crm-tool]");
+    if (!toolButton) return;
+    showCrmWorkspaceTool(toolButton.dataset.openCrmTool);
   });
 }
 
@@ -3481,12 +3498,14 @@ reviewModal.addEventListener("click", (event) => {
 });
 if (openFiscalSettingsBtn) {
   openFiscalSettingsBtn.addEventListener("click", () => {
+    closeCrmSettingsModal();
     closeCRMHeaderNav();
     openFiscalSettingsModal();
   });
 }
 if (enableCrmNotificationsBtn) {
   enableCrmNotificationsBtn.addEventListener("click", async () => {
+    closeCrmSettingsModal();
     closeCRMHeaderNav();
     await activateCRMNotifications();
   });
@@ -3498,6 +3517,7 @@ if (fiscalRangeAlertButton) {
   });
 }
 if (closeFiscalSettingsBtn) closeFiscalSettingsBtn.addEventListener("click", closeFiscalSettingsModal);
+if (closeCrmSettingsBtn) closeCrmSettingsBtn.addEventListener("click", closeCrmSettingsModal);
 if (crmNavToggle) crmNavToggle.addEventListener("click", toggleCRMHeaderNav);
 if (crmHeaderNav) {
   crmHeaderNav.addEventListener("click", (event) => {
@@ -3694,16 +3714,8 @@ onAuthChange(async (user) => {
     setAuthMessage("");
     await unlockUI(user, currentStaffProfile);
   } catch (_error) {
-    currentStaffProfile = null;
-    pendingAuthMessage = t("authStartupError");
-    try {
-      await signOutUser();
-    } catch (_signOutError) {
-      setAuthBusy(false);
-      setAuthMessage(pendingAuthMessage, "error");
-      pendingAuthMessage = "";
-      lockUI();
-    }
+    setAuthBusy(false);
+    showToast(t("authSessionExpired"));
   }
 });
 

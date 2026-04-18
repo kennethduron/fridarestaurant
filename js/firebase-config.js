@@ -20,6 +20,7 @@ const FIREBASE_PUBLIC_CONFIG = {
 let currentSession = readSession();
 const authListeners = new Set();
 let messagingSetupPromise = null;
+let refreshSessionPromise = null;
 
 const app = null;
 const db = null;
@@ -44,11 +45,12 @@ function readSession() {
   }
 }
 
-function writeSession(session) {
+function writeSession(session, options = {}) {
+  const { notify = true } = options;
   currentSession = session || null;
   if (currentSession) localStorage.setItem(SESSION_KEY, JSON.stringify(currentSession));
   else localStorage.removeItem(SESSION_KEY);
-  notifyAuthListeners();
+  if (notify) notifyAuthListeners();
 }
 
 function sessionUser(session = currentSession) {
@@ -82,6 +84,9 @@ async function apiRequest(path, options = {}) {
   const text = await response.text();
   const payload = text ? safeJson(text) : null;
   if (!response.ok) {
+    if (shouldRefreshSession(response, payload, path, options) && await refreshStaffSession()) {
+      return apiRequest(path, { ...options, authRefreshRetried: true });
+    }
     const message = payload?.error?.message || payload?.message || response.statusText || "Request failed";
     const error = new Error(message);
     error.code = payload?.error?.code || `http/${response.status}`;
@@ -89,6 +94,42 @@ async function apiRequest(path, options = {}) {
     throw error;
   }
   return payload;
+}
+
+function shouldRefreshSession(response, payload, path, options) {
+  if (options.skipAuthRefresh || options.authRefreshRetried) return false;
+  if (String(path || "").startsWith("/api/auth/")) return false;
+  if (!currentSession || !currentSession.refresh_token) return false;
+  const code = payload?.error?.code || "";
+  return response.status === 401 && (code === "invalid_token" || code === "missing_token");
+}
+
+async function refreshStaffSession() {
+  if (!currentSession || !currentSession.refresh_token) return false;
+  if (refreshSessionPromise) return refreshSessionPromise;
+
+  refreshSessionPromise = (async () => {
+    try {
+      const refreshedSession = await apiRequest("/api/auth/refresh", {
+        method: "POST",
+        body: { refresh_token: currentSession.refresh_token },
+        skipAuthRefresh: true
+      });
+      writeSession({
+        ...currentSession,
+        ...refreshedSession,
+        user: refreshedSession.user || currentSession.user
+      }, { notify: false });
+      return true;
+    } catch (error) {
+      console.warn("Staff session refresh failed", error);
+      return false;
+    } finally {
+      refreshSessionPromise = null;
+    }
+  })();
+
+  return refreshSessionPromise;
 }
 
 function safeJson(text) {

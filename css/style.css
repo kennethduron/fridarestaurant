@@ -1991,6 +1991,26 @@ textarea:focus {
 .crm-tools-workspace {
   display: grid;
   gap: 12px;
+  margin: 0 0 16px;
+}
+
+.crm-settings-card {
+  width: min(920px, 94%);
+  max-height: min(88vh, 900px);
+  overflow: auto;
+}
+
+.crm-settings-card h3 {
+  margin: 2px 0 6px;
+}
+
+.crm-settings-text {
+  margin: 0;
+  color: var(--muted);
+}
+
+.crm-settings-options {
+  margin: 16px 0 0;
 }
 
 .product-manager {
