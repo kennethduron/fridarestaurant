@@ -2007,6 +2007,28 @@ textarea:focus {
   margin: 16px 0 0;
 }
 
+.crm-notification-note {
+  margin-top: 14px;
+  border: 1px solid #d9c4aa;
+  border-radius: 8px;
+  background: #fff8ef;
+  padding: 12px 14px;
+}
+
+.crm-notification-note strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.crm-notification-note p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
 .modal .crm-work-modal-card {
   width: min(1540px, calc(100vw - 48px));
   max-width: none;

@@ -69,11 +69,13 @@ async function notifyOrderStatus(order) {
   if (!tokens.length) return;
 
   const message = statusMessage(order.status);
+  const orderLink = `https://fridarestauranthn.web.app/?order=${encodeURIComponent(order.id)}`;
   await sendToTokens(tokens, {
     title: message.title,
     body: message.body,
-    link: "https://fridarestauranthn.web.app/",
+    link: orderLink,
     data: {
+      type: "order_status",
       orderId: order.id,
       status: order.status,
       displayId: order.display_id || ""

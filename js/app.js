@@ -1,4 +1,4 @@
-import { addOrder, addReservation, listenOrderById, loadMenuSettings, registerOrderNotificationToken } from "./firebase-config.js?v=20260418b";
+import { addOrder, addReservation, listenOrderById, loadMenuSettings, registerOrderNotificationToken } from "./firebase-config.js?v=20260418e";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260417a";
 
 const STORAGE = {
@@ -366,6 +366,8 @@ let lang = "es";
 let activeCategory = "all";
 let cart = read(STORAGE.cart, []);
 let recentOrderIds = [];
+const urlParams = new URLSearchParams(window.location.search);
+let pendingLinkedOrderId = urlParams.get("order") || urlParams.get("orderId") || "";
 const trackerOrderById = new Map();
 const trackerUnsubs = new Map();
 const trackerClearTimers = new Map();
@@ -1100,6 +1102,26 @@ function removeRecentOrderId(orderId) {
   renderTracker();
 }
 
+function clearLinkedOrderUrl() {
+  if (!pendingLinkedOrderId) return;
+  const url = new URL(window.location.href);
+  url.searchParams.delete("order");
+  url.searchParams.delete("orderId");
+  url.searchParams.delete("notificationOpen");
+  const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+  window.history.replaceState(window.history.state, "", nextUrl || "/");
+}
+
+function openLinkedTrackerOrderIfReady(orderId) {
+  if (!pendingLinkedOrderId || pendingLinkedOrderId !== orderId || !trackerOrderById.has(orderId)) return;
+  tracker?.scrollIntoView({ behavior: "smooth", block: "center" });
+  requestAnimationFrame(() => {
+    openTrackerOrderModal(orderId);
+    clearLinkedOrderUrl();
+    pendingLinkedOrderId = "";
+  });
+}
+
 function asDate(value) {
   if (!value) return null;
   const date = value.toDate ? value.toDate() : new Date(value);
@@ -1265,6 +1287,7 @@ function subscribeTrackerOrder(orderId) {
       trackerOrderById.set(orderId, order);
       scheduleAcceptedTrackerClear(order);
       renderTracker();
+      openLinkedTrackerOrderIfReady(orderId);
     },
     () => {
       trackerOrderById.delete(orderId);
@@ -1797,6 +1820,7 @@ if (!recentOrderIds.length) {
     writeRecentOrderIds(recentOrderIds);
   }
 }
+if (pendingLinkedOrderId) addRecentOrderId(pendingLinkedOrderId);
 syncTrackerSubscriptions();
 applyI18n();
 refreshMenuSettings();

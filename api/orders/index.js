@@ -139,10 +139,11 @@ async function notifyStaffNewOrder(order) {
   if (!tokens.length) return;
 
   const orderRef = order.display_id ? `#${order.display_id}` : `#${String(order.id).slice(0, 6)}`;
+  const orderLink = `https://fridarestauranthn.web.app/crm.html?order=${encodeURIComponent(order.id)}`;
   await sendToTokens(tokens, {
     title: "Nuevo pedido recibido",
     body: `${orderRef} | ${order.customer_name || "Cliente"} | L ${Number(order.total || 0).toFixed(2)}`,
-    link: "https://fridarestauranthn.web.app/crm.html",
+    link: orderLink,
     data: {
       type: "new_order",
       orderId: order.id,

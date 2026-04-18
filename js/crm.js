@@ -17,13 +17,15 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260418b";
+} from "./firebase-config.js?v=20260418e";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260417a";
 
 if (window.location.search === "?") {
   window.history.replaceState({}, "", `${window.location.pathname}${window.location.hash}`);
 }
+
+const crmUrlParams = new URLSearchParams(window.location.search);
 
 const i18n = {
   es: {
@@ -57,6 +59,8 @@ const i18n = {
     crmToolsKitchenText: "Vista dedicada para que cocina reciba y avance pedidos.",
     crmNotificationsAction: "Activar avisos",
     crmNotificationsActionText: "Si no aceptaste al entrar, activa aqui los avisos de pedidos y reservas.",
+    crmNotificationsAppleTitle: "Aviso para iPhone y iPad",
+    crmNotificationsAppleText: "En Android los avisos funcionan desde Chrome. En iPhone o iPad, abre el CRM en Safari, agregalo a pantalla de inicio y activa los avisos desde ese icono.",
     viewOrders: "Pedidos",
     viewReservations: "Reservas",
     filterAll: "Todos",
@@ -306,6 +310,8 @@ const i18n = {
     crmToolsKitchenText: "Dedicated screen for the kitchen to receive and move orders.",
     crmNotificationsAction: "Enable alerts",
     crmNotificationsActionText: "If you did not allow alerts at sign-in, enable order and reservation notices here.",
+    crmNotificationsAppleTitle: "iPhone and iPad notice",
+    crmNotificationsAppleText: "On Android, alerts work from Chrome. On iPhone or iPad, open the CRM in Safari, add it to the Home Screen, and enable alerts from that icon.",
     viewOrders: "Orders",
     viewReservations: "Reservations",
     filterAll: "All",
@@ -627,6 +633,7 @@ let audioCtx = null;
 let audioUnlocked = false;
 let realtimeAuthExpiredHandled = false;
 let fiscalSettings = mergeFiscalSettings();
+let pendingLinkedOrderId = crmUrlParams.get("order") || crmUrlParams.get("orderId") || "";
 
 function t(key) {
   return (i18n[lang] && i18n[lang][key]) || key;
@@ -2932,6 +2939,21 @@ function openReview(orderId) {
   reviewModal.classList.remove("hidden");
 }
 
+function openLinkedOrderIfReady() {
+  if (!pendingLinkedOrderId) return;
+  const order = ordersCache.find((row) => row.id === pendingLinkedOrderId);
+  if (!order) return;
+  activeFilter = "all";
+  viewButtons.forEach((button) => button.classList.toggle("active", button.dataset.view === "orders"));
+  filterButtons.forEach((button) => button.classList.toggle("active", button.dataset.filter === "all"));
+  ordersView.classList.remove("hidden");
+  reservationsView.classList.add("hidden");
+  renderOrders();
+  openReview(pendingLinkedOrderId);
+  pendingLinkedOrderId = "";
+  window.history.replaceState({}, "", `${window.location.pathname}${window.location.hash}`);
+}
+
 function closeReviewModal() {
   selectedOrderId = null;
   reviewModal.classList.add("hidden");
@@ -3227,6 +3249,7 @@ function startRealtime() {
       renderSalesCalendar();
       renderOrders();
       if (selectedOrderId) openReview(selectedOrderId);
+      openLinkedOrderIfReady();
     },
     (error) => handleRealtimeError(error, "ordersListenerError")
   );

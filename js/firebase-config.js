@@ -292,17 +292,36 @@ async function setupFirebaseMessaging() {
     const firebaseApp = appModule.getApps().length
       ? appModule.getApps()[0]
       : appModule.initializeApp(FIREBASE_PUBLIC_CONFIG);
-    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
+      updateViaCache: "none"
+    });
+    registration.update().catch(() => null);
     const messaging = messagingModule.getMessaging(firebaseApp);
 
     messagingModule.onMessage(messaging, (payload) => {
       const title = payload.notification?.title || "Frida Restaurant";
       const body = payload.notification?.body || "Tu pedido tiene una actualizacion.";
+      const link = notificationTargetLink(payload);
+      const actionTitle = payload.data?.type === "new_order" || payload.data?.type === "new_reservation" ? "Abrir CRM" : "Ver pedido";
       if (Notification.permission === "granted") {
-        new Notification(title, {
+        registration.showNotification(title, {
           body,
           icon: "/assets/icon.jpg",
-          data: payload.data || {}
+          badge: "/assets/icon.jpg",
+          tag: payload.data?.orderId ? `frida-order-${payload.data.orderId}` : "frida-restaurant",
+          renotify: true,
+          actions: [
+            {
+              action: "open-crm",
+              title: actionTitle
+            }
+          ],
+          data: {
+            ...(payload.data || {}),
+            link
+          }
+        }).catch(() => {
+          window.location.href = link;
         });
       }
     });
@@ -314,6 +333,28 @@ async function setupFirebaseMessaging() {
     };
   })();
   return messagingSetupPromise;
+}
+
+function notificationTargetLink(payload) {
+  const data = payload?.data || {};
+  const directLink = data.link ||
+    data.click_action ||
+    data.clickAction ||
+    payload?.fcmOptions?.link ||
+    payload?.webpush?.fcmOptions?.link ||
+    payload?.fcm_options?.link;
+
+  if (directLink) return new URL(directLink, window.location.origin).href;
+
+  if (data.type === "new_order" && data.orderId) {
+    return new URL(`/crm.html?order=${encodeURIComponent(data.orderId)}`, window.location.origin).href;
+  }
+
+  if (data.type === "new_reservation" && data.reservationId) {
+    return new URL(`/crm.html?reservation=${encodeURIComponent(data.reservationId)}`, window.location.origin).href;
+  }
+
+  return new URL("/", window.location.origin).href;
 }
 
 function mapOrder(row) {

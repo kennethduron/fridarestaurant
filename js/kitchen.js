@@ -6,7 +6,7 @@ import {
   onAuthChange,
   signOutUser,
   isStaffAuthorized
-} from "./firebase-config.js?v=20260418b";
+} from "./firebase-config.js?v=20260418e";
 
 const i18n = {
   es: {
