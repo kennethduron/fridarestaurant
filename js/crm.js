@@ -48,6 +48,13 @@ const i18n = {
     fiscalModalText: "Completa los datos legales que se imprimen automaticamente en la factura fiscal.",
     crmTitle: "Panel de pedidos y reservas",
     crmSub: "Gestion operacional en tiempo real para representantes.",
+    crmToolsNav: "Configuracion",
+    crmToolsEyebrow: "Configuracion",
+    crmToolsTitle: "Herramientas del CRM",
+    crmToolsText: "Organiza pedidos internos, menu, facturacion y cocina desde un solo lugar.",
+    crmToolsOpen: "Ver opciones",
+    crmToolsFiscalText: "Datos legales, CAI, rango autorizado e impuestos.",
+    crmToolsKitchenText: "Vista dedicada para que cocina reciba y avance pedidos.",
     viewOrders: "Pedidos",
     viewReservations: "Reservas",
     filterAll: "Todos",
@@ -288,6 +295,13 @@ const i18n = {
     fiscalModalText: "Complete the legal data that will print automatically on the fiscal invoice.",
     crmTitle: "Orders and reservations dashboard",
     crmSub: "Real-time operations view for representatives.",
+    crmToolsNav: "Settings",
+    crmToolsEyebrow: "Settings",
+    crmToolsTitle: "CRM tools",
+    crmToolsText: "Manage internal orders, menu, invoicing, and kitchen from one place.",
+    crmToolsOpen: "View options",
+    crmToolsFiscalText: "Legal data, CAI, authorization range, and taxes.",
+    crmToolsKitchenText: "Dedicated screen for the kitchen to receive and move orders.",
     viewOrders: "Orders",
     viewReservations: "Reservations",
     filterAll: "All",
@@ -526,6 +540,7 @@ const reservationsList = document.getElementById("reservationsList");
 const statsGrid = document.getElementById("statsGrid");
 const foodStats = document.getElementById("foodStats");
 const salesCalendar = document.getElementById("salesCalendar");
+const crmTools = document.getElementById("crmTools");
 const productManager = document.getElementById("productManager");
 const orderCreator = document.getElementById("orderCreator");
 const viewButtons = Array.from(document.querySelectorAll(".chip[data-view]"));
@@ -3289,6 +3304,28 @@ if (salesCalendar) {
     if (!paymentFilterSelect) return;
     salesDayPaymentFilter = paymentFilterSelect.value || "all";
     renderSalesCalendar();
+  });
+}
+
+if (crmTools) {
+  crmTools.addEventListener("click", (event) => {
+    const toolButton = event.target.closest("[data-open-crm-tool]");
+    if (!toolButton) return;
+    crmTools.open = true;
+
+    if (toolButton.dataset.openCrmTool === "order") {
+      updateOrderCreatorDraftFromForm();
+      orderCreatorExpanded = true;
+      renderOrderCreator();
+      requestAnimationFrame(() => orderCreator?.scrollIntoView({ behavior: "smooth", block: "start" }));
+      return;
+    }
+
+    if (toolButton.dataset.openCrmTool === "products") {
+      productManagerExpanded = true;
+      renderProductManager();
+      requestAnimationFrame(() => productManager?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    }
   });
 }
 
