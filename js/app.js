@@ -130,6 +130,7 @@ const i18n = {
     trackerTotal: "Total",
     trackerPayAtCashier: "Pagar en caja",
     trackerPaymentProcessed: "Pago procesado con éxito",
+    notificationEnableAction: "Activar avisos",
     status_pending: "Pendiente",
     status_preparing: "Preparando",
     status_ready: "Listo",
@@ -274,6 +275,7 @@ const i18n = {
     trackerTotal: "Total",
     trackerPayAtCashier: "Pay at cashier",
     trackerPaymentProcessed: "Payment was successfully processed",
+    notificationEnableAction: "Enable alerts",
     status_pending: "Pending",
     status_preparing: "Preparing",
     status_ready: "Ready",
@@ -1007,6 +1009,21 @@ function showCenterNotice(message, duration = 2200) {
   showToast(message, { duration, center: true, highlight: true });
 }
 
+async function activateOrderNotifications(orderId, customerPhone) {
+  if (!orderId) return false;
+  try {
+    const notificationToken = await registerOrderNotificationToken(orderId, customerPhone || "");
+    if (notificationToken) {
+      showToast(t("notificationReady"), { duration: 2600, highlight: true });
+      return true;
+    }
+  } catch (notificationError) {
+    console.warn("Notification registration failed", notificationError);
+    showToast(t("notificationUnavailable"), { duration: 4200 });
+  }
+  return false;
+}
+
 function setCheckoutBusy(isBusy) {
   [
     sendToKitchenBtn,
@@ -1204,6 +1221,7 @@ function renderTracker() {
           <div class="tracker-status-row">
             <p><strong>${statusLabel(order.status)}</strong></p>
             <button class="btn btn-outline tracker-view-order" data-id="${order.id}">${t("trackerView")}</button>
+            <button class="btn btn-outline tracker-enable-notifications" data-id="${order.id}">${t("notificationEnableAction")}</button>
           </div>
         </div>
       `;
@@ -1501,16 +1519,7 @@ function finishSuccessfulOrder(orderId, mode, showConfirmation, customerPhone) {
   if (showConfirmation) {
     showCenterNotice(mode === "paypal_paid" || mode === "card_paid" ? t("paymentCardSent") : t("paymentCashSent"));
   }
-  registerOrderNotificationToken(orderId, customerPhone)
-    .then((notificationToken) => {
-      if (notificationToken) {
-        showToast(t("notificationReady"), { duration: 2600, highlight: true });
-      }
-    })
-    .catch((notificationError) => {
-      console.warn("Notification registration failed", notificationError);
-      showToast(t("notificationUnavailable"), { duration: 4200 });
-    });
+  activateOrderNotifications(orderId, customerPhone);
 }
 
 async function submitReservation(event) {
@@ -1752,8 +1761,15 @@ trackerOrderModal?.addEventListener("click", (event) => {
 });
 tracker?.addEventListener("click", (event) => {
   const viewButton = event.target.closest(".tracker-view-order");
-  if (!viewButton) return;
-  openTrackerOrderModal(viewButton.dataset.id);
+  if (viewButton) {
+    openTrackerOrderModal(viewButton.dataset.id);
+    return;
+  }
+
+  const notificationButton = event.target.closest(".tracker-enable-notifications");
+  if (!notificationButton) return;
+  const order = trackerOrderById.get(notificationButton.dataset.id);
+  activateOrderNotifications(notificationButton.dataset.id, order?.customer?.phone);
 });
 if (cardFallbackForm) {
   cardFallbackForm.addEventListener("submit", async (event) => {

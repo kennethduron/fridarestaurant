@@ -763,7 +763,8 @@ h4 {
   margin: 0;
 }
 
-.tracker-view-order {
+.tracker-view-order,
+.tracker-enable-notifications {
   width: auto;
   min-width: 0;
   padding: 6px 10px;
@@ -1866,7 +1867,7 @@ textarea:focus {
 .crm-tools {
   margin: 0 0 16px;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--surface);
   box-shadow: 0 8px 20px rgba(31, 24, 12, 0.05);
   overflow: hidden;
@@ -1942,7 +1943,7 @@ textarea:focus {
 
 .crm-tools-shortcuts {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -1951,7 +1952,7 @@ textarea:focus {
   width: 100%;
   min-height: 112px;
   border: 1px solid #e2cfba;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fff9f1;
   color: inherit;
   padding: 12px;

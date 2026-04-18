@@ -55,6 +55,8 @@ const i18n = {
     crmToolsOpen: "Ver opciones",
     crmToolsFiscalText: "Datos legales, CAI, rango autorizado e impuestos.",
     crmToolsKitchenText: "Vista dedicada para que cocina reciba y avance pedidos.",
+    crmNotificationsAction: "Activar avisos",
+    crmNotificationsActionText: "Si no aceptaste al entrar, activa aqui los avisos de pedidos y reservas.",
     viewOrders: "Pedidos",
     viewReservations: "Reservas",
     filterAll: "Todos",
@@ -302,6 +304,8 @@ const i18n = {
     crmToolsOpen: "View options",
     crmToolsFiscalText: "Legal data, CAI, authorization range, and taxes.",
     crmToolsKitchenText: "Dedicated screen for the kitchen to receive and move orders.",
+    crmNotificationsAction: "Enable alerts",
+    crmNotificationsActionText: "If you did not allow alerts at sign-in, enable order and reservation notices here.",
     viewOrders: "Orders",
     viewReservations: "Reservations",
     filterAll: "All",
@@ -530,6 +534,7 @@ const authPassword = document.getElementById("crmPassword");
 const authSubmitBtn = document.getElementById("crmSignIn");
 const signOutBtn = document.getElementById("crmSignOut");
 const openFiscalSettingsBtn = document.getElementById("openFiscalSettings");
+const enableCrmNotificationsBtn = document.getElementById("enableCrmNotifications");
 const crmNavToggle = document.getElementById("crmNavToggle");
 const crmHeaderNav = document.getElementById("crmHeaderNav");
 const crmApp = document.getElementById("crmApp");
@@ -541,6 +546,7 @@ const statsGrid = document.getElementById("statsGrid");
 const foodStats = document.getElementById("foodStats");
 const salesCalendar = document.getElementById("salesCalendar");
 const crmTools = document.getElementById("crmTools");
+const crmSettingsLinks = Array.from(document.querySelectorAll("[data-open-crm-settings]"));
 const productManager = document.getElementById("productManager");
 const orderCreator = document.getElementById("orderCreator");
 const viewButtons = Array.from(document.querySelectorAll(".chip[data-view]"));
@@ -860,14 +866,32 @@ function notifyPaymentReceived(order) {
   }
 }
 
-async function registerCRMPushNotifications() {
+async function registerCRMPushNotifications(options = {}) {
+  const { showUnavailableToast = true } = options;
   try {
     const token = await registerStaffNotificationToken("web-crm");
-    if (token) showToast(t("crmNotificationsReady"));
+    if (token) {
+      showToast(t("crmNotificationsReady"));
+      return true;
+    }
   } catch (error) {
     console.warn("CRM push registration failed", error);
-    showToast(t("crmNotificationsUnavailable"));
+    if (showUnavailableToast) showToast(t("crmNotificationsUnavailable"));
   }
+  return false;
+}
+
+async function activateCRMNotifications(options = {}) {
+  const { showUnavailableToast = true } = options;
+  const permission = await ensureNotificationPermission();
+  await unlockNotificationSound();
+
+  if (permission !== "granted") {
+    if (showUnavailableToast) showToast(t("crmNotificationsUnavailable"));
+    return false;
+  }
+
+  return registerCRMPushNotifications({ showUnavailableToast });
 }
 
 function orderStatusLabel(status) {
@@ -3199,9 +3223,7 @@ async function unlockUI(user, profile) {
   staffBadge.textContent = `${user.email} | ${t("staffRole")}: ${profile.role}`;
   await refreshFiscalSettings();
   await refreshMenuSettings();
-  ensureNotificationPermission();
-  unlockNotificationSound();
-  registerCRMPushNotifications();
+  activateCRMNotifications({ showUnavailableToast: false });
   startRealtime();
 }
 
@@ -3306,6 +3328,17 @@ if (salesCalendar) {
     renderSalesCalendar();
   });
 }
+
+crmSettingsLinks.forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    if (crmTools) {
+      crmTools.open = true;
+      requestAnimationFrame(() => crmTools.scrollIntoView({ behavior: "smooth", block: "start" }));
+    }
+    closeCRMHeaderNav();
+  });
+});
 
 if (crmTools) {
   crmTools.addEventListener("click", (event) => {
@@ -3450,6 +3483,12 @@ if (openFiscalSettingsBtn) {
   openFiscalSettingsBtn.addEventListener("click", () => {
     closeCRMHeaderNav();
     openFiscalSettingsModal();
+  });
+}
+if (enableCrmNotificationsBtn) {
+  enableCrmNotificationsBtn.addEventListener("click", async () => {
+    closeCRMHeaderNav();
+    await activateCRMNotifications();
   });
 }
 if (fiscalRangeAlertButton) {
