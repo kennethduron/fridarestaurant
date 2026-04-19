@@ -697,6 +697,17 @@ function focusEditableFieldFromLabel(event) {
   field.focus({ preventScroll: true });
 }
 
+function focusedEditableField() {
+  const active = document.activeElement;
+  if (!(active instanceof HTMLElement)) return null;
+  return active.matches(CRM_EDITABLE_FIELD_SELECTOR) ? active : null;
+}
+
+function applyResponsiveChrome() {
+  const shortLabel = window.matchMedia("(max-width: 560px)").matches;
+  signOutBtn.textContent = shortLabel ? t("signOutShort") : t("signOut");
+}
+
 function readHiddenOrderIds() {
   try {
     const raw = JSON.parse(localStorage.getItem(HIDDEN_ORDER_IDS_KEY) || "[]");
@@ -2574,8 +2585,7 @@ function updateLanguageToggleButtons() {
 function applyI18n() {
   document.documentElement.lang = lang;
   updateLanguageToggleButtons();
-  const shortLabel = window.matchMedia("(max-width: 560px)").matches;
-  signOutBtn.textContent = shortLabel ? t("signOutShort") : t("signOut");
+  applyResponsiveChrome();
   periodButtons.forEach((button) => {
     const label = t(`period_${button.dataset.period}`);
     button.textContent = label;
@@ -3556,6 +3566,10 @@ function startRealtime() {
   realtimeAuthExpiredHandled = false;
   unsubscribeOrders = listenOrders(
     (orders) => {
+      const activeEditable = focusedEditableField();
+      const editingOrderName = Boolean(activeEditable?.classList.contains("crm-customer-name-input"));
+      const editingReviewField = Boolean(activeEditable && reviewModal?.contains(activeEditable));
+      const editingSalesSearch = Boolean(activeEditable && activeEditable.id === "salesDaySearch");
       const nextIds = new Set(orders.map((order) => order.id));
       const nextPaymentMap = new Map(orders.map((order) => [order.id, order.payment?.status || "unpaid"]));
       if (!hasSeenInitialOrdersSnapshot) {
@@ -3577,7 +3591,6 @@ function startRealtime() {
         knownOrderPaymentStatus = nextPaymentMap;
       }
 
-      const editingOrderName = isEditingOrderCustomerName();
       orders.forEach((order) => {
         if (!orderNamePendingValues.has(order.id) && !orderNameSavingIds.has(order.id)) {
           orderNameLastSavedValues.set(order.id, order.customer?.name || "");
@@ -3596,10 +3609,10 @@ function startRealtime() {
       ));
       renderStats();
       renderFoodStats();
-      renderSalesCalendar();
+      if (!editingSalesSearch) renderSalesCalendar();
       if (!editingOrderName) {
         renderOrders();
-        if (selectedOrderId) openReview(selectedOrderId);
+        if (selectedOrderId && !editingReviewField) openReview(selectedOrderId);
       }
       openLinkedOrderIfReady();
     },
@@ -4118,19 +4131,19 @@ function toggleLanguage() {
   applyI18n();
 }
 
-let crmI18nResizeFrame = null;
-function scheduleCRMApplyI18n() {
-  if (crmI18nResizeFrame !== null) return;
-  crmI18nResizeFrame = window.requestAnimationFrame(() => {
-    crmI18nResizeFrame = null;
-    applyI18n();
+let crmResponsiveResizeFrame = null;
+function scheduleCRMResponsiveChrome() {
+  if (crmResponsiveResizeFrame !== null) return;
+  crmResponsiveResizeFrame = window.requestAnimationFrame(() => {
+    crmResponsiveResizeFrame = null;
+    applyResponsiveChrome();
   });
 }
 
 if (langToggleDesktop) langToggleDesktop.addEventListener("click", toggleLanguage);
 if (langToggleMobile) langToggleMobile.addEventListener("click", toggleLanguage);
 
-window.addEventListener("resize", scheduleCRMApplyI18n);
+window.addEventListener("resize", scheduleCRMResponsiveChrome);
 window.addEventListener("pointerdown", unlockNotificationSound, { once: true });
 window.addEventListener("keydown", unlockNotificationSound, { once: true });
 document.addEventListener("click", focusEditableFieldFromLabel, { capture: true });
