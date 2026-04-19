@@ -529,6 +529,13 @@ async function updateOrderInvoiceData(id, invoiceData) {
   });
 }
 
+async function updateOrderCustomerName(id, customerName) {
+  await apiRequest(`/api/orders/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: { customer_name: customerName }
+  });
+}
+
 async function loadFiscalSettings() {
   const result = await apiRequest("/api/settings/fiscal");
   return result.settings || null;
@@ -742,6 +749,7 @@ export {
   updateOrderPaymentStatus,
   updateOrderPaymentMethod,
   updateOrderInvoiceData,
+  updateOrderCustomerName,
   loadFiscalSettings,
   loadMenuSettings,
   listenMenuSettings,

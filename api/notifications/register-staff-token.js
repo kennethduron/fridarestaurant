@@ -37,19 +37,6 @@ module.exports = async function handler(req, res) {
       body: payload
     });
 
-    await supabaseFetch(
-      `/rest/v1/staff_notification_tokens?staff_profile_id=eq.${encodeURIComponent(staff.id)}&platform=eq.${encodeURIComponent(payload.platform)}&token=neq.${encodeURIComponent(token)}&active=eq.true`,
-      {
-        method: "PATCH",
-        admin: true,
-        prefer: "return=minimal",
-        body: {
-          active: false,
-          updated_at: new Date().toISOString()
-        }
-      }
-    ).catch(() => null);
-
     sendJson(req, res, 201, {
       token: Array.isArray(inserted) ? inserted[0] : inserted
     }, ["POST", "OPTIONS"]);

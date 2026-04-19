@@ -6,6 +6,7 @@ import {
   updateOrderPaymentStatus,
   updateOrderPaymentMethod,
   updateOrderInvoiceData,
+  updateOrderCustomerName,
   loadFiscalSettings,
   loadMenuSettings,
   saveFiscalSettings,
@@ -17,7 +18,7 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260419b";
+} from "./firebase-config.js?v=20260419c";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 
@@ -97,6 +98,9 @@ const i18n = {
     emptyOrders: "No hay pedidos en este estado.",
     emptyReservations: "No hay reservas registradas.",
     customer: "Cliente",
+    customerNameLabel: "Nombre del cliente",
+    customerNameSaved: "Nombre actualizado",
+    customerNameSaveError: "No se pudo actualizar el nombre.",
     orderComments: "Comentarios del pedido",
     invoiceRequestSummary: "Solicita factura con RTN y nombre",
     orderPickupBadge: "Recoger",
@@ -355,6 +359,9 @@ const i18n = {
     emptyOrders: "No orders for this status.",
     emptyReservations: "No reservations found.",
     customer: "Customer",
+    customerNameLabel: "Customer name",
+    customerNameSaved: "Name updated",
+    customerNameSaveError: "Could not update the name.",
     orderComments: "Order comments",
     invoiceRequestSummary: "Customer requested invoice with RTN and name",
     orderPickupBadge: "Pickup",
@@ -648,17 +655,43 @@ let hasSeenInitialReservationsSnapshot = false;
 let knownOrderIds = new Set();
 let knownReservationIds = new Set();
 const HIDDEN_ORDER_IDS_KEY = "frida_crm_hidden_order_ids_v1";
+const CRM_NOTIFICATIONS_ENABLED_KEY = "frida_crm_notifications_enabled_v1";
 let hiddenOrderIds = readHiddenOrderIds();
 let pendingHiddenOrderId = "";
 let knownOrderPaymentStatus = new Map();
+let orderNameSaveTimers = new Map();
+let orderNamePendingValues = new Map();
+let orderNameLastSavedValues = new Map();
+let orderNameSavingIds = new Set();
 let audioCtx = null;
 let audioUnlocked = false;
 let realtimeAuthExpiredHandled = false;
 let fiscalSettings = mergeFiscalSettings();
 let pendingLinkedOrderId = crmUrlParams.get("order") || crmUrlParams.get("orderId") || "";
+let lastCrmPushRegisterAt = 0;
 
 function t(key) {
   return (i18n[lang] && i18n[lang][key]) || key;
+}
+
+const CRM_EDITABLE_FIELD_SELECTOR = [
+  'input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([readonly]):not([disabled])',
+  "textarea:not([readonly]):not([disabled])"
+].join(",");
+
+function editableFieldFromEvent(event) {
+  const target = event.target;
+  if (!(target instanceof Element)) return null;
+  const directField = target.closest(CRM_EDITABLE_FIELD_SELECTOR);
+  if (directField) return directField;
+  const label = target.closest("label");
+  return label ? label.querySelector(CRM_EDITABLE_FIELD_SELECTOR) : null;
+}
+
+function focusEditableFieldForTouch(event) {
+  const field = editableFieldFromEvent(event);
+  if (!field || document.activeElement === field) return;
+  field.focus({ preventScroll: true });
 }
 
 function readHiddenOrderIds() {
@@ -863,6 +896,15 @@ async function ensureNotificationPermission() {
   }
 }
 
+function readCrmNotificationsEnabled() {
+  return localStorage.getItem(CRM_NOTIFICATIONS_ENABLED_KEY) === "true";
+}
+
+function writeCrmNotificationsEnabled(enabled) {
+  if (enabled) localStorage.setItem(CRM_NOTIFICATIONS_ENABLED_KEY, "true");
+  else localStorage.removeItem(CRM_NOTIFICATIONS_ENABLED_KEY);
+}
+
 function canUseLocalCrmNotification() {
   return !crmPushNotificationsReady && canUseBrowserNotifications() && Notification.permission === "granted";
 }
@@ -918,12 +960,18 @@ function notifyPaymentReceived(order) {
 }
 
 async function registerCRMPushNotifications(options = {}) {
-  const { showUnavailableToast = true } = options;
+  const { showUnavailableToast = true, remember = false, force = false } = options;
+  const now = Date.now();
+  if (!force && crmPushNotificationsReady && now - lastCrmPushRegisterAt < 15 * 60 * 1000) {
+    return true;
+  }
   try {
     const token = await registerStaffNotificationToken("web-crm");
     if (token) {
       crmPushNotificationsReady = true;
-      showToast(t("crmNotificationsReady"));
+      lastCrmPushRegisterAt = now;
+      if (remember) writeCrmNotificationsEnabled(true);
+      if (showUnavailableToast) showToast(t("crmNotificationsReady"));
       return true;
     }
   } catch (error) {
@@ -935,16 +983,29 @@ async function registerCRMPushNotifications(options = {}) {
 }
 
 async function activateCRMNotifications(options = {}) {
-  const { showUnavailableToast = true } = options;
+  const { showUnavailableToast = true, remember = true, force = false } = options;
   const permission = await ensureNotificationPermission();
   await unlockNotificationSound();
 
   if (permission !== "granted") {
+    if (permission === "denied") writeCrmNotificationsEnabled(false);
     if (showUnavailableToast) showToast(t("crmNotificationsUnavailable"));
     return false;
   }
 
-  return registerCRMPushNotifications({ showUnavailableToast });
+  return registerCRMPushNotifications({ showUnavailableToast, remember, force });
+}
+
+async function renewCRMNotificationsIfAllowed(options = {}) {
+  if (!canUseBrowserNotifications()) return false;
+  const { force = false } = options;
+  const shouldRenew = Notification.permission === "granted" || readCrmNotificationsEnabled();
+  if (!shouldRenew) return false;
+  if (Notification.permission === "granted") {
+    await unlockNotificationSound();
+    return registerCRMPushNotifications({ showUnavailableToast: false, remember: true, force });
+  }
+  return activateCRMNotifications({ showUnavailableToast: false, remember: true, force });
 }
 
 function orderStatusLabel(status) {
@@ -2986,7 +3047,7 @@ function renderOrders() {
         <div class="crm-top">
           <div>
             <strong>#${order.displayId || order.id.slice(0, 6)}</strong>
-            <p>${t("customer")}: ${order.customer?.name || ""} (${order.customer?.phone || ""})</p>
+            ${renderCustomerNameEditor(order)}
             ${renderInvoiceRequestNotice(order)}
             <p><strong>${crmPaymentLine(order)}</strong></p>
           </div>
@@ -3179,6 +3240,86 @@ function patchOrderInCache(orderId, patcher) {
     return nextOrder;
   });
   return { previousOrder, nextOrder };
+}
+
+function focusedOrderNameInput() {
+  const active = document.activeElement;
+  return active && active.classList && active.classList.contains("crm-customer-name-input") ? active : null;
+}
+
+function isEditingOrderCustomerName() {
+  return Boolean(focusedOrderNameInput());
+}
+
+function renderCustomerNameEditor(order) {
+  const value = orderNamePendingValues.has(order.id)
+    ? orderNamePendingValues.get(order.id)
+    : (order.customer?.name || "");
+  const phone = String(order.customer?.phone || "").trim();
+  return `
+    <label class="crm-customer-name-field">
+      <span>${t("customer")}:</span>
+      <input
+        class="crm-customer-name-input"
+        type="text"
+        autocomplete="name"
+        autocapitalize="words"
+        spellcheck="false"
+        data-id="${order.id}"
+        value="${escapeHtml(value)}"
+        aria-label="${escapeHtml(t("customerNameLabel"))}"
+      >
+      ${phone ? `<small>(${escapeHtml(phone)})</small>` : ""}
+    </label>
+  `;
+}
+
+function patchOrderCustomerNameInCache(orderId, customerName) {
+  patchOrderInCache(orderId, (current) => ({
+    ...current,
+    customer: {
+      ...(current.customer || {}),
+      name: customerName
+    },
+    updatedAt: new Date().toISOString()
+  }));
+}
+
+async function persistOrderCustomerName(orderId, rawName) {
+  const customerName = String(rawName || "").trim();
+  if (!customerName || orderNameSavingIds.has(orderId)) return;
+  const order = ordersCache.find((row) => row.id === orderId);
+  if (!order) return;
+  const previousName = orderNameLastSavedValues.get(orderId) || order.customer?.name || "";
+  if (customerName === previousName.trim()) return;
+
+  orderNameSavingIds.add(orderId);
+  try {
+    await updateOrderCustomerName(orderId, customerName, currentStaffUser);
+    orderNameLastSavedValues.set(orderId, customerName);
+    if (String(orderNamePendingValues.get(orderId) || "").trim() === customerName) {
+      orderNamePendingValues.delete(orderId);
+    }
+    patchOrderCustomerNameInCache(orderId, customerName);
+  } catch (_error) {
+    showToast(t("customerNameSaveError"));
+  } finally {
+    orderNameSavingIds.delete(orderId);
+    const pendingValue = orderNamePendingValues.get(orderId);
+    if (pendingValue !== undefined && String(pendingValue).trim() !== customerName) {
+      scheduleOrderCustomerNameSave(orderId, pendingValue);
+    }
+  }
+}
+
+function scheduleOrderCustomerNameSave(orderId, customerName, delay = 650) {
+  if (orderNameSaveTimers.has(orderId)) {
+    window.clearTimeout(orderNameSaveTimers.get(orderId));
+  }
+  orderNameSaveTimers.set(orderId, window.setTimeout(() => {
+    orderNameSaveTimers.delete(orderId);
+    persistOrderCustomerName(orderId, customerName);
+  }, delay));
 }
 
 async function setStatus(orderId, status) {
@@ -3433,12 +3574,30 @@ function startRealtime() {
         knownOrderPaymentStatus = nextPaymentMap;
       }
 
-      ordersCache = orders;
+      const editingOrderName = isEditingOrderCustomerName();
+      orders.forEach((order) => {
+        if (!orderNamePendingValues.has(order.id) && !orderNameSavingIds.has(order.id)) {
+          orderNameLastSavedValues.set(order.id, order.customer?.name || "");
+        }
+      });
+      ordersCache = orders.map((order) => (
+        orderNamePendingValues.has(order.id)
+          ? {
+              ...order,
+              customer: {
+                ...(order.customer || {}),
+                name: orderNamePendingValues.get(order.id)
+              }
+            }
+          : order
+      ));
       renderStats();
       renderFoodStats();
       renderSalesCalendar();
-      renderOrders();
-      if (selectedOrderId) openReview(selectedOrderId);
+      if (!editingOrderName) {
+        renderOrders();
+        if (selectedOrderId) openReview(selectedOrderId);
+      }
       openLinkedOrderIfReady();
     },
     (error) => handleRealtimeError(error, "ordersListenerError")
@@ -3484,7 +3643,7 @@ async function unlockUI(user, profile) {
   staffBadge.textContent = `${user.email} | ${t("staffRole")}: ${profile.role}`;
   await refreshFiscalSettings();
   await refreshMenuSettings();
-  activateCRMNotifications({ showUnavailableToast: false });
+  renewCRMNotificationsIfAllowed({ force: true });
   startRealtime();
 }
 
@@ -3518,6 +3677,59 @@ ordersList.addEventListener("click", (event) => {
 ordersList.addEventListener("change", (event) => {
   const paymentMethodSelect = event.target.closest(".payment-method-select");
   if (paymentMethodSelect) setPaymentMethod(paymentMethodSelect.dataset.id, paymentMethodSelect.value);
+});
+
+ordersList.addEventListener("focusin", (event) => {
+  const input = event.target.closest(".crm-customer-name-input");
+  if (!input) return;
+  const orderId = input.dataset.id;
+  const order = ordersCache.find((row) => row.id === orderId);
+  if (order && !orderNameLastSavedValues.has(orderId)) {
+    orderNameLastSavedValues.set(orderId, order.customer?.name || "");
+  }
+});
+
+ordersList.addEventListener("input", (event) => {
+  const input = event.target.closest(".crm-customer-name-input");
+  if (!input) return;
+  const orderId = input.dataset.id;
+  const order = ordersCache.find((row) => row.id === orderId);
+  if (order && !orderNameLastSavedValues.has(orderId)) {
+    orderNameLastSavedValues.set(orderId, order.customer?.name || "");
+  }
+  orderNamePendingValues.set(orderId, input.value);
+  patchOrderCustomerNameInCache(orderId, input.value);
+  scheduleOrderCustomerNameSave(orderId, input.value);
+});
+
+ordersList.addEventListener("keydown", (event) => {
+  const input = event.target.closest(".crm-customer-name-input");
+  if (input && event.key === "Enter") {
+    event.preventDefault();
+    input.blur();
+  }
+});
+
+ordersList.addEventListener("focusout", (event) => {
+  const input = event.target.closest(".crm-customer-name-input");
+  if (!input) return;
+  const orderId = input.dataset.id;
+  const nextName = input.value.trim();
+  if (orderNameSaveTimers.has(orderId)) {
+    window.clearTimeout(orderNameSaveTimers.get(orderId));
+    orderNameSaveTimers.delete(orderId);
+  }
+  if (!nextName) {
+    const previousName = orderNameLastSavedValues.get(orderId) || "";
+    input.value = previousName;
+    orderNamePendingValues.delete(orderId);
+    patchOrderCustomerNameInCache(orderId, previousName);
+    window.requestAnimationFrame(renderOrders);
+    return;
+  }
+  persistOrderCustomerName(orderId, nextName).finally(() => {
+    window.requestAnimationFrame(renderOrders);
+  });
 });
 
 
@@ -3583,7 +3795,24 @@ if (salesCalendar) {
     const searchInput = event.target.closest("#salesDaySearch");
     if (!searchInput) return;
     salesDaySearchTerm = searchInput.value || "";
-    renderSalesCalendarKeepingSearchPosition(searchInput.selectionStart, searchInput.selectionEnd);
+    if (document.activeElement !== searchInput) {
+      renderSalesCalendarKeepingSearchPosition(searchInput.selectionStart, searchInput.selectionEnd);
+    }
+  });
+
+  salesCalendar.addEventListener("focusout", (event) => {
+    const searchInput = event.target.closest("#salesDaySearch");
+    if (!searchInput) return;
+    salesDaySearchTerm = searchInput.value || "";
+    window.requestAnimationFrame(renderSalesCalendar);
+  });
+
+  salesCalendar.addEventListener("keydown", (event) => {
+    const searchInput = event.target.closest("#salesDaySearch");
+    if (searchInput && event.key === "Enter") {
+      event.preventDefault();
+      searchInput.blur();
+    }
   });
 
   salesCalendar.addEventListener("change", (event) => {
@@ -3645,11 +3874,21 @@ if (productManager) {
     const searchInput = event.target.closest("#productManagerSearch");
     if (!searchInput) return;
     productManagerSearchTerm = searchInput.value || "";
-    renderProductManager();
-    const nextSearchInput = document.getElementById("productManagerSearch");
-    if (nextSearchInput) {
-      nextSearchInput.focus({ preventScroll: true });
-      nextSearchInput.setSelectionRange(nextSearchInput.value.length, nextSearchInput.value.length);
+    if (document.activeElement !== searchInput) renderProductManager();
+  });
+
+  productManager.addEventListener("focusout", (event) => {
+    const searchInput = event.target.closest("#productManagerSearch");
+    if (!searchInput) return;
+    productManagerSearchTerm = searchInput.value || "";
+    window.requestAnimationFrame(renderProductManager);
+  });
+
+  productManager.addEventListener("keydown", (event) => {
+    const searchInput = event.target.closest("#productManagerSearch");
+    if (searchInput && event.key === "Enter") {
+      event.preventDefault();
+      searchInput.blur();
     }
   });
 
@@ -3698,17 +3937,28 @@ if (orderCreator) {
     if (searchInput) {
       orderCreatorSearchTerm = searchInput.value || "";
       updateOrderCreatorDraftFromForm();
-      renderOrderCreator();
-      const nextSearchInput = document.getElementById("orderCreatorSearch");
-      if (nextSearchInput) {
-        nextSearchInput.focus({ preventScroll: true });
-        nextSearchInput.setSelectionRange(nextSearchInput.value.length, nextSearchInput.value.length);
-      }
+      if (document.activeElement !== searchInput) renderOrderCreator();
       return;
     }
 
     if (event.target.closest("#orderCreatorForm")) {
       updateOrderCreatorDraftFromForm();
+    }
+  });
+
+  orderCreator.addEventListener("focusout", (event) => {
+    const searchInput = event.target.closest("#orderCreatorSearch");
+    if (!searchInput) return;
+    orderCreatorSearchTerm = searchInput.value || "";
+    updateOrderCreatorDraftFromForm();
+    window.requestAnimationFrame(renderOrderCreator);
+  });
+
+  orderCreator.addEventListener("keydown", (event) => {
+    const searchInput = event.target.closest("#orderCreatorSearch");
+    if (searchInput && event.key === "Enter") {
+      event.preventDefault();
+      searchInput.blur();
     }
   });
 
@@ -3766,7 +4016,7 @@ if (enableCrmNotificationsBtn) {
   enableCrmNotificationsBtn.addEventListener("click", async () => {
     closeCrmSettingsModal();
     closeCRMHeaderNav();
-    await activateCRMNotifications();
+    await activateCRMNotifications({ remember: true, force: true });
   });
 }
 if (fiscalRangeAlertButton) {
@@ -3880,6 +4130,16 @@ if (langToggleMobile) langToggleMobile.addEventListener("click", toggleLanguage)
 window.addEventListener("resize", scheduleCRMApplyI18n);
 window.addEventListener("pointerdown", unlockNotificationSound, { once: true });
 window.addEventListener("keydown", unlockNotificationSound, { once: true });
+document.addEventListener("pointerdown", focusEditableFieldForTouch, { capture: true });
+document.addEventListener("touchend", focusEditableFieldForTouch, { capture: true });
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && currentStaffUser) {
+    renewCRMNotificationsIfAllowed();
+  }
+});
+window.addEventListener("focus", () => {
+  if (currentStaffUser) renewCRMNotificationsIfAllowed();
+});
 
 authForm.addEventListener("submit", async (event) => {
   event.preventDefault();

@@ -319,6 +319,8 @@ const invoiceDetailsBackBtn = document.getElementById("invoiceDetailsBack");
 const invoiceDetailsContinueBtn = document.getElementById("invoiceDetailsContinue");
 const invoicePhoneGroup = document.getElementById("invoicePhoneGroup");
 const invoicePickupPhoneInput = document.getElementById("invoicePickupPhone");
+const invoiceDeliveryAddressGroup = document.getElementById("invoiceDeliveryAddressGroup");
+const invoiceDeliveryAddressInput = document.getElementById("invoiceDeliveryAddressInput");
 const pickupDetailsModal = document.getElementById("pickupDetailsModal");
 const closePickupDetailsBtn = document.getElementById("closePickupDetails");
 const pickupDetailsBackBtn = document.getElementById("pickupDetailsBack");
@@ -1017,8 +1019,20 @@ async function sendCurrentOrderToKitchen(options = {}) {
 }
 
 function openInvoiceDetailsModal() {
-  if (invoicePhoneGroup) invoicePhoneGroup.classList.add("hidden");
-  if (invoicePickupPhoneInput) invoicePickupPhoneInput.value = "";
+  const fulfillment = selectedOrderFulfillment();
+  const needsContactPhone = fulfillment === "takeaway" || fulfillment === "delivery";
+  const needsDeliveryAddress = fulfillment === "delivery";
+  if (invoicePhoneGroup) invoicePhoneGroup.classList.toggle("hidden", !needsContactPhone);
+  if (invoicePickupPhoneInput && needsContactPhone) {
+    invoicePickupPhoneInput.value =
+      (pickupPhoneInput?.value || "").trim() ||
+      localStorage.getItem(STORAGE.lastPickupPhone) ||
+      "";
+  }
+  if (invoiceDeliveryAddressGroup) invoiceDeliveryAddressGroup.classList.toggle("hidden", !needsDeliveryAddress);
+  if (invoiceDeliveryAddressInput) {
+    invoiceDeliveryAddressInput.value = needsDeliveryAddress ? (deliveryAddressInput?.value || "").trim() : "";
+  }
   invoiceDetailsModal?.classList.remove("hidden");
 }
 
@@ -1027,6 +1041,24 @@ function closeInvoiceDetailsModal() {
 }
 
 function syncInvoicePickupPhone() {
+  const fulfillment = selectedOrderFulfillment();
+  if (fulfillment !== "takeaway" && fulfillment !== "delivery") return true;
+  const phoneValue = (invoicePickupPhoneInput?.value || "").trim();
+  if (!phoneValue) {
+    showToast(t("needPickupPhone"));
+    return false;
+  }
+  if (pickupPhoneInput) pickupPhoneInput.value = phoneValue;
+  localStorage.setItem(STORAGE.lastPickupPhone, phoneValue);
+
+  if (fulfillment === "delivery") {
+    const addressValue = (invoiceDeliveryAddressInput?.value || "").trim();
+    if (!addressValue) {
+      showToast(t("needDeliveryAddress"));
+      return false;
+    }
+    if (deliveryAddressInput) deliveryAddressInput.value = addressValue;
+  }
   return true;
 }
 
@@ -1416,9 +1448,10 @@ function validateCustomerForOrder(options = {}) {
   const customerPickup = fulfillment === "takeaway";
   const customerDelivery = fulfillment === "delivery";
   const tableNumber = fulfillment === "dine_in" ? (orderTableNumberInput?.value || "").trim() : "";
-  const deliveryAddress = (deliveryAddressInput?.value || "").trim();
+  const deliveryAddress = ((deliveryAddressInput?.value || "") || (invoiceDeliveryAddressInput?.value || "")).trim();
   const customerPhone = (
     document.getElementById("orderCustomerPhone")?.value ||
+    (needsOrderDetailsStep() ? invoicePickupPhoneInput?.value : "") ||
     (needsOrderDetailsStep() ? pickupPhoneInput?.value : "") ||
     (needsOrderDetailsStep() ? localStorage.getItem(STORAGE.lastPickupPhone) : "") ||
     ""
@@ -1518,8 +1551,12 @@ function finishSuccessfulOrder(orderId, showConfirmation, customerPhone) {
   setOrderFulfillment("dine_in");
   if (orderTableNumberInput) orderTableNumberInput.value = "";
   if (pickupPhoneInput) pickupPhoneInput.value = "";
+  if (invoicePickupPhoneInput) invoicePickupPhoneInput.value = "";
   if (deliveryAddressInput) deliveryAddressInput.value = "";
+  if (invoiceDeliveryAddressInput) invoiceDeliveryAddressInput.value = "";
   if (deliveryAddressGroup) deliveryAddressGroup.classList.add("hidden");
+  if (invoiceDeliveryAddressGroup) invoiceDeliveryAddressGroup.classList.add("hidden");
+  if (invoicePhoneGroup) invoicePhoneGroup.classList.add("hidden");
   const needInvoiceField = document.getElementById("orderNeedInvoice");
   if (needInvoiceField) needInvoiceField.checked = false;
   const businessNameField = document.getElementById("orderBusinessName");
@@ -1652,12 +1689,12 @@ sendToKitchenBtn.addEventListener("click", () => {
   if (!cart.length) return;
   const customer = validateCustomerForOrder({ requireInvoiceDetails: false });
   if (!customer) return;
-  if (needsOrderDetailsStep()) {
-    openPickupDetailsModal();
+  if (customer.needsInvoice) {
+    openInvoiceDetailsModal();
     return;
   }
-  if (customer.needsInvoice && (!customer.businessName || !customer.businessRTN)) {
-    openInvoiceDetailsModal();
+  if (needsOrderDetailsStep()) {
+    openPickupDetailsModal();
     return;
   }
   sendCurrentOrderToKitchen();
@@ -1675,7 +1712,7 @@ async function handlePickupCheckout() {
   closePickupDetailsModal();
   const customer = validateCustomerForOrder({ requireInvoiceDetails: false });
   if (!customer) return;
-  if (customer.needsInvoice && (!customer.businessName || !customer.businessRTN)) {
+  if (customer.needsInvoice) {
     openInvoiceDetailsModal();
     return;
   }

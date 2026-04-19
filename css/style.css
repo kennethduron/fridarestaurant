@@ -842,6 +842,14 @@ textarea:focus {
   box-shadow: 0 0 0 4px var(--ring);
 }
 
+.crm-page input,
+.crm-page textarea {
+  pointer-events: auto;
+  touch-action: auto;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 .btn {
   border: 1px solid transparent;
   border-radius: 11px;
@@ -2681,6 +2689,50 @@ textarea:focus {
   gap: 8px;
 }
 
+.crm-customer-name-field {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
+  align-items: center;
+  gap: 5px;
+  margin: 14px 0 12px;
+  min-width: 0;
+}
+
+.crm-customer-name-field span {
+  color: var(--text);
+}
+
+.crm-customer-name-input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  padding: 5px 7px;
+  font: inherit;
+  font-weight: 800;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.crm-customer-name-input:hover,
+.crm-customer-name-input:focus {
+  border-color: #d8c4ad;
+  background: #fffdf9;
+  outline: none;
+}
+
+.crm-customer-name-field small {
+  color: var(--muted);
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
 .crm-print-actions {
   display: flex;
   flex-direction: column;
@@ -3958,6 +4010,20 @@ textarea:focus {
     min-width: 0;
   }
 
+  .crm-customer-name-field {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    gap: 4px;
+    margin: 14px 0 12px;
+  }
+
+  .crm-customer-name-input {
+    min-height: 42px;
+    padding: 8px 10px;
+    background: #fffdf9;
+    border-color: #e5d4bf;
+  }
+
   .crm-top .badge {
     align-self: center;
   }
@@ -4183,6 +4249,12 @@ textarea:focus {
 
   .crm-page .brand {
     font-size: 0.94rem;
+  }
+
+  .crm-page input,
+  .crm-page textarea,
+  .crm-page select {
+    font-size: 16px;
   }
 
   .crm-page #crmSignOut {
