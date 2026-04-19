@@ -6,6 +6,9 @@ const API_BASE_URL = (
 
 const SESSION_KEY = "frida_staff_session_v1";
 const POLL_INTERVAL_MS = 5000;
+const MENU_SETTINGS_SYNC_INTERVAL_MS = 1500;
+const MENU_SETTINGS_CHANNEL = "frida_menu_settings_v1";
+const MENU_SETTINGS_STORAGE_KEY = "frida_menu_settings_changed_v1";
 const STAFF_EMAIL_DOMAIN = "frida.local";
 const FCM_VAPID_KEY = "BNmfp8tu6f6EWUwnX4grqCsQxPBR35s1Qr9XF1R3JzIN-s1k8ySArkSStrFlQbjcPgTv2h3y-7bspsmmpxej2xM";
 const FIREBASE_PUBLIC_CONFIG = {
@@ -21,6 +24,7 @@ let currentSession = readSession();
 const authListeners = new Set();
 let messagingSetupPromise = null;
 let refreshSessionPromise = null;
+let lastMenuSettingsSignature = "";
 
 const app = null;
 const db = null;
@@ -169,7 +173,7 @@ function normalizeOrderInput(order) {
     notes: (order.customer && order.customer.comments) || "",
     items: Array.isArray(order.items) ? order.items.map((item) => ({
       id: item.id || item.menu_item_id || "",
-      name: item.name || item.title || "",
+      name: itemDisplayName(item),
       quantity: Number(item.qty || item.quantity || 1),
       unit_price: Number(item.price || item.unit_price || 0),
       total: Number(item.total || Number(item.qty || item.quantity || 1) * Number(item.price || item.unit_price || 0)),
@@ -184,6 +188,20 @@ function normalizeOrderInput(order) {
     invoice,
     language: order.language || "es"
   };
+}
+
+function itemDisplayName(item) {
+  const directName = String(item.name || "").trim();
+  if (directName && directName !== "[object Object]") return directName;
+  const title = item.title;
+  if (typeof title === "string") {
+    const text = title.trim();
+    return text === "[object Object]" ? "" : text;
+  }
+  if (title && typeof title === "object") {
+    return String(title.es || title.en || title[Object.keys(title)[0]] || "").trim();
+  }
+  return "";
 }
 
 async function addOrder(order) {
@@ -300,7 +318,7 @@ async function setupFirebaseMessaging() {
 
     messagingModule.onMessage(messaging, (payload) => {
       const title = payload.notification?.title || "Frida Restaurant";
-      const body = payload.notification?.body || "Tu pedido tiene una actualizacion.";
+      const body = payload.notification?.body || "Tu pedido tiene una actualización.";
       const link = notificationTargetLink(payload);
       const actionTitle = payload.data?.type === "new_order" || payload.data?.type === "new_reservation" ? "Abrir CRM" : "Ver pedido";
       if (Notification.permission === "granted") {
@@ -308,8 +326,8 @@ async function setupFirebaseMessaging() {
           body,
           icon: "/assets/icon.jpg",
           badge: "/assets/icon.jpg",
-          tag: payload.data?.orderId ? `frida-order-${payload.data.orderId}` : "frida-restaurant",
-          renotify: true,
+          tag: notificationTag(payload.data || {}),
+          renotify: false,
           actions: [
             {
               action: "open-crm",
@@ -355,6 +373,12 @@ function notificationTargetLink(payload) {
   }
 
   return new URL("/", window.location.origin).href;
+}
+
+function notificationTag(data) {
+  if (data.orderId) return `frida-order-${data.orderId}`;
+  if (data.reservationId) return `frida-reservation-${data.reservationId}`;
+  return `frida-${data.type || "notice"}`;
 }
 
 function mapOrder(row) {
@@ -528,7 +552,113 @@ async function saveMenuSettings(settings) {
     method: "PATCH",
     body: { settings }
   });
-  return result.settings;
+  const savedSettings = result.settings || { items: {} };
+  notifyMenuSettingsChanged(savedSettings);
+  return savedSettings;
+}
+
+function menuSettingsSignature(settings) {
+  try {
+    return JSON.stringify(settings || { items: {} });
+  } catch (_error) {
+    return String(Date.now());
+  }
+}
+
+function notifyMenuSettingsChanged(settings) {
+  const payload = {
+    settings: settings || { items: {} },
+    changedAt: Date.now()
+  };
+  lastMenuSettingsSignature = menuSettingsSignature(payload.settings);
+
+  try {
+    localStorage.setItem(MENU_SETTINGS_STORAGE_KEY, JSON.stringify(payload));
+  } catch (_error) {
+    // Local storage may be blocked; polling still keeps other screens in sync.
+  }
+
+  if ("BroadcastChannel" in window) {
+    try {
+      const channel = new BroadcastChannel(MENU_SETTINGS_CHANNEL);
+      channel.postMessage(payload);
+      channel.close();
+    } catch (_error) {
+      // Some private browsing modes expose BroadcastChannel but block it.
+    }
+  }
+}
+
+function listenMenuSettings(callback, options = {}) {
+  const intervalMs = Number(options.intervalMs || MENU_SETTINGS_SYNC_INTERVAL_MS);
+  let stopped = false;
+  let loading = false;
+  let intervalId = null;
+  let channel = null;
+
+  const applySettings = (settings, force = false) => {
+    if (stopped) return;
+    const nextSettings = settings || { items: {} };
+    const nextSignature = menuSettingsSignature(nextSettings);
+    if (!force && nextSignature === lastMenuSettingsSignature) return;
+    lastMenuSettingsSignature = nextSignature;
+    callback(nextSettings);
+  };
+
+  const pullSettings = async (force = false) => {
+    if (loading || stopped) return;
+    loading = true;
+    try {
+      applySettings(await loadMenuSettings(), force);
+    } catch (_error) {
+      // Keep the last rendered menu if the API blinks.
+    } finally {
+      loading = false;
+    }
+  };
+
+  const handleStorage = (event) => {
+    if (event.key !== MENU_SETTINGS_STORAGE_KEY || !event.newValue) return;
+    try {
+      const payload = JSON.parse(event.newValue);
+      if (payload && payload.settings) applySettings(payload.settings);
+    } catch (_error) {
+      pullSettings();
+    }
+  };
+
+  const handleFocus = () => pullSettings();
+  const handleVisibility = () => {
+    if (!document.hidden) pullSettings();
+  };
+
+  if ("BroadcastChannel" in window) {
+    try {
+      channel = new BroadcastChannel(MENU_SETTINGS_CHANNEL);
+      channel.onmessage = (event) => {
+        if (event.data && event.data.settings) applySettings(event.data.settings);
+        else pullSettings();
+      };
+    } catch (_error) {
+      channel = null;
+    }
+  }
+
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener("focus", handleFocus);
+  document.addEventListener("visibilitychange", handleVisibility);
+
+  pullSettings(true);
+  intervalId = window.setInterval(() => pullSettings(), intervalMs);
+
+  return () => {
+    stopped = true;
+    if (intervalId) window.clearInterval(intervalId);
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener("focus", handleFocus);
+    document.removeEventListener("visibilitychange", handleVisibility);
+    if (channel) channel.close();
+  };
 }
 
 async function reserveNextFiscalInvoiceNumber() {
@@ -614,6 +744,7 @@ export {
   updateOrderInvoiceData,
   loadFiscalSettings,
   loadMenuSettings,
+  listenMenuSettings,
   saveFiscalSettings,
   saveMenuSettings,
   reserveNextFiscalInvoiceNumber,

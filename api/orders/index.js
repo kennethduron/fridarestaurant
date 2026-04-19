@@ -116,12 +116,13 @@ function normalizeItems(items) {
   return items.map((item) => {
     const quantity = Number(item.quantity || item.qty || 1);
     const unitPrice = Number(item.unit_price || item.unitPrice || item.price || 0);
-    if (!item.name || quantity <= 0) {
+    const name = itemDisplayName(item);
+    if (!name || quantity <= 0) {
       throw httpError(400, "invalid_item", "Each item needs a name and quantity.");
     }
     return {
       menu_item_id: item.menu_item_id || item.id || null,
-      name: String(item.name),
+      name,
       quantity,
       unit_price: unitPrice,
       total: Number(item.total || unitPrice * quantity),
@@ -130,12 +131,26 @@ function normalizeItems(items) {
   });
 }
 
+function itemDisplayName(item) {
+  const directName = String(item.name || "").trim();
+  if (directName && directName !== "[object Object]") return directName;
+  const title = item.title;
+  if (typeof title === "string") {
+    const text = title.trim();
+    return text === "[object Object]" ? "" : text;
+  }
+  if (title && typeof title === "object") {
+    return String(title.es || title.en || title[Object.keys(title)[0]] || "").trim();
+  }
+  return "";
+}
+
 async function notifyStaffNewOrder(order) {
-  const rows = await supabaseFetch("/rest/v1/staff_notification_tokens?active=eq.true&select=token", {
+  const rows = await supabaseFetch("/rest/v1/staff_notification_tokens?active=eq.true&select=token,staff_profile_id,updated_at,created_at&order=updated_at.desc", {
     admin: true,
     prefer: "return=representation"
   });
-  const tokens = Array.isArray(rows) ? rows.map((row) => row.token) : [];
+  const tokens = latestStaffTokens(rows);
   if (!tokens.length) return;
 
   const orderRef = order.display_id ? `#${order.display_id}` : `#${String(order.id).slice(0, 6)}`;
@@ -151,4 +166,14 @@ async function notifyStaffNewOrder(order) {
       displayId: order.display_id || ""
     }
   });
+}
+
+function latestStaffTokens(rows) {
+  const byStaff = new Map();
+  (Array.isArray(rows) ? rows : []).forEach((row) => {
+    if (!row || !row.token) return;
+    const key = row.staff_profile_id || row.token;
+    if (!byStaff.has(key)) byStaff.set(key, row.token);
+  });
+  return Array.from(new Set(byStaff.values()));
 }

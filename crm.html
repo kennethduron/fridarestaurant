@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Frida Restaurant CRM | Gestion de pedidos</title>
+    <title>Frida Restaurant CRM | Gestión de pedidos</title>
     <meta name="description"
         content="CRM bilingue para representantes: revisar pedidos, cambiar estado y revisar reservas.">
     <meta name="robots" content="noindex, nofollow">
@@ -13,7 +13,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20260418g">
+    <link rel="stylesheet" href="css/style.css?v=20260419i">
     <link rel="icon" type="image/jpeg" href="assets/icon.jpg">
     <link rel="shortcut icon" href="assets/icon.jpg">
     <link rel="apple-touch-icon" href="assets/icon.jpg">
@@ -24,14 +24,14 @@
         <div class="container nav-wrap">
             <a class="brand" href="#">Frida Restaurant CRM</a>
             <button id="crmNavToggle" class="nav-toggle crm-nav-toggle" type="button" aria-expanded="false"
-                aria-controls="crmHeaderNav" aria-label="Abrir menu">
+                aria-controls="crmHeaderNav" aria-label="Abrir menú">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
             <nav id="crmHeaderNav" class="crm-header-nav" aria-label="CRM navigation">
                 <div class="crm-head-actions">
-                    <a class="btn btn-outline" href="#crmSettingsModal" data-open-crm-settings data-i18n="crmToolsNav">Configuracion</a>
+                    <a class="btn btn-outline" href="#crmSettingsModal" data-open-crm-settings data-i18n="crmToolsNav">Configuración</a>
                     <button id="crmLangToggleMobile" class="btn btn-ghost crm-lang-mobile" aria-label="Cambiar idioma">EN</button>
                 </div>
             </nav>
@@ -43,14 +43,14 @@
     <main class="container section">
         <section id="authGate" class="auth-gate">
             <h1 data-i18n="authTitle">Acceso CRM del personal</h1>
-            <p data-i18n="authText">Ingresa con usuario y contrasena para validar rol de representante.</p>
+            <p data-i18n="authText">Ingresa con usuario y contraseña para validar rol de representante.</p>
             <form id="crmAuthForm" class="reservation-form" novalidate>
                 <label class="full">
                     <span data-i18n="authUserLabel">Usuario</span>
                     <input id="crmUser" type="text" autocomplete="username" required>
                 </label>
                 <label class="full">
-                    <span data-i18n="authPassLabel">Contrasena</span>
+                    <span data-i18n="authPassLabel">Contraseña</span>
                     <input id="crmPassword" type="password" autocomplete="current-password" required>
                 </label>
                 <div class="full">
@@ -64,7 +64,7 @@
         <section id="crmApp" class="hidden">
             <div class="section-head">
                 <h1 data-i18n="crmTitle">Panel de pedidos y reservas</h1>
-                <p data-i18n="crmSub">Gestion operacional en tiempo real para representantes.</p>
+                <p data-i18n="crmSub">Gestión operacional en tiempo real para representantes.</p>
                 <p id="staffBadge" class="muted-line"></p>
             </div>
 
@@ -119,13 +119,30 @@
         </div>
     </div>
 
+    <div id="hideOrderConfirmModal" class="modal hidden" role="dialog" aria-modal="true"
+        aria-labelledby="hideOrderConfirmTitle">
+        <div class="modal-card hide-order-confirm-card">
+            <header>
+                <div>
+                    <h3 id="hideOrderConfirmTitle" data-i18n="hideOrderConfirmTitle">Eliminar orden</h3>
+                    <p class="hide-order-confirm-text" data-i18n="hideOrderConfirmText">¿Deseas eliminar esta orden de la vista del CRM?</p>
+                </div>
+                <button id="closeHideOrderConfirm" class="btn btn-ghost" aria-label="Cerrar">X</button>
+            </header>
+            <div class="cart-actions">
+                <button id="cancelHideOrder" class="btn btn-outline" type="button" data-i18n="cancelButton">Cancelar</button>
+                <button id="confirmHideOrder" class="btn btn-primary" type="button" data-i18n="hideOrderConfirmButton">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="crmSettingsModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="crmSettingsModalTitle">
         <div class="modal-card crm-settings-card">
             <header>
                 <div>
-                    <span class="crm-tools-eyebrow" data-i18n="crmToolsEyebrow">Configuracion</span>
+                    <span class="crm-tools-eyebrow" data-i18n="crmToolsEyebrow">Configuración</span>
                     <h3 id="crmSettingsModalTitle" data-i18n="crmToolsTitle">Herramientas del CRM</h3>
-                    <p class="crm-settings-text" data-i18n="crmToolsText">Organiza pedidos internos, menu, facturacion y cocina desde un solo lugar.</p>
+                    <p class="crm-settings-text" data-i18n="crmToolsText">Organiza pedidos internos, menú, facturación y cocina desde un solo lugar.</p>
                 </div>
                 <button id="closeCrmSettings" class="btn btn-ghost" aria-label="Cerrar">X</button>
             </header>
@@ -135,8 +152,8 @@
                     <span data-i18n="orderCreatorCollapsedText">Crea pedidos internos para mesa, recoger o delivery sin salir del CRM.</span>
                 </button>
                 <button class="crm-tool-action" type="button" data-open-crm-tool="products">
-                    <strong data-i18n="productManagerTitle">Gestion de productos</strong>
-                    <span data-i18n="productManagerCollapsedText">Ajustes de menu listos. Abre esta seccion para editar productos.</span>
+                    <strong data-i18n="productManagerTitle">Gestión de productos</strong>
+                    <span data-i18n="productManagerCollapsedText">Ajustes de menú listos. Abre esta sección para editar productos.</span>
                 </button>
                 <button id="openFiscalSettings" class="crm-tool-action" type="button">
                     <strong data-i18n="fiscalSettingsPage">Ajustes fiscales</strong>
@@ -144,7 +161,7 @@
                 </button>
                 <button id="enableCrmNotifications" class="crm-tool-action" type="button">
                     <strong data-i18n="crmNotificationsAction">Activar avisos</strong>
-                    <span data-i18n="crmNotificationsActionText">Si no aceptaste al entrar, activa aqui los avisos de pedidos y reservas.</span>
+                    <span data-i18n="crmNotificationsActionText">Si no aceptaste al entrar, activa aquí los avisos de pedidos y reservas.</span>
                 </button>
                 <a class="crm-tool-action" href="kitchen.html" target="_blank" rel="noopener">
                     <strong data-i18n="kitchenScreen">Pantalla cocina</strong>
@@ -153,7 +170,7 @@
             </div>
             <aside class="crm-notification-note">
                 <strong data-i18n="crmNotificationsAppleTitle">Aviso para iPhone y iPad</strong>
-                <p data-i18n="crmNotificationsAppleText">En Android los avisos funcionan desde Chrome. En iPhone o iPad, abre el CRM en Safari, agregalo a pantalla de inicio y activa los avisos desde ese icono.</p>
+                <p data-i18n="crmNotificationsAppleText">En Android los avisos funcionan desde Chrome. En iPhone o iPad, abre el CRM en Safari, agrégalo a pantalla de inicio y activa los avisos desde ese ícono.</p>
             </aside>
         </div>
     </div>
@@ -171,7 +188,7 @@
     <div id="productManagerModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="productManagerModalTitle">
         <div class="modal-card crm-work-modal-card">
             <header class="crm-work-modal-head">
-                <h3 id="productManagerModalTitle" data-i18n="productManagerTitle">Gestion de productos</h3>
+                <h3 id="productManagerModalTitle" data-i18n="productManagerTitle">Gestión de productos</h3>
                 <button id="closeProductManagerModal" class="btn btn-ghost" aria-label="Cerrar">X</button>
             </header>
             <section id="productManager" class="product-manager"></section>
@@ -183,7 +200,7 @@
             <header>
                 <div>
                     <h3 id="fiscalModalTitle" data-i18n="fiscalModalTitle">Ajustes fiscales</h3>
-                    <p class="fiscal-modal-text" data-i18n="fiscalModalText">Completa los datos legales que se imprimen automaticamente en la factura fiscal.</p>
+                    <p class="fiscal-modal-text" data-i18n="fiscalModalText">Completa los datos legales que se imprimen automáticamente en la factura fiscal.</p>
                 </div>
                 <button id="closeFiscalSettings" class="btn btn-ghost" aria-label="Cerrar">X</button>
             </header>
@@ -193,7 +210,7 @@
                     <input name="brandName" required>
                 </label>
                 <label>
-                    <span data-i18n="legalName">Razon social</span>
+                    <span data-i18n="legalName">Razón social</span>
                     <input name="legalName" required>
                 </label>
                 <label>
@@ -201,11 +218,11 @@
                     <input name="rtn" required>
                 </label>
                 <label>
-                    <span data-i18n="phone">Telefono</span>
+                    <span data-i18n="phone">Teléfono</span>
                     <input name="phone" required>
                 </label>
                 <label class="full">
-                    <span data-i18n="address">Direccion</span>
+                    <span data-i18n="address">Dirección</span>
                     <input name="address" required>
                 </label>
                 <label class="full">
@@ -217,7 +234,7 @@
                     <input name="cai" required>
                 </label>
                 <label>
-                    <span data-i18n="emissionDeadline">Fecha limite de emision</span>
+                    <span data-i18n="emissionDeadline">Fecha límite de emisión</span>
                     <input name="emissionDeadline" placeholder="02/02/2027" required>
                 </label>
                 <label>
@@ -229,7 +246,7 @@
                     <input name="authorizationRangeEnd" required>
                 </label>
                 <label>
-                    <span data-i18n="nextInvoiceNumber">Siguiente numero de factura</span>
+                    <span data-i18n="nextInvoiceNumber">Siguiente número de factura</span>
                     <input name="nextInvoiceNumber" required>
                 </label>
                 <label class="full">
@@ -257,16 +274,16 @@
                     <input name="tax_desserts" type="number" min="0" max="100" step="0.01" required>
                 </label>
                 <div class="full fiscal-form-actions">
-                    <button type="submit" class="btn btn-primary" data-i18n="saveButton">Guardar configuracion</button>
+                    <button type="submit" class="btn btn-primary" data-i18n="saveButton">Guardar configuración</button>
                 </div>
             </form>
-            <p class="fiscal-page-note" data-i18n="settingsWarning">Cambia estos datos solo con informacion fiscal valida autorizada por SAR.</p>
+            <p class="fiscal-page-note" data-i18n="settingsWarning">Cambia estos datos solo con información fiscal válida autorizada por SAR.</p>
         </div>
     </div>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <script type="module" src="js/crm.js?v=20260418j"></script>
+    <script type="module" src="js/crm.js?v=20260419e"></script>
 </body>
 
 </html>

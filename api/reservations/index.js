@@ -69,11 +69,11 @@ function normalizeReservation(body) {
 }
 
 async function notifyStaffNewReservation(reservation) {
-  const rows = await supabaseFetch("/rest/v1/staff_notification_tokens?active=eq.true&select=token", {
+  const rows = await supabaseFetch("/rest/v1/staff_notification_tokens?active=eq.true&select=token,staff_profile_id,updated_at,created_at&order=updated_at.desc", {
     admin: true,
     prefer: "return=representation"
   });
-  const tokens = Array.isArray(rows) ? rows.map((row) => row.token) : [];
+  const tokens = latestStaffTokens(rows);
   if (!tokens.length) return;
 
   const when = [reservation.reservation_date, reservation.reservation_time].filter(Boolean).join(" ");
@@ -90,4 +90,14 @@ async function notifyStaffNewReservation(reservation) {
       time: reservation.reservation_time || ""
     }
   });
+}
+
+function latestStaffTokens(rows) {
+  const byStaff = new Map();
+  (Array.isArray(rows) ? rows : []).forEach((row) => {
+    if (!row || !row.token) return;
+    const key = row.staff_profile_id || row.token;
+    if (!byStaff.has(key)) byStaff.set(key, row.token);
+  });
+  return Array.from(new Set(byStaff.values()));
 }

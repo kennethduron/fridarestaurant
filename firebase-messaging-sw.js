@@ -1,4 +1,7 @@
-self.FRIDA_SW_VERSION = "20260418f";
+self.FRIDA_SW_VERSION = "20260419a";
+
+const recentNotificationKeys = new Map();
+const NOTIFICATION_DEDUPE_MS = 12000;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
@@ -13,28 +16,49 @@ self.addEventListener("push", (event) => {
   const notification = payload.notification || {};
   const data = payload.data || {};
   const title = notification.title || data.title || "Frida Restaurant";
-  const body = notification.body || data.body || "Tu pedido tiene una actualizacion.";
+  const body = notification.body || data.body || "Tu pedido tiene una actualización.";
   const link = resolveNotificationLink(data, payload);
   const notificationData = Object.assign({}, data, { link });
   const actionTitle = data.type === "new_order" || data.type === "new_reservation" ? "Abrir CRM" : "Ver pedido";
+  const notificationKey = notificationDedupeKey(data, title, body);
 
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      icon: "/assets/icon.jpg",
-      badge: "/assets/icon.jpg",
-      tag: data.orderId ? `frida-order-${data.orderId}` : "frida-restaurant",
-      renotify: true,
-      actions: [
-        {
-          action: "open-crm",
-          title: actionTitle
-        }
-      ],
-      data: notificationData
+    shouldShowNotification(notificationKey).then((shouldShow) => {
+      if (!shouldShow) return null;
+      return self.registration.showNotification(title, {
+        body,
+        icon: "/assets/icon.jpg",
+        badge: "/assets/icon.jpg",
+        tag: notificationKey,
+        renotify: false,
+        timestamp: Date.now(),
+        actions: [
+          {
+            action: "open-crm",
+            title: actionTitle
+          }
+        ],
+        data: notificationData
+      });
     })
   );
 });
+
+function notificationDedupeKey(data, title, body) {
+  if (data.orderId) return `frida-order-${data.orderId}`;
+  if (data.reservationId) return `frida-reservation-${data.reservationId}`;
+  return `frida-${data.type || "notice"}-${title}-${body}`;
+}
+
+async function shouldShowNotification(key) {
+  const now = Date.now();
+  for (const [cachedKey, expiresAt] of recentNotificationKeys.entries()) {
+    if (expiresAt <= now) recentNotificationKeys.delete(cachedKey);
+  }
+  if (recentNotificationKeys.has(key)) return false;
+  recentNotificationKeys.set(key, now + NOTIFICATION_DEDUPE_MS);
+  return true;
+}
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();

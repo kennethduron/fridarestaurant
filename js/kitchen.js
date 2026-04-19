@@ -6,39 +6,42 @@ import {
   onAuthChange,
   signOutUser,
   isStaffAuthorized
-} from "./firebase-config.js?v=20260418e";
+} from "./firebase-config.js?v=20260419b";
+import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 
 const i18n = {
   es: {
     authTitle: "Acceso de cocina",
-    authText: "Ingresa con usuario y contrasena para ver los pedidos en preparacion.",
+    authText: "Ingresa con usuario y contraseña para ver los pedidos en preparación.",
     authUserLabel: "Usuario",
-    authPassLabel: "Contrasena",
+    authPassLabel: "Contraseña",
     authButton: "Ingresar",
-    authInvalid: "Usuario o contrasena invalidos.",
+    authInvalid: "Usuario o contraseña inválidos.",
     authUserNotFound: "Usuario no encontrado.",
     authUserNeedsMapping: "Ese usuario no existe. Verifica el usuario asignado en Supabase.",
     authDenied: "Tu usuario no tiene permisos para esta pantalla.",
     authChecking: "Validando acceso...",
-    authProviderDisabled: "El acceso con usuario y contrasena no esta habilitado. Revisa Supabase Auth.",
-    authUnauthorizedDomain: "Este dominio no esta autorizado para el backend. Revisa WEB_ORIGINS en Vercel.",
-    authNetworkError: "No se pudo conectar con la API. Revisa tu conexion e intenta de nuevo.",
-    authPermissionError: "La API bloqueo la validacion del usuario. Revisa roles y variables privadas.",
-    screenTitle: "Pedidos en preparacion",
-    screenSub: "Esta pantalla muestra unicamente pedidos marcados como En preparacion.",
+    authProviderDisabled: "El acceso con usuario y contraseña no está habilitado. Revisa Supabase Auth.",
+    authUnauthorizedDomain: "Este dominio no está autorizado para el backend. Revisa WEB_ORIGINS en Vercel.",
+    authNetworkError: "No se pudo conectar con la API. Revisa tu conexión e intenta de nuevo.",
+    authPermissionError: "La API bloqueó la validación del usuario. Revisa roles y variables privadas.",
+    screenTitle: "Pedidos en preparación",
+    screenSub: "Esta pantalla muestra únicamente pedidos marcados como En preparación.",
     countLabel: "Pendientes en cocina:",
     staffRole: "Rol",
     signOut: "Salir",
     signOutShort: "Salir",
-    emptyPrep: "No hay pedidos en preparacion.",
+    emptyPrep: "No hay pedidos en preparación.",
     date: "Fecha",
     time: "Hora",
     customer: "Cliente",
     mode: "Servicio",
-    pickup: "Para llevar",
+    pickup: "Recoger",
+    delivery: "Delivery",
     dineIn: "En restaurante",
     comments: "Comentarios",
     noComments: "Sin comentarios",
+    address: "Dirección",
     total: "Total",
     status: "Estado",
     status_preparing: "Preparando",
@@ -72,9 +75,11 @@ const i18n = {
     customer: "Customer",
     mode: "Service",
     pickup: "Pickup",
+    delivery: "Delivery",
     dineIn: "Dine-in",
     comments: "Comments",
     noComments: "No comments",
+    address: "Address",
     total: "Total",
     status: "Status",
     status_preparing: "Preparing",
@@ -171,10 +176,30 @@ function formatTime(value) {
 }
 
 function foodName(item) {
-  return item.title?.[lang] || item.title?.es || item.title?.en || "Item";
+  const title = item?.title;
+  const candidates = [
+    title && typeof title === "object" ? title[lang] : "",
+    title && typeof title === "object" ? title.es : "",
+    title && typeof title === "object" ? title.en : "",
+    typeof title === "string" ? title : "",
+    item?.name
+  ];
+  for (const candidate of candidates) {
+    const text = String(candidate || "").trim();
+    if (text && text !== "[object Object]") return text;
+  }
+
+  const byId = BASE_MENU_ITEMS.find((menuItem) => menuItem.id === item?.id || menuItem.id === item?.menu_item_id);
+  if (byId) return byId.title?.[lang] || byId.title?.es || byId.title?.en || "Item";
+
+  const price = Number(item?.price || item?.unit_price || 0);
+  const samePrice = price ? BASE_MENU_ITEMS.filter((menuItem) => Number(menuItem.price) === price) : [];
+  const byPrice = samePrice.length === 1 ? samePrice[0] : null;
+  return byPrice?.title?.[lang] || byPrice?.title?.es || byPrice?.title?.en || "Item";
 }
 
 function prepMode(order) {
+  if (order?.customer?.delivery || order?.order_type === "delivery" || order?.orderType === "delivery") return t("delivery");
   return order?.customer?.pickup ? t("pickup") : t("dineIn");
 }
 
@@ -217,6 +242,7 @@ function renderOrders() {
           <p><strong>${t("date")}:</strong> ${formatDate(order.createdAt)} | <strong>${t("time")}:</strong> ${formatTime(order.createdAt)}</p>
           <p><strong>${t("customer")}:</strong> ${order.customer?.name || "-"} (${order.customer?.phone || "-"})</p>
           <p><strong>${t("mode")}:</strong> ${prepMode(order)}</p>
+          ${order.customer?.deliveryAddress ? `<p><strong>${t("address")}:</strong> ${order.customer.deliveryAddress}</p>` : ""}
           <p><strong>${t("comments")}:</strong> ${order.customer?.comments || t("noComments")}</p>
           <ul>
             ${(order.items || [])

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Frida Restaurant | Diagnostico de notificaciones</title>
+  <title>Frida Restaurant | Diagnóstico de notificaciones</title>
   <style>
     body {
       margin: 0;
@@ -53,8 +53,8 @@
 </head>
 <body>
   <main>
-    <h1>Diagnostico de notificaciones</h1>
-    <p>Abre esta pagina desde el telefono donde quieres recibir las notificaciones. Toca el boton y comparte el resultado si algo falla.</p>
+    <h1>Diagnóstico de notificaciones</h1>
+    <p>Abre esta página desde el teléfono donde quieres recibir las notificaciones. Toca el botón y comparte el resultado si algo falla.</p>
     <button id="runTest">Probar notificaciones</button>
     <pre id="log">Listo para probar.</pre>
   </main>
@@ -126,7 +126,7 @@
           exists: Boolean(token),
           preview: token ? `${token.slice(0, 28)}...${token.slice(-12)}` : null
         });
-        if (!token) throw new Error("Firebase no devolvio token.");
+        if (!token) throw new Error("Firebase no devolvió token.");
 
         const response = await fetch(`${API_BASE_URL}/api/notifications/register-token`, {
           method: "POST",
@@ -138,12 +138,12 @@
           })
         });
         const text = await response.text();
-        write("7. Registro en Supabase via backend", {
+        write("7. Registro en Supabase vía backend", {
           ok: response.ok,
           status: response.status,
           body: text
         });
-        if (!response.ok) throw new Error(`El backend rechazo el token con HTTP ${response.status}.`);
+        if (!response.ok) throw new Error(`El backend rechazó el token con HTTP ${response.status}.`);
 
         write("Resultado: OK. Ahora revisa Supabase > notification_tokens. Debe aparecer una fila nueva.");
       } catch (error) {

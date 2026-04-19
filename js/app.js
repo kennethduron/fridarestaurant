@@ -1,5 +1,5 @@
-import { addOrder, addReservation, listenOrderById, loadMenuSettings, registerOrderNotificationToken } from "./firebase-config.js?v=20260418e";
-import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260417a";
+import { addOrder, addReservation, listenOrderById, listenMenuSettings, registerOrderNotificationToken } from "./firebase-config.js?v=20260419b";
+import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 
 const STORAGE = {
   cart: "restaurant_cart_v1",
@@ -10,31 +10,31 @@ const STORAGE = {
 
 const i18n = {
   es: {
-    navMenu: "Menu",
+    navMenu: "Menú",
     navOrder: "Pedido",
     navReservations: "Reservas",
     navAbout: "Nosotros",
     heroEyebrow: "Restaurante y experiencias memorables",
     heroTitle: "Frida Restaurant",
-    heroSub: "Explora el menu, envia pedidos y reserva tu mesa desde cualquier dispositivo con una presentacion elegante y clara.",
-    heroCtaMenu: "Ver menu",
+    heroSub: "Explora el menú, envía pedidos y reserva tu mesa desde cualquier dispositivo con una presentación elegante y clara.",
+    heroCtaMenu: "Ver menú",
     heroCtaReservation: "Reservar mesa",
-    heroCardEyebrow: "Atencion y horarios",
+    heroCardEyebrow: "Atención y horarios",
     heroCardTitle: "Horario",
     heroCardText: "Todo listo para pedidos, reservas y una experiencia comoda en sala durante toda la semana.",
     daysWeek: "Lunes a Viernes",
     daysWeekend: "Sabado y Domingo",
-    badgeFast: "Servicio rapido",
+    badgeFast: "Servicio rápido",
     badgeFresh: "Producto fresco",
     badgeFamily: "Ambiente familiar",
-    strip1Title: "Menu digital",
-    strip1Text: "Categorias claras y recorrido intuitivo desde cualquier pantalla.",
-    strip2Title: "Pedidos rapidos",
+    strip1Title: "Menú digital",
+    strip1Text: "Categorías claras y recorrido intuitivo desde cualquier pantalla.",
+    strip2Title: "Pedidos rápidos",
     strip2Text: "Carrito directo a cocina con un flujo simple y profesional.",
-    strip3Title: "Reservas faciles",
+    strip3Title: "Reservas fáciles",
     strip3Text: "Solicita tu mesa en segundos desde celular, tablet o computadora.",
-    menuTitle: "Menu por categorias",
-    menuText: "Categorias formales: Entradas, Platos principales, Bebidas y Postres.",
+    menuTitle: "Menú por categorías",
+    menuText: "Categorías formales: Entradas, Platos principales, Bebidas y Postres.",
     menuNewBadge: "Nuevo",
     tabAll: "Todo",
     tabAppetizers: "Entradas",
@@ -45,25 +45,25 @@ const i18n = {
     category_main_courses: "Platos principales",
     category_beverages: "Bebidas",
     category_desserts: "Postres",
-    orderTitle: "Pedido rapido",
-    orderText: "Agrega productos al carrito y envia el pedido a cocina con un clic.",
+    orderTitle: "Pedido rápido",
+    orderText: "Agrega productos al carrito y envía el pedido a cocina con un clic.",
     reservationTitle: "Reserva de mesa",
     reservationText: "Comparte datos importantes para organizar tu experiencia.",
     fieldName: "Nombre completo",
-    fieldPhone: "Telefono",
+    fieldPhone: "Teléfono",
     fieldEmail: "Correo",
     fieldDate: "Fecha",
     fieldTime: "Hora",
     fieldParty: "Personas",
-    fieldOccasion: "Ocasion",
-    fieldOccasionPlaceholder: "Cumpleanos, reunion, aniversario",
+    fieldOccasion: "Ocasión",
+    fieldOccasionPlaceholder: "Cumpleaños, reunión, aniversario",
     fieldAllergies: "Alergias",
     fieldAllergiesPlaceholder: "Gluten, lactosa, frutos secos",
     fieldNotes: "Notas especiales",
-    fieldNotesPlaceholder: "Mesa cerca de ventana, silla para bebe, etc.",
+    fieldNotesPlaceholder: "Mesa cerca de ventana, silla para bebé, etc.",
     btnReserve: "Enviar reserva",
-    about1Title: "Atencion profesional",
-    about1Text: "Equipo entrenado para tiempos de respuesta rapidos.",
+    about1Title: "Atención profesional",
+    about1Text: "Equipo entrenado para tiempos de respuesta rápidos.",
     about2Title: "Calidad constante",
     about2Text: "Control interno en cocina y servicio al cliente.",
     about3Title: "Experiencia memorable",
@@ -71,65 +71,60 @@ const i18n = {
     cartTitle: "Carrito",
     cartTotal: "Total",
     orderCustomerName: "Nombre para el pedido",
-    orderCustomerPhone: "Telefono de contacto",
+    orderCustomerPhone: "Teléfono de contacto",
     orderCustomerComments: "Comentarios del pedido",
-    orderCustomerCommentsPlaceholder: "Alergias, sin picante, para llevar, etc.",
-    orderNeedInvoice: "Necesita factura con RTN?",
+    orderCustomerCommentsPlaceholder: "Alergias, sin picante, recoger, delivery, etc.",
+    orderTableLabel: "Número de mesa",
+    orderTablePlaceholder: "Mesa",
+    orderNeedInvoice: "Factura con RTN?",
     orderBusinessName: "Nombre de la empresa",
-    orderBusinessNamePlaceholder: "Nombre del negocio o razon social",
+    orderBusinessNamePlaceholder: "Nombre del negocio o razón social",
     orderBusinessRTN: "RTN de la empresa",
     orderBusinessRTNPlaceholder: "RTN del negocio o empresa",
     orderInvoiceStepTitle: "Datos para factura con RTN",
     orderInvoiceStepText: "Completa estos datos para preparar la factura fiscal de este pedido.",
     orderInvoiceBack: "Volver",
-    orderInvoiceContinue: "Continuar",
-    orderPickupLabel: "Para llevar",
-    pickupStepTitle: "Pedido para llevar",
-    pickupStepText: "Agrega el telefono de contacto y elige como deseas pagar este pedido para llevar.",
-    pickupPhoneLabel: "Telefono para recoger",
-    pickupPhonePlaceholder: "Telefono de contacto",
+    orderTypeLabel: "Tipo de pedido",
+    orderDineInLabel: "En restaurante",
+    orderPickupLabel: "Recoger",
+    orderDeliveryLabel: "Delivery",
+    pickupStepTitle: "Datos del pedido",
+    pickupStepText: "Confirma los datos para enviar este pedido a cocina.",
+    pickupPhoneLabel: "Teléfono de contacto",
+    pickupPhonePlaceholder: "Teléfono de contacto",
+    deliveryAddressLabel: "Dirección de entrega",
+    deliveryAddressPlaceholder: "Dirección completa para delivery",
     pickupBack: "Volver",
     btnSendKitchen: "Enviar a cocina",
-    btnPayNow: "Pagar ahora",
     btnBack: "Volver",
-    btnPayCashier: "Pagar en caja",
-    btnPay: "Pagar",
-    paymentChoiceTitle: "Metodo de pago",
-    paymentChoiceText: "Elige como deseas pagar este pedido para continuar.",
-    paypalTitle: "Pagar con tarjeta",
-    paypalInstructions: "Agrega la informacion de tu tarjeta y luego toca Pagar ahora.",
-    cardNameLabel: "Nombre en la tarjeta",
-    cardNumberLabel: "Numero de tarjeta",
-    cardExpiryLabel: "Vencimiento (MM/AA)",
-    cardCvvLabel: "CVV",
     btnClear: "Vaciar",
-    footerText: "Direccion, telefono y horarios actualizados.",
+    footerText: "Dirección, teléfono y horarios actualizados.",
     add: "Agregar",
     remove: "Eliminar",
-    emptyCart: "Tu carrito esta vacio.",
+    emptyCart: "Tu carrito está vacío.",
     addedToCart: "agregado al carrito",
     orderSent: "Pedido enviado a cocina",
     reservationSent: "Reserva enviada",
     needCustomer: "Completa el nombre del pedido.",
+    needTableNumber: "Completa el número de mesa.",
     needPickupName: "Completa primero el nombre para el pedido.",
-    needPickupPhone: "Confirma el telefono para el pedido para llevar.",
+    needPickupPhone: "Confirma el teléfono para este pedido.",
+    needDeliveryAddress: "Escribe la dirección para el delivery.",
     needInvoiceCustomer: "Completa nombre o empresa y RTN para la factura.",
     trackerEmpty: "No hay pedidos recientes.",
-    trackerLabel: "Ultimo pedido",
+    trackerLabel: "Último pedido",
     trackerPrint: "Imprimir pedido",
     trackerView: "Ver pedido",
     trackerModalTitle: "Detalle del pedido",
     trackerCustomer: "Cliente",
     trackerDate: "Fecha",
     trackerStatus: "Estado",
-    trackerPaymentMethod: "Metodo de pago",
-    trackerMethodCash: "Efectivo",
-    trackerMethodCard: "Tarjeta",
-    trackerMethodTransfer: "Transferencia bancaria",
+    trackerOrderType: "Tipo de pedido",
+    trackerDineIn: "Comer en restaurante",
+    trackerToGo: "Recoger",
+    trackerDelivery: "Delivery",
     trackerItems: "Productos",
     trackerTotal: "Total",
-    trackerPayAtCashier: "Pagar en caja",
-    trackerPaymentProcessed: "Pago procesado con éxito",
     notificationEnableAction: "Activar avisos",
     status_pending: "Pendiente",
     status_preparing: "Preparando",
@@ -138,15 +133,15 @@ const i18n = {
     status_delivered: "Entregada",
     status_rejected: "Rechazado",
     orderError: "No se pudo enviar el pedido. Intenta de nuevo.",
-    invalidCardData: "Completa los datos de tarjeta correctamente.",
-    paypalNotConfigured: "PayPal no esta configurado. Contacta al restaurante.",
-    paypalLoadError: "No se pudo cargar PayPal. Intenta nuevamente.",
-    paypalPaymentError: "No se pudo completar el pago con PayPal.",
-    paymentCashSent: "Pedido enviado a cocina. Estara completado aproximadamente en 15 minutos.",
-    paymentCardSent: "Pago aprobado. Pedido confirmado y listo aproximadamente en 15 minutos.",
+    orderSentNotice: "Pedido enviado a cocina. Estará completado aproximadamente en 15 minutos.",
+    orderViewPromptTitle: "Orden enviada",
+    orderViewPromptText: "¿Deseas ver la orden?",
+    yesButton: "Sí",
+    noButton: "No",
+    orderLoading: "Cargando orden...",
     orderSubmitting: "Enviando pedido...",
     notificationReady: "Notificaciones activadas para este pedido.",
-    notificationUnavailable: "El pedido se envio, pero no se pudo activar la notificacion en este navegador.",
+    notificationUnavailable: "El pedido se envió, pero no se pudo activar la notificación en este navegador.",
     reservationSubmitting: "Enviando reserva...",
     reservationError: "No se pudo enviar la reserva. Intenta de nuevo.",
     hnTimeLabel: "Hora en Honduras",
@@ -218,8 +213,10 @@ const i18n = {
     orderCustomerName: "Order name",
     orderCustomerPhone: "Contact phone",
     orderCustomerComments: "Order comments",
-    orderCustomerCommentsPlaceholder: "Allergies, no spice, takeaway, etc.",
-    orderNeedInvoice: "Need an invoice with RTN?",
+    orderCustomerCommentsPlaceholder: "Allergies, no spice, pickup, delivery, etc.",
+    orderTableLabel: "Table number",
+    orderTablePlaceholder: "Table",
+    orderNeedInvoice: "Invoice with RTN?",
     orderBusinessName: "Business name",
     orderBusinessNamePlaceholder: "Business or legal name",
     orderBusinessRTN: "Business RTN",
@@ -227,26 +224,19 @@ const i18n = {
     orderInvoiceStepTitle: "Invoice details with RTN",
     orderInvoiceStepText: "Complete these details so we can prepare the fiscal invoice for this order.",
     orderInvoiceBack: "Back",
-    orderInvoiceContinue: "Continue",
-    orderPickupLabel: "To go",
-    pickupStepTitle: "Pickup order",
-    pickupStepText: "Add the contact phone and choose how you want to pay for this pickup order.",
-    pickupPhoneLabel: "Pickup phone",
+    orderTypeLabel: "Order type",
+    orderDineInLabel: "Dine in",
+    orderPickupLabel: "Pickup",
+    orderDeliveryLabel: "Delivery",
+    pickupStepTitle: "Order details",
+    pickupStepText: "Confirm the details to send this order to the kitchen.",
+    pickupPhoneLabel: "Contact phone",
     pickupPhonePlaceholder: "Contact phone",
+    deliveryAddressLabel: "Delivery address",
+    deliveryAddressPlaceholder: "Full delivery address",
     pickupBack: "Back",
     btnSendKitchen: "Send to kitchen",
-    btnPayNow: "Pay now",
     btnBack: "Back",
-    btnPayCashier: "Pay at cashier",
-    btnPay: "Pay",
-    paymentChoiceTitle: "Payment method",
-    paymentChoiceText: "Choose how you want to pay this order to continue.",
-    paypalTitle: "Pay with card",
-    paypalInstructions: "Add your card information and then tap Pay now.",
-    cardNameLabel: "Name on card",
-    cardNumberLabel: "Card number",
-    cardExpiryLabel: "Expiry (MM/YY)",
-    cardCvvLabel: "CVV",
     btnClear: "Clear",
     footerText: "Address, phone and opening hours up to date.",
     add: "Add",
@@ -256,8 +246,10 @@ const i18n = {
     orderSent: "Order sent to kitchen",
     reservationSent: "Reservation sent",
     needCustomer: "Please complete the order name.",
+    needTableNumber: "Please enter the table number.",
     needPickupName: "Please enter the order name first.",
-    needPickupPhone: "Please confirm the phone for the pickup order.",
+    needPickupPhone: "Please confirm the phone for this order.",
+    needDeliveryAddress: "Please enter the delivery address.",
     needInvoiceCustomer: "Please complete business name and RTN for the invoice.",
     trackerEmpty: "No recent orders.",
     trackerLabel: "Last order",
@@ -267,14 +259,12 @@ const i18n = {
     trackerCustomer: "Customer",
     trackerDate: "Date",
     trackerStatus: "Status",
-    trackerPaymentMethod: "Payment method",
-    trackerMethodCash: "Cash",
-    trackerMethodCard: "Card",
-    trackerMethodTransfer: "Bank transfer",
+    trackerOrderType: "Order type",
+    trackerDineIn: "Dine in",
+    trackerToGo: "Pickup",
+    trackerDelivery: "Delivery",
     trackerItems: "Items",
     trackerTotal: "Total",
-    trackerPayAtCashier: "Pay at cashier",
-    trackerPaymentProcessed: "Payment was successfully processed",
     notificationEnableAction: "Enable alerts",
     status_pending: "Pending",
     status_preparing: "Preparing",
@@ -283,12 +273,12 @@ const i18n = {
     status_delivered: "Delivered",
     status_rejected: "Rejected",
     orderError: "Could not send order. Please try again.",
-    invalidCardData: "Please complete valid card details.",
-    paypalNotConfigured: "PayPal is not configured. Please contact the restaurant.",
-    paypalLoadError: "Could not load PayPal. Please try again.",
-    paypalPaymentError: "Could not complete PayPal payment.",
-    paymentCashSent: "Order sent to kitchen. It will be completed in about 15 minutes.",
-    paymentCardSent: "Payment approved. Order confirmed and ready in about 15 minutes.",
+    orderSentNotice: "Order sent to kitchen. It will be completed in about 15 minutes.",
+    orderViewPromptTitle: "Order sent",
+    orderViewPromptText: "Would you like to view the order?",
+    yesButton: "Yes",
+    noButton: "No",
+    orderLoading: "Loading order...",
     orderSubmitting: "Sending order...",
     notificationReady: "Notifications enabled for this order.",
     notificationUnavailable: "The order was sent, but notifications could not be enabled in this browser.",
@@ -319,39 +309,31 @@ const cartCount = document.getElementById("cartCount");
 const cartTotal = document.getElementById("cartTotal");
 const clearCart = document.getElementById("clearCart");
 const sendToKitchenBtn = document.getElementById("sendToKitchen");
+const orderFulfillmentSelect = document.getElementById("orderFulfillment");
+const orderTableGroup = document.getElementById("orderTableGroup");
+const orderTableNumberInput = document.getElementById("orderTableNumber");
 const orderNeedInvoiceCheckbox = document.getElementById("orderNeedInvoice");
-const paymentChoiceModal = document.getElementById("paymentChoiceModal");
-const closePaymentChoiceBtn = document.getElementById("closePaymentChoice");
-const choosePayNowBtn = document.getElementById("choosePayNow");
-const choosePayCashBtn = document.getElementById("choosePayCash");
 const invoiceDetailsModal = document.getElementById("invoiceDetailsModal");
 const closeInvoiceDetailsBtn = document.getElementById("closeInvoiceDetails");
 const invoiceDetailsBackBtn = document.getElementById("invoiceDetailsBack");
 const invoiceDetailsContinueBtn = document.getElementById("invoiceDetailsContinue");
-const invoicePayNowBtn = document.getElementById("invoicePayNow");
-const invoicePayCashBtn = document.getElementById("invoicePayCash");
 const invoicePhoneGroup = document.getElementById("invoicePhoneGroup");
 const invoicePickupPhoneInput = document.getElementById("invoicePickupPhone");
 const pickupDetailsModal = document.getElementById("pickupDetailsModal");
 const closePickupDetailsBtn = document.getElementById("closePickupDetails");
 const pickupDetailsBackBtn = document.getElementById("pickupDetailsBack");
-const pickupPayNowBtn = document.getElementById("pickupPayNow");
-const pickupPayCashBtn = document.getElementById("pickupPayCash");
+const pickupSendKitchenBtn = document.getElementById("pickupSendKitchen");
 const pickupPhoneInput = document.getElementById("pickupPhoneInput");
-const paypalPaymentModal = document.getElementById("paypalPaymentModal");
-const closePaypalPaymentBtn = document.getElementById("closePaypalPayment");
-const cardPaymentBackBtn = document.getElementById("cardPaymentBack");
-const paypalPaymentTotal = document.getElementById("paypalPaymentTotal");
+const deliveryAddressGroup = document.getElementById("deliveryAddressGroup");
+const deliveryAddressInput = document.getElementById("deliveryAddressInput");
 const trackerOrderModal = document.getElementById("trackerOrderModal");
 const trackerOrderModalTitle = document.getElementById("trackerOrderModalTitle");
 const trackerOrderModalBody = document.getElementById("trackerOrderModalBody");
 const closeTrackerOrderModal = document.getElementById("closeTrackerOrderModal");
-const cardFallbackForm = document.getElementById("cardFallbackForm");
-const cardNameInput = document.getElementById("cardName");
-const cardNumberInput = document.getElementById("cardNumber");
-const cardExpiryInput = document.getElementById("cardExpiry");
-const cardCvvInput = document.getElementById("cardCvv");
-const paypalButtonsContainer = document.getElementById("paypalButtonsContainer");
+const orderViewPrompt = document.getElementById("orderViewPrompt");
+const closeOrderViewPromptBtn = document.getElementById("closeOrderViewPrompt");
+const viewOrderPromptYesBtn = document.getElementById("viewOrderPromptYes");
+const viewOrderPromptNoBtn = document.getElementById("viewOrderPromptNo");
 const toast = document.getElementById("toast");
 const busyScreen = createBusyScreen();
 const tracker = document.getElementById("orderTracker");
@@ -375,15 +357,10 @@ let toastTimer = null;
 let hnTimeTick = null;
 let hnWeatherTick = null;
 let weatherState = { loading: true, error: false, temperature: null, weatherCode: null };
-let pendingCheckoutAction = null;
-let paypalBackTarget = "paymentChoice";
-
+let latestSubmittedOrderId = "";
+let pendingPromptOrderId = "";
 const HONDURAS_TIMEZONE = "America/Tegucigalpa";
 const WEATHER_ENDPOINT = "https://api.open-meteo.com/v1/forecast?latitude=15.4012&longitude=-87.8000&current=temperature_2m,weather_code&timezone=America%2FTegucigalpa";
-const PAYPAL_CLIENT_ID = (document.querySelector('meta[name="paypal-client-id"]')?.content || "").trim();
-const PAYPAL_CURRENCY = (document.querySelector('meta[name="paypal-currency"]')?.content || "USD").trim().toUpperCase();
-
-let paypalSdkPromise = null;
 let isSubmittingOrder = false;
 
 function read(key, fallback) {
@@ -409,6 +386,38 @@ function money(v) {
     currency: "HNL",
     minimumFractionDigits: 2
   }).format(Number(v || 0));
+}
+
+function meaningfulText(value) {
+  const text = String(value || "").trim();
+  return text && text !== "[object Object]" ? text : "";
+}
+
+function orderItemTitle(item) {
+  const title = item?.title;
+  const candidates = [
+    title && typeof title === "object" ? title[lang] : "",
+    title && typeof title === "object" ? title.es : "",
+    title && typeof title === "object" ? title.en : "",
+    typeof title === "string" ? title : "",
+    item?.name
+  ];
+  for (const candidate of candidates) {
+    const text = meaningfulText(candidate);
+    if (text) return text;
+  }
+  const source = menuItemForOrderItem(item);
+  return source?.title?.[lang] || source?.title?.es || source?.title?.en || "Item";
+}
+
+function menuItemForOrderItem(item) {
+  const byId = menuItems.find((menuItem) => menuItem.id === item?.id || menuItem.id === item?.menu_item_id);
+  if (byId) return byId;
+
+  const price = Number(item?.price || item?.unit_price || 0);
+  if (!price) return null;
+  const samePrice = menuItems.filter((menuItem) => Number(menuItem.price) === price);
+  return samePrice.length === 1 ? samePrice[0] : null;
 }
 
 function escapeHtml(value) {
@@ -472,18 +481,12 @@ function buildPrintableOrderHtml(order) {
   const customerName = escapeHtml(order.customer?.name || "Consumidor final");
   const customerPhone = escapeHtml(order.customer?.phone || "-");
   const comments = escapeHtml(order.customer?.comments || "-");
-  const paymentState = order.payment?.status === "paid"
-    ? (lang === "es" ? "Pagada" : "Paid")
-    : (lang === "es" ? "Pendiente" : "Pending");
-  const paymentTerms = order.payment?.status === "paid"
-    ? (lang === "es" ? "Contado" : "Paid in full")
-    : (lang === "es" ? "Pendiente" : "Pending");
   const statusText = escapeHtml(statusLabel(order.status));
   const amountInWords = escapeHtml(amountToWordsEs(order.total).toUpperCase());
   const logoUrl = new URL("assets/casa-brava-logo.jpg", window.location.href).href;
   const itemRows = (order.items || [])
     .map((item) => {
-      const title = escapeHtml(item.title?.[lang] || item.title?.es || item.title?.en || "Item");
+      const title = escapeHtml(orderItemTitle(item));
       const qty = Number(item.qty || 0);
       const unitPrice = Number(item.price || 0);
       const lineTotal = qty * unitPrice;
@@ -596,8 +599,6 @@ function buildPrintableOrderHtml(order) {
           <strong>${lang === "es" ? "CLIENTE" : "CUSTOMER"}: ${customerName}</strong>
         </div>
         <div class="section">
-          <p><strong>${lang === "es" ? "TERMINOS" : "TERMS"}:</strong> ${escapeHtml(paymentTerms)}</p>
-          <p><strong>${lang === "es" ? "ESTADO" : "STATUS"}:</strong> ${escapeHtml(paymentState)}</p>
           <p><strong>${lang === "es" ? "PEDIDO" : "ORDER"}:</strong> ${statusText}</p>
           <p><strong>${lang === "es" ? "COMENTARIOS" : "COMMENTS"}:</strong> ${comments}</p>
         </div>
@@ -607,10 +608,8 @@ function buildPrintableOrderHtml(order) {
         <div class="summary">
           <div class="summary-row"><span>${lang === "es" ? "DESCUENTO" : "DISCOUNT"}</span><span>${escapeHtml(money(0))}</span></div>
           <div class="summary-row"><span>${lang === "es" ? "IMPORTE GRAVADO" : "TAXABLE AMOUNT"}</span><span>${escapeHtml(money(order.total))}</span></div>
-          <div class="summary-row total"><strong>${lang === "es" ? "TOTAL A PAGAR" : "TOTAL DUE"}</strong><strong>${escapeHtml(money(order.total))}</strong></div>
+          <div class="summary-row total"><strong>${lang === "es" ? "TOTAL" : "TOTAL"}</strong><strong>${escapeHtml(money(order.total))}</strong></div>
           <div class="amount-words">${amountInWords}</div>
-          <div class="summary-row"><span>${lang === "es" ? "PAGO" : "PAYMENT"}</span><span>${escapeHtml(money(order.total))}</span></div>
-          <div class="summary-row"><span>${lang === "es" ? "CAMBIO" : "CHANGE"}</span><span>${escapeHtml(money(0))}</span></div>
         </div>
         <p class="thanks">${lang === "es" ? "MUCHAS GRACIAS, TE ESPERAMOS PRONTO" : "THANK YOU, SEE YOU SOON"}</p>
       </div>
@@ -758,12 +757,6 @@ function statusLabel(status) {
   return t(`status_${status}`) || status;
 }
 
-function trackerPaymentMethodLabel(method) {
-  if (method === "bank_transfer") return t("trackerMethodTransfer");
-  if (method === "card" || method === "paypal" || method === "online") return t("trackerMethodCard");
-  return t("trackerMethodCash");
-}
-
 function applyI18n() {
   document.documentElement.lang = lang;
   langToggle.textContent = lang === "es" ? "EN" : "ES";
@@ -795,19 +788,104 @@ function itemImage(item) {
   return item.image || categoryImageMap[item.category] || "assets/food.svg";
 }
 
+function normalizeTextForTranslation(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function translateVisibleNoteToEnglish(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+
+  const phrase = normalizeTextForTranslation(text).replace(/[.!?]+$/g, "");
+  const phrases = {
+    "sin gluten": "Gluten-free",
+    "sin lactosa": "Lactose-free",
+    "sin azucar": "Sugar-free",
+    "bajo en azucar": "Low in sugar",
+    "vegetariano": "Vegetarian",
+    "vegano": "Vegan",
+    "picante": "Spicy",
+    "muy picante": "Very spicy",
+    "poco picante": "Mildly spicy",
+    "recomendado": "Recommended",
+    "favorito de la casa": "House favorite",
+    "nuevo": "New",
+    "producto nuevo": "New item",
+    "especial de la casa": "House special",
+    "preparado al momento": "Prepared fresh",
+    "hecho al momento": "Made fresh",
+    "ideal para compartir": "Great for sharing",
+    "perfecto para compartir": "Perfect for sharing",
+    "por tiempo limitado": "Limited time only",
+    "disponible por tiempo limitado": "Available for a limited time",
+    "acompanado de papas": "Served with fries",
+    "acompanado con papas": "Served with fries",
+    "incluye bebida": "Includes a drink"
+  };
+  if (phrases[phrase]) return phrases[phrase];
+
+  const replacements = [
+    [/\bsin\b/gi, "without"],
+    [/\bcon\b/gi, "with"],
+    [/\by\b/gi, "and"],
+    [/\bo\b/gi, "or"],
+    [/\bde la casa\b/gi, "house"],
+    [/\bcasero\b/gi, "homemade"],
+    [/\bcasera\b/gi, "homemade"],
+    [/\bfresco\b/gi, "fresh"],
+    [/\bfresca\b/gi, "fresh"],
+    [/\bnatural\b/gi, "natural"],
+    [/\bpicante\b/gi, "spicy"],
+    [/\bsuave\b/gi, "mild"],
+    [/\bdulce\b/gi, "sweet"],
+    [/\bcrujiente\b/gi, "crispy"],
+    [/\bcremoso\b/gi, "creamy"],
+    [/\bcremosa\b/gi, "creamy"],
+    [/\bartesanal\b/gi, "artisanal"],
+    [/\brecomendado\b/gi, "recommended"],
+    [/\brecomendada\b/gi, "recommended"],
+    [/\bnuevo\b/gi, "new"],
+    [/\bnueva\b/gi, "new"],
+    [/\bespecial\b/gi, "special"],
+    [/\bpollo\b/gi, "chicken"],
+    [/\bres\b/gi, "beef"],
+    [/\bcerdo\b/gi, "pork"],
+    [/\bpescado\b/gi, "fish"],
+    [/\bmariscos\b/gi, "seafood"],
+    [/\bqueso\b/gi, "cheese"],
+    [/\bpapas\b/gi, "fries"],
+    [/\bensalada\b/gi, "salad"],
+    [/\bsalsa\b/gi, "sauce"],
+    [/\blimon\b/gi, "lime"],
+    [/\blimón\b/gi, "lime"]
+  ];
+
+  let translated = text;
+  replacements.forEach(([pattern, replacement]) => {
+    translated = translated.replace(pattern, replacement);
+  });
+  return translated.trim();
+}
+
 function applyMenuSettings(settings) {
   const overrides = settings?.items && typeof settings.items === "object" ? settings.items : {};
   menuItems.splice(0, menuItems.length, ...BASE_MENU_ITEMS.map((baseItem) => {
     const override = overrides[baseItem.id] || {};
     const price = Number(override.price);
     const note = override.note && typeof override.note === "object" ? override.note : {};
+    const noteEs = String(note.es || note.en || "").trim();
     return {
       ...baseItem,
       title: { ...baseItem.title },
       price: Number.isFinite(price) && price >= 0 ? price : baseItem.price,
       note: {
-        es: String(note.es || "").trim(),
-        en: String(note.en || "").trim()
+        es: noteEs,
+        en: translateVisibleNoteToEnglish(noteEs)
       },
       isNew: Boolean(override.isNew)
     };
@@ -833,16 +911,13 @@ function syncCartWithMenu() {
   if (changed) write(STORAGE.cart, cart);
 }
 
-async function refreshMenuSettings() {
-  try {
-    const settings = await loadMenuSettings();
+function startMenuSettingsSync() {
+  return listenMenuSettings((settings) => {
     applyMenuSettings(settings);
     syncCartWithMenu();
-  } catch (_error) {
-    applyMenuSettings({ items: {} });
-  }
-  renderMenu();
-  renderCart();
+    renderMenu();
+    renderCart();
+  });
 }
 
 function renderMenu() {
@@ -876,17 +951,43 @@ function closeDrawer() {
   drawer.classList.remove("open");
   drawer.setAttribute("aria-hidden", "true");
   overlay.classList.add("hidden");
-  pendingCheckoutAction = null;
   closePickupDetailsModal();
   closeInvoiceDetailsModal();
-  closePaymentChoiceModal();
-  closePaypalPaymentModal();
+  hideOrderViewPrompt();
+}
+
+function selectedOrderFulfillment() {
+  return orderFulfillmentSelect?.value || document.querySelector('input[name="orderFulfillment"]:checked')?.value || "dine_in";
+}
+
+function setOrderFulfillment(value = "dine_in") {
+  if (orderFulfillmentSelect) orderFulfillmentSelect.value = value;
+  const field = document.querySelector(`input[name="orderFulfillment"][value="${value}"]`);
+  if (field) field.checked = true;
+  syncOrderTypeFields();
+}
+
+function needsOrderDetailsStep() {
+  return ["takeaway", "delivery"].includes(selectedOrderFulfillment());
+}
+
+function syncOrderTypeFields() {
+  const isDineIn = selectedOrderFulfillment() === "dine_in";
+  orderTableGroup?.classList.toggle("hidden", !isDineIn);
+  if (!isDineIn && orderTableNumberInput) orderTableNumberInput.value = "";
+  if (deliveryAddressGroup) {
+    deliveryAddressGroup.classList.toggle("hidden", selectedOrderFulfillment() !== "delivery");
+  }
 }
 
 function openPickupDetailsModal() {
+  const fulfillment = selectedOrderFulfillment();
+  const isDelivery = fulfillment === "delivery";
   if (pickupPhoneInput) {
-    pickupPhoneInput.value = "";
+    pickupPhoneInput.value = localStorage.getItem(STORAGE.lastPickupPhone) || "";
   }
+  if (deliveryAddressGroup) deliveryAddressGroup.classList.toggle("hidden", !isDelivery);
+  if (deliveryAddressInput && !isDelivery) deliveryAddressInput.value = "";
   pickupDetailsModal?.classList.remove("hidden");
 }
 
@@ -900,37 +1001,24 @@ function applyPickupPhoneFromModal() {
     showToast(t("needPickupPhone"));
     return false;
   }
+  if (selectedOrderFulfillment() === "delivery" && !String(deliveryAddressInput?.value || "").trim()) {
+    showToast(t("needDeliveryAddress"));
+    return false;
+  }
   const mainPhoneInput = document.getElementById("orderCustomerPhone");
   if (mainPhoneInput) mainPhoneInput.value = phoneValue;
   localStorage.setItem(STORAGE.lastPickupPhone, phoneValue);
   return true;
 }
 
-async function proceedWithCheckoutAction(action) {
-  pendingCheckoutAction = null;
-  if (action === "cash") {
-    const sent = await submitOrderWithMode("cash_on_pickup", {}, { showConfirmation: false });
-    if (sent) showCenterNotice(t("paymentCashSent"), 4200);
-    return;
-  }
-  if (action === "card") {
-    const customer = validateCustomerForOrder({ requireInvoiceDetails: false });
-    paypalBackTarget = customer?.needsInvoice ? "invoiceDetails" : "paymentChoice";
-    showToast(t("paypalInstructions"), { duration: 2600 });
-    openPaypalPaymentModal();
-    renderPayPalButtons();
-  }
+async function sendCurrentOrderToKitchen(options = {}) {
+  const sent = await submitOrderToKitchen({ showConfirmation: false, ...options });
+  if (sent) showCenterNotice(t("orderSentNotice"), 4200);
 }
 
 function openInvoiceDetailsModal() {
-  const isPickup = Boolean(document.getElementById("orderPickup")?.checked);
-  if (invoicePhoneGroup) invoicePhoneGroup.classList.toggle("hidden", !isPickup);
-  if (invoicePayNowBtn) invoicePayNowBtn.classList.remove("hidden");
-  if (invoicePayCashBtn) invoicePayCashBtn.classList.remove("hidden");
-  if (invoiceDetailsContinueBtn) invoiceDetailsContinueBtn.classList.add("hidden");
-  if (isPickup && invoicePickupPhoneInput) {
-    invoicePickupPhoneInput.value = "";
-  }
+  if (invoicePhoneGroup) invoicePhoneGroup.classList.add("hidden");
+  if (invoicePickupPhoneInput) invoicePickupPhoneInput.value = "";
   invoiceDetailsModal?.classList.remove("hidden");
 }
 
@@ -939,48 +1027,15 @@ function closeInvoiceDetailsModal() {
 }
 
 function syncInvoicePickupPhone() {
-  const isPickup = Boolean(document.getElementById("orderPickup")?.checked);
-  if (!isPickup) return true;
-  const phoneValue = (invoicePickupPhoneInput?.value || "").trim();
-  if (!phoneValue) {
-    showToast(t("needPickupPhone"));
-    return false;
-  }
-  if (pickupPhoneInput) pickupPhoneInput.value = phoneValue;
-  localStorage.setItem(STORAGE.lastPickupPhone, phoneValue);
   return true;
 }
 
-async function handleInvoiceCheckout(action) {
-  pendingCheckoutAction = action;
+async function handleInvoiceCheckout() {
   if (!syncInvoicePickupPhone()) return;
   const customer = validateCustomerForOrder({ requireInvoiceDetails: true });
   if (!customer) return;
   closeInvoiceDetailsModal();
-  await proceedWithCheckoutAction(action);
-}
-
-function openPaymentChoiceModal() {
-  paymentChoiceModal?.classList.remove("hidden");
-}
-
-function closePaymentChoiceModal() {
-  paymentChoiceModal?.classList.add("hidden");
-}
-
-function openPaypalPaymentModal() {
-  if (paypalPaymentTotal) {
-    const total = cart.reduce((sum, row) => sum + row.qty * row.price, 0);
-    paypalPaymentTotal.textContent = money(total);
-  }
-  paypalPaymentModal?.classList.remove("hidden");
-}
-
-function closePaypalPaymentModal() {
-  paypalPaymentModal?.classList.add("hidden");
-  if (paypalButtonsContainer) paypalButtonsContainer.innerHTML = "";
-  if (cardFallbackForm) cardFallbackForm.reset();
-  paypalBackTarget = "paymentChoice";
+  await sendCurrentOrderToKitchen();
 }
 
 function animateAddToCart(sourceEl, message) {
@@ -1011,6 +1066,29 @@ function showCenterNotice(message, duration = 2200) {
   showToast(message, { duration, center: true, highlight: true });
 }
 
+function showOrderViewPrompt(orderId) {
+  if (!orderId || !orderViewPrompt) return;
+  latestSubmittedOrderId = orderId;
+  orderViewPrompt.classList.remove("hidden");
+}
+
+function hideOrderViewPrompt() {
+  orderViewPrompt?.classList.add("hidden");
+}
+
+function viewSubmittedOrder(orderId = latestSubmittedOrderId) {
+  if (!orderId) return;
+  const order = trackerOrderById.get(orderId);
+  hideOrderViewPrompt();
+  if (order) {
+    tracker?.scrollIntoView({ behavior: "smooth", block: "center" });
+    requestAnimationFrame(() => openTrackerOrderModal(orderId));
+    return;
+  }
+  pendingPromptOrderId = orderId;
+  showToast(t("orderLoading"), { duration: 1600, highlight: true });
+}
+
 async function activateOrderNotifications(orderId, customerPhone) {
   if (!orderId) return false;
   try {
@@ -1029,13 +1107,8 @@ async function activateOrderNotifications(orderId, customerPhone) {
 function setCheckoutBusy(isBusy) {
   [
     sendToKitchenBtn,
-    choosePayCashBtn,
-    choosePayNowBtn,
-    pickupPayCashBtn,
-    pickupPayNowBtn,
-    invoicePayCashBtn,
-    invoicePayNowBtn,
-    cardFallbackForm?.querySelector('button[type="submit"]')
+    pickupSendKitchenBtn,
+    invoiceDetailsContinueBtn
   ].filter(Boolean).forEach((button) => {
     button.disabled = isBusy;
     button.classList.toggle("is-busy", isBusy);
@@ -1229,17 +1302,12 @@ function renderTracker() {
   tracker.innerHTML = orders
     .map((order) => {
       const createdAt = asDate(order.createdAt) || new Date();
-      const isPaid = order.payment?.status === "paid";
-      const isToGo = Boolean(order.customer?.pickup);
-      const customerPaymentLine = isPaid
-        ? (isToGo ? `${t("orderPickupLabel")} | ${t("trackerPaymentProcessed")}` : t("trackerPaymentProcessed"))
-        : (isToGo ? `${t("orderPickupLabel")} | ${t("trackerPayAtCashier")}` : t("trackerPayAtCashier"));
+      const orderTypeLine = orderFulfillmentLabel(order);
       return `
         <div class="tracker-row">
           <strong>${t("trackerLabel")}: #${order.displayId || order.id.slice(0, 6)}</strong>
           <p>${order.customer?.name || ""} | ${createdAt.toLocaleString(lang === "es" ? "es-ES" : "en-US")}</p>
-          <p><strong>${customerPaymentLine}</strong></p>
-          <p><strong>${t("trackerPaymentMethod")}:</strong> ${escapeHtml(trackerPaymentMethodLabel(order.payment?.method))}</p>
+          <p><strong>${t("trackerOrderType")}:</strong> ${escapeHtml(orderTypeLine)}</p>
           <div class="tracker-status-row">
             <p><strong>${statusLabel(order.status)}</strong></p>
             <button class="btn btn-outline tracker-view-order" data-id="${order.id}">${t("trackerView")}</button>
@@ -1258,12 +1326,13 @@ function openTrackerOrderModal(orderId) {
   trackerOrderModalBody.innerHTML = `
     <p><strong>${t("trackerCustomer")}:</strong> ${escapeHtml(order.customer?.name || "")}</p>
     <p><strong>${t("trackerDate")}:</strong> ${escapeHtml((asDate(order.createdAt) || new Date()).toLocaleString(lang === "es" ? "es-ES" : "en-US"))}</p>
-    <p><strong>${t("trackerPaymentMethod")}:</strong> ${escapeHtml(order.payment?.status === "paid" ? t("trackerPaymentProcessed") : t("trackerPayAtCashier"))}</p>
+    <p><strong>${t("trackerOrderType")}:</strong> ${escapeHtml(orderFulfillmentLabel(order))}</p>
+    ${orderDeliveryAddressLine(order)}
     <p><strong>${t("trackerStatus")}:</strong> ${escapeHtml(statusLabel(order.status))}</p>
     <p><strong>${t("trackerItems")}:</strong></p>
     <ul>
       ${(order.items || [])
-        .map((item) => `<li>${escapeHtml(item.title?.[lang] || item.title?.es || item.title?.en || "Item")} x ${Number(item.qty || 0)} (${escapeHtml(money(item.price))})</li>`)
+        .map((item) => `<li>${escapeHtml(orderItemTitle(item))} x ${Number(item.qty || 0)} (${escapeHtml(money(item.price))})</li>`)
         .join("")}
     </ul>
     <p><strong>${t("trackerTotal")}:</strong> ${escapeHtml(money(order.total))}</p>
@@ -1287,6 +1356,10 @@ function subscribeTrackerOrder(orderId) {
       trackerOrderById.set(orderId, order);
       scheduleAcceptedTrackerClear(order);
       renderTracker();
+      if (pendingPromptOrderId === orderId) {
+        pendingPromptOrderId = "";
+        viewSubmittedOrder(orderId);
+      }
       openLinkedTrackerOrderIfReady(orderId);
     },
     () => {
@@ -1313,65 +1386,41 @@ function addRecentOrderId(orderId) {
   syncTrackerSubscriptions();
 }
 
-function buildPaymentDetails(mode, paymentMeta = {}) {
-  if (mode === "paypal_paid") {
-    return {
-      method: "paypal",
-      status: "paid",
-      provider: "paypal",
-      checkoutUrl: "",
-      cardLast4: "",
-      transactionId: paymentMeta.transactionId || "",
-      paypalOrderId: paymentMeta.paypalOrderId || ""
-    };
-  }
-  if (mode === "card_paid") {
-    return {
-      method: "card",
-      status: "paid",
-      provider: "manual_card_entry",
-      checkoutUrl: "",
-      cardLast4: paymentMeta.cardLast4 || "",
-      transactionId: paymentMeta.transactionId || "",
-      paypalOrderId: ""
-    };
-  }
+function orderFulfillmentLabel(order) {
+  const type = String(order?.order_type || order?.orderType || "").trim();
+  if (type === "delivery" || order?.customer?.delivery) return t("trackerDelivery");
+  if (type === "takeaway" || order?.customer?.pickup) return t("trackerToGo");
+  return t("trackerDineIn");
+}
+
+function orderDeliveryAddressLine(order) {
+  const type = String(order?.order_type || order?.orderType || "").trim();
+  const isDelivery = type === "delivery" || order?.customer?.delivery;
+  const address = String(order?.customer?.deliveryAddress || "").trim();
+  return isDelivery && address ? `<p><strong>${t("deliveryAddressLabel")}:</strong> ${escapeHtml(address)}</p>` : "";
+}
+
+function buildOrderProcessingDetails() {
   return {
-    method: "cash_on_pickup",
+    method: "in_store",
     status: "unpaid",
-    provider: "in_store",
-    checkoutUrl: "",
-    cardLast4: "",
-    transactionId: "",
-    paypalOrderId: ""
+    provider: "in_store"
   };
-}
-
-function normalizeCardNumber(value) {
-  return String(value || "").replace(/\D/g, "");
-}
-
-function validateCardForm() {
-  const cardName = (cardNameInput?.value || "").trim();
-  const cardNumber = normalizeCardNumber(cardNumberInput?.value || "");
-  const cardExpiry = (cardExpiryInput?.value || "").trim();
-  const cardCvv = String(cardCvvInput?.value || "").trim();
-  const validExpiry = /^(0[1-9]|1[0-2])\/\d{2}$/.test(cardExpiry);
-  const validNumber = cardNumber.length >= 13 && cardNumber.length <= 19;
-  const validCvv = /^\d{3,4}$/.test(cardCvv);
-  if (!cardName || !validNumber || !validExpiry || !validCvv) return null;
-  return { cardLast4: cardNumber.slice(-4) };
 }
 
 function validateCustomerForOrder(options = {}) {
   const { requireInvoiceDetails = true } = options;
   const customerName = (document.getElementById("orderCustomerName").value || "").trim();
   const customerComments = (document.getElementById("orderCustomerComments")?.value || "").trim();
-  const customerPickup = Boolean(document.getElementById("orderPickup")?.checked);
+  const fulfillment = selectedOrderFulfillment();
+  const customerPickup = fulfillment === "takeaway";
+  const customerDelivery = fulfillment === "delivery";
+  const tableNumber = fulfillment === "dine_in" ? (orderTableNumberInput?.value || "").trim() : "";
+  const deliveryAddress = (deliveryAddressInput?.value || "").trim();
   const customerPhone = (
     document.getElementById("orderCustomerPhone")?.value ||
-    (customerPickup ? pickupPhoneInput?.value : "") ||
-    (customerPickup ? localStorage.getItem(STORAGE.lastPickupPhone) : "") ||
+    (needsOrderDetailsStep() ? pickupPhoneInput?.value : "") ||
+    (needsOrderDetailsStep() ? localStorage.getItem(STORAGE.lastPickupPhone) : "") ||
     ""
   ).trim();
   const needsInvoice = Boolean(document.getElementById("orderNeedInvoice")?.checked);
@@ -1379,6 +1428,14 @@ function validateCustomerForOrder(options = {}) {
   const businessRTN = (document.getElementById("orderBusinessRTN")?.value || "").trim();
   if (!customerName) {
     showToast(t("needCustomer"));
+    return null;
+  }
+  if (fulfillment === "dine_in" && !tableNumber) {
+    showToast(t("needTableNumber"));
+    return null;
+  }
+  if (customerDelivery && requireInvoiceDetails && !deliveryAddress) {
+    showToast(t("needDeliveryAddress"));
     return null;
   }
   if (requireInvoiceDetails && needsInvoice && (!businessName || !businessRTN)) {
@@ -1389,91 +1446,18 @@ function validateCustomerForOrder(options = {}) {
     customerName,
     customerPhone,
     customerComments,
+    fulfillment,
+    tableNumber,
     customerPickup,
+    customerDelivery,
+    deliveryAddress,
     needsInvoice,
     businessName,
     businessRTN
   };
 }
 
-function loadPayPalSdk() {
-  if (!PAYPAL_CLIENT_ID) return Promise.reject(new Error("paypal_not_configured"));
-  if (window.paypal) return Promise.resolve(window.paypal);
-  if (paypalSdkPromise) return paypalSdkPromise;
-
-  paypalSdkPromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector('script[data-paypal-sdk="true"]');
-    if (existing) {
-      existing.addEventListener("load", () => resolve(window.paypal));
-      existing.addEventListener("error", () => reject(new Error("paypal_sdk_load_error")));
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(PAYPAL_CLIENT_ID)}&currency=${encodeURIComponent(PAYPAL_CURRENCY)}&intent=capture`;
-    script.async = true;
-    script.dataset.paypalSdk = "true";
-    script.addEventListener("load", () => resolve(window.paypal));
-    script.addEventListener("error", () => reject(new Error("paypal_sdk_load_error")));
-    document.head.appendChild(script);
-  });
-
-  return paypalSdkPromise;
-}
-
-async function renderPayPalButtons() {
-  const customer = validateCustomerForOrder();
-  if (!customer) return;
-  if (!paypalButtonsContainer) return;
-  if (cardFallbackForm) cardFallbackForm.classList.remove("hidden");
-  const total = cart.reduce((sum, row) => sum + row.qty * row.price, 0);
-  if (!total) return;
-
-  paypalButtonsContainer.innerHTML = "";
-  try {
-    const paypal = await loadPayPalSdk();
-    if (!paypal || !paypal.Buttons) throw new Error("paypal_sdk_unavailable");
-    paypal
-      .Buttons({
-        style: {
-          layout: "vertical",
-          color: "gold",
-          shape: "rect",
-          label: "pay"
-        },
-        createOrder: (_data, actions) =>
-          actions.order.create({
-            purchase_units: [
-              {
-                amount: {
-                  currency_code: PAYPAL_CURRENCY,
-                  value: total.toFixed(2)
-                }
-              }
-            ]
-          }),
-        onApprove: async (data, actions) => {
-          const capture = await actions.order.capture();
-          const transactionId = capture?.purchase_units?.[0]?.payments?.captures?.[0]?.id || "";
-          const paid = await submitOrderWithMode(
-            "paypal_paid",
-            { transactionId, paypalOrderId: data?.orderID || "" },
-            { showConfirmation: false }
-          );
-          if (paid) showCenterNotice(t("paymentCardSent"));
-        },
-        onError: () => {
-          showToast(t("paypalPaymentError"));
-        },
-        onCancel: () => {}
-      })
-      .render("#paypalButtonsContainer");
-  } catch (error) {
-    const missingConfig = error.message === "paypal_not_configured";
-    showToast(missingConfig ? t("paypalNotConfigured") : t("paypalLoadError"));
-  }
-}
-
-async function submitOrderWithMode(mode, paymentMeta = {}, options = {}) {
+async function submitOrderToKitchen(options = {}) {
   const { showConfirmation = true } = options;
   if (!cart.length) return false;
   if (isSubmittingOrder) return false;
@@ -1484,15 +1468,19 @@ async function submitOrderWithMode(mode, paymentMeta = {}, options = {}) {
 
   const orderPayload = {
     language: lang,
+    order_type: customer.fulfillment,
     customer: {
       name: customer.customerName,
       phone: customer.customerPhone,
+      table: customer.tableNumber,
       comments: customer.customerComments,
-      pickup: customer.customerPickup
+      pickup: customer.customerPickup,
+      delivery: customer.customerDelivery,
+      deliveryAddress: customer.deliveryAddress
     },
     items: cart,
     total: cart.reduce((sum, row) => sum + row.qty * row.price, 0),
-    payment: buildPaymentDetails(mode, paymentMeta),
+    payment: buildOrderProcessingDetails(),
     invoice: customer.needsInvoice
       ? {
           billingName: customer.businessName,
@@ -1508,7 +1496,7 @@ async function submitOrderWithMode(mode, paymentMeta = {}, options = {}) {
 
   try {
     const orderId = await withSlowBusyScreen(t("orderSubmitting"), () => addOrder(orderPayload));
-    finishSuccessfulOrder(orderId, mode, showConfirmation, customer.customerPhone);
+    finishSuccessfulOrder(orderId, showConfirmation, customer.customerPhone);
     return true;
   } catch (_e) {
     showToast(t("orderError"));
@@ -1519,15 +1507,19 @@ async function submitOrderWithMode(mode, paymentMeta = {}, options = {}) {
   }
 }
 
-function finishSuccessfulOrder(orderId, mode, showConfirmation, customerPhone) {
+function finishSuccessfulOrder(orderId, showConfirmation, customerPhone) {
   addRecentOrderId(orderId);
+  latestSubmittedOrderId = orderId;
   cart = [];
   write(STORAGE.cart, cart);
   renderCart();
   const commentsField = document.getElementById("orderCustomerComments");
   if (commentsField) commentsField.value = "";
-  const pickupField = document.getElementById("orderPickup");
-  if (pickupField) pickupField.checked = false;
+  setOrderFulfillment("dine_in");
+  if (orderTableNumberInput) orderTableNumberInput.value = "";
+  if (pickupPhoneInput) pickupPhoneInput.value = "";
+  if (deliveryAddressInput) deliveryAddressInput.value = "";
+  if (deliveryAddressGroup) deliveryAddressGroup.classList.add("hidden");
   const needInvoiceField = document.getElementById("orderNeedInvoice");
   if (needInvoiceField) needInvoiceField.checked = false;
   const businessNameField = document.getElementById("orderBusinessName");
@@ -1536,12 +1528,13 @@ function finishSuccessfulOrder(orderId, mode, showConfirmation, customerPhone) {
   if (businessRTNField) businessRTNField.value = "";
   const invoiceFieldsBox = document.getElementById("orderInvoiceFields");
   if (invoiceFieldsBox) invoiceFieldsBox.classList.add("hidden");
-  closePaypalPaymentModal();
-  closePaymentChoiceModal();
   closeDrawer();
   if (showConfirmation) {
-    showCenterNotice(mode === "paypal_paid" || mode === "card_paid" ? t("paymentCardSent") : t("paymentCashSent"));
+    showCenterNotice(t("orderSentNotice"));
   }
+  window.setTimeout(() => {
+    if (latestSubmittedOrderId === orderId) showOrderViewPrompt(orderId);
+  }, 900);
   activateOrderNotifications(orderId, customerPhone);
 }
 
@@ -1659,11 +1652,7 @@ sendToKitchenBtn.addEventListener("click", () => {
   if (!cart.length) return;
   const customer = validateCustomerForOrder({ requireInvoiceDetails: false });
   if (!customer) return;
-  if (customer.customerPickup && customer.needsInvoice) {
-    openInvoiceDetailsModal();
-    return;
-  }
-  if (customer.customerPickup) {
+  if (needsOrderDetailsStep()) {
     openPickupDetailsModal();
     return;
   }
@@ -1671,73 +1660,39 @@ sendToKitchenBtn.addEventListener("click", () => {
     openInvoiceDetailsModal();
     return;
   }
-  openPaymentChoiceModal();
+  sendCurrentOrderToKitchen();
 });
 closePickupDetailsBtn?.addEventListener("click", () => {
-  const pickupField = document.getElementById("orderPickup");
-  if (pickupField) pickupField.checked = false;
-  pendingCheckoutAction = null;
+  setOrderFulfillment("dine_in");
   closePickupDetailsModal();
 });
 pickupDetailsBackBtn?.addEventListener("click", () => {
-  const pickupField = document.getElementById("orderPickup");
-  if (pickupField) pickupField.checked = false;
-  pendingCheckoutAction = null;
+  setOrderFulfillment("dine_in");
   closePickupDetailsModal();
 });
-async function handlePickupCheckout(action) {
+async function handlePickupCheckout() {
   if (!applyPickupPhoneFromModal()) return;
   closePickupDetailsModal();
   const customer = validateCustomerForOrder({ requireInvoiceDetails: false });
   if (!customer) return;
   if (customer.needsInvoice && (!customer.businessName || !customer.businessRTN)) {
-    pendingCheckoutAction = action;
     openInvoiceDetailsModal();
     return;
   }
-  await proceedWithCheckoutAction(action);
+  await sendCurrentOrderToKitchen();
 }
 
-pickupPayCashBtn?.addEventListener("click", () => {
-  handlePickupCheckout("cash");
-});
-
-pickupPayNowBtn?.addEventListener("click", () => {
-  handlePickupCheckout("card");
+pickupSendKitchenBtn?.addEventListener("click", () => {
+  handlePickupCheckout();
 });
 closeInvoiceDetailsBtn?.addEventListener("click", () => {
-  pendingCheckoutAction = null;
   closeInvoiceDetailsModal();
 });
 invoiceDetailsBackBtn?.addEventListener("click", () => {
-  pendingCheckoutAction = null;
   closeInvoiceDetailsModal();
 });
 invoiceDetailsContinueBtn?.addEventListener("click", () => {
-  if (!syncInvoicePickupPhone()) return;
-  const customer = validateCustomerForOrder({ requireInvoiceDetails: true });
-  if (!customer) return;
-  closeInvoiceDetailsModal();
-  if (pendingCheckoutAction) {
-    proceedWithCheckoutAction(pendingCheckoutAction);
-    return;
-  }
-  openPaymentChoiceModal();
-});
-invoicePayCashBtn?.addEventListener("click", () => {
-  handleInvoiceCheckout("cash");
-});
-invoicePayNowBtn?.addEventListener("click", () => {
-  handleInvoiceCheckout("card");
-});
-closePaymentChoiceBtn?.addEventListener("click", closePaymentChoiceModal);
-choosePayCashBtn?.addEventListener("click", async () => {
-  closePaymentChoiceModal();
-  await proceedWithCheckoutAction("cash");
-});
-choosePayNowBtn?.addEventListener("click", () => {
-  closePaymentChoiceModal();
-  proceedWithCheckoutAction("card");
+  handleInvoiceCheckout();
 });
 orderNeedInvoiceCheckbox?.addEventListener("change", () => {
   if (orderNeedInvoiceCheckbox.checked) return;
@@ -1747,36 +1702,34 @@ orderNeedInvoiceCheckbox?.addEventListener("change", () => {
   if (businessRTNField) businessRTNField.value = "";
   closeInvoiceDetailsModal();
 });
-document.getElementById("orderPickup")?.addEventListener("change", (event) => {
-  if (!event.target.checked) {
-    pendingCheckoutAction = null;
-    closePickupDetailsModal();
-    return;
-  }
+orderFulfillmentSelect?.addEventListener("change", () => {
+  if (selectedOrderFulfillment() === "dine_in") closePickupDetailsModal();
+  syncOrderTypeFields();
+});
+document.querySelectorAll('input[name="orderFulfillment"]').forEach((field) => {
+  field.addEventListener("change", () => {
+    if (selectedOrderFulfillment() === "dine_in") closePickupDetailsModal();
+    syncOrderTypeFields();
+  });
 });
 pickupDetailsModal?.addEventListener("click", (event) => {
   if (event.target === pickupDetailsModal) {
-    const pickupField = document.getElementById("orderPickup");
-    if (pickupField) pickupField.checked = false;
-    pendingCheckoutAction = null;
+    setOrderFulfillment("dine_in");
     closePickupDetailsModal();
   }
 });
 invoiceDetailsModal?.addEventListener("click", (event) => {
   if (event.target === invoiceDetailsModal) {
-    pendingCheckoutAction = null;
     closeInvoiceDetailsModal();
   }
 });
-closePaypalPaymentBtn?.addEventListener("click", closePaypalPaymentModal);
-cardPaymentBackBtn?.addEventListener("click", () => {
-  const nextStep = paypalBackTarget;
-  closePaypalPaymentModal();
-  if (nextStep === "invoiceDetails") {
-    openInvoiceDetailsModal();
-    return;
-  }
-  openPaymentChoiceModal();
+closeOrderViewPromptBtn?.addEventListener("click", hideOrderViewPrompt);
+viewOrderPromptNoBtn?.addEventListener("click", hideOrderViewPrompt);
+viewOrderPromptYesBtn?.addEventListener("click", () => {
+  viewSubmittedOrder();
+});
+orderViewPrompt?.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") hideOrderViewPrompt();
 });
 closeTrackerOrderModal?.addEventListener("click", closeTrackerModal);
 trackerOrderModal?.addEventListener("click", (event) => {
@@ -1794,22 +1747,6 @@ tracker?.addEventListener("click", (event) => {
   const order = trackerOrderById.get(notificationButton.dataset.id);
   activateOrderNotifications(notificationButton.dataset.id, order?.customer?.phone);
 });
-if (cardFallbackForm) {
-  cardFallbackForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const card = validateCardForm();
-    if (!card) {
-      showToast(t("invalidCardData"));
-      return;
-    }
-    const paid = await submitOrderWithMode(
-      "card_paid",
-      { cardLast4: card.cardLast4, transactionId: `manual_${Date.now()}` },
-      { showConfirmation: false }
-    );
-    if (paid) showCenterNotice(t("paymentCardSent"));
-  });
-}
 reservationForm.addEventListener("submit", submitReservation);
 
 recentOrderIds = readRecentOrderIds();
@@ -1822,6 +1759,7 @@ if (!recentOrderIds.length) {
 }
 if (pendingLinkedOrderId) addRecentOrderId(pendingLinkedOrderId);
 syncTrackerSubscriptions();
+syncOrderTypeFields();
 applyI18n();
-refreshMenuSettings();
+startMenuSettingsSync();
 startHondurasLiveInfo();

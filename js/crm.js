@@ -17,9 +17,9 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260418e";
+} from "./firebase-config.js?v=20260419b";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
-import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260417a";
+import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 
 if (window.location.search === "?") {
   window.history.replaceState({}, "", `${window.location.pathname}${window.location.hash}`);
@@ -30,37 +30,37 @@ const crmUrlParams = new URLSearchParams(window.location.search);
 const i18n = {
   es: {
     authTitle: "Acceso CRM del personal",
-    authText: "Ingresa con usuario y contrasena para validar rol de representante.",
+    authText: "Ingresa con usuario y contraseña para validar rol de representante.",
     authUserLabel: "Usuario",
-    authPassLabel: "Contrasena",
+    authPassLabel: "Contraseña",
     authButton: "Ingresar",
-    authInvalid: "Usuario o contrasena invalidos.",
+    authInvalid: "Usuario o contraseña inválidos.",
     authUserNotFound: "Usuario no encontrado.",
     authDenied: "Tu usuario no tiene permisos CRM. Contacta al administrador.",
-    authStartupError: "El acceso fue valido, pero el CRM no pudo iniciar correctamente. Intenta de nuevo.",
+    authStartupError: "El acceso fue válido, pero el CRM no pudo iniciar correctamente. Intenta de nuevo.",
     authChecking: "Validando acceso...",
-    authProviderDisabled: "El acceso con usuario y contrasena no esta habilitado. Revisa Supabase Auth.",
-    authUnauthorizedDomain: "Este dominio no esta autorizado para el backend. Revisa WEB_ORIGINS en Vercel.",
-    authNetworkError: "No se pudo conectar con la API. Revisa tu conexion e intenta de nuevo.",
-    authPermissionError: "La API bloqueo la validacion del usuario. Revisa roles y variables privadas.",
-    authSessionExpired: "No se pudo renovar la conexion. El CRM seguira abierto; cierra sesion solo si deseas salir.",
+    authProviderDisabled: "El acceso con usuario y contraseña no está habilitado. Revisa Supabase Auth.",
+    authUnauthorizedDomain: "Este dominio no está autorizado para el backend. Revisa WEB_ORIGINS en Vercel.",
+    authNetworkError: "No se pudo conectar con la API. Revisa tu conexión e intenta de nuevo.",
+    authPermissionError: "La API bloqueó la validación del usuario. Revisa roles y variables privadas.",
+    authSessionExpired: "No se pudo renovar la conexión. El CRM seguirá abierto; cierra sesión solo si deseas salir.",
     kitchenScreen: "Pantalla cocina",
     fiscalSettingsPage: "Ajustes fiscales",
     fiscalModalTitle: "Ajustes fiscales",
-    fiscalModalText: "Completa los datos legales que se imprimen automaticamente en la factura fiscal.",
+    fiscalModalText: "Completa los datos legales que se imprimen automáticamente en la factura fiscal.",
     crmTitle: "Panel de pedidos y reservas",
-    crmSub: "Gestion operacional en tiempo real para representantes.",
-    crmToolsNav: "Configuracion",
-    crmToolsEyebrow: "Configuracion",
+    crmSub: "Gestión operacional en tiempo real para representantes.",
+    crmToolsNav: "Configuración",
+    crmToolsEyebrow: "Configuración",
     crmToolsTitle: "Herramientas del CRM",
-    crmToolsText: "Organiza pedidos internos, menu, facturacion y cocina desde un solo lugar.",
+    crmToolsText: "Organiza pedidos internos, menú, facturación y cocina desde un solo lugar.",
     crmToolsOpen: "Ver opciones",
     crmToolsFiscalText: "Datos legales, CAI, rango autorizado e impuestos.",
     crmToolsKitchenText: "Vista dedicada para que cocina reciba y avance pedidos.",
     crmNotificationsAction: "Activar avisos",
-    crmNotificationsActionText: "Si no aceptaste al entrar, activa aqui los avisos de pedidos y reservas.",
+    crmNotificationsActionText: "Si no aceptaste al entrar, activa aquí los avisos de pedidos y reservas.",
     crmNotificationsAppleTitle: "Aviso para iPhone y iPad",
-    crmNotificationsAppleText: "En Android los avisos funcionan desde Chrome. En iPhone o iPad, abre el CRM en Safari, agregalo a pantalla de inicio y activa los avisos desde ese icono.",
+    crmNotificationsAppleText: "En Android los avisos funcionan desde Chrome. En iPhone o iPad, abre el CRM en Safari, agrégalo a pantalla de inicio y activa los avisos desde ese ícono.",
     viewOrders: "Pedidos",
     viewReservations: "Reservas",
     filterAll: "Todos",
@@ -79,7 +79,7 @@ const i18n = {
     btnRejectShort: "Rechazar",
     btnReopen: "Reabrir",
     btnReactivate: "Reactivar",
-    actionBack: "Atras",
+    actionBack: "Atrás",
     actionNext: "Siguiente",
     btnMarkPaid: "Marcar pagado",
   btnPrint: "Factura normal",
@@ -88,61 +88,68 @@ const i18n = {
     btnSaveInvoice: "Guardar factura",
     review: "Revisar pedido",
     reviewShort: "Detalles",
+    hideOrder: "Eliminar orden",
+    hideOrderConfirmTitle: "Eliminar orden",
+    hideOrderConfirmText: "¿Deseas eliminar esta orden de la vista del CRM?",
+    hideOrderConfirmButton: "Eliminar",
+    cancelButton: "Cancelar",
+    orderHidden: "Orden eliminada de la vista.",
     emptyOrders: "No hay pedidos en este estado.",
     emptyReservations: "No hay reservas registradas.",
     customer: "Cliente",
     orderComments: "Comentarios del pedido",
     invoiceRequestSummary: "Solicita factura con RTN y nombre",
-    orderPickupBadge: "Para llevar",
+    orderPickupBadge: "Recoger",
+    orderDeliveryBadge: "Delivery",
     orderCashierPending: "Pagará en caja",
     orderPaidMessage: "Pago realizado",
     orderUnpaidMessage: "No ha pagado el pedido",
     payment: "Pago",
-    paymentMethod: "Metodo",
+    paymentMethod: "Método",
     paymentMethodSelect: "Forma de pago",
     paymentMethodPlaceholder: "Selecciona forma de pago",
     paymentMethodRequired: "Selecciona una forma de pago antes de entregar el pedido.",
     paymentStatus: "Estado",
     orderStatus: "Estado del pedido",
     invoiceSectionTitle: "Datos de factura",
-    invoiceBillingName: "Nombre de facturacion",
+    invoiceBillingName: "Nombre de facturación",
     invoiceBillingRTN: "RTN del cliente",
-    invoiceNumber: "Numero de factura",
-    invoiceNumberAuto: "Numero asignado automaticamente",
-    invoiceNumberPending: "Se asignara al imprimir",
+    invoiceNumber: "Número de factura",
+    invoiceNumberAuto: "Número asignado automáticamente",
+    invoiceNumberPending: "Se asignará al imprimir",
     invoiceNotes: "Notas fiscales",
-    invoiceHasExoneration: "Cliente con exoneracion",
-    invoiceExemptionRegister: "Registro de exoneracion",
+    invoiceHasExoneration: "Cliente con exoneración",
+    invoiceExemptionRegister: "Registro de exoneración",
     invoiceExemptOrder: "Orden de compra exenta",
-    invoiceSagRegister: "N. registro SAG",
+    invoiceSagRegister: "N.º registro SAG",
     invoiceSaved: "Factura guardada",
-    invoiceMissingNumber: "Completa el numero de factura antes de imprimir.",
+    invoiceMissingNumber: "Completa el número de factura antes de imprimir.",
     invoiceLegalNotice: "Verifica CAI, RTN, rango autorizado e ISV antes de usar esta factura con clientes.",
-    invoiceInvalidRange: "El rango fiscal es invalido. Revisa ajustes fiscales.",
-    invoiceRangeExhausted: "El rango autorizado ya se termino. Actualiza el siguiente numero de factura.",
-    invoicePrintBlockedExhausted: "No se puede mostrar la factura fiscal. El rango autorizado ya se excedio y debes actualizarlo en Ajustes fiscales.",
-    invoiceDeadlineExceeded: "La fecha limite de emision ya vencio. Actualiza los ajustes fiscales.",
-    invoicePrintBlockedExpired: "No se puede mostrar la factura fiscal. La fecha limite de emision ya vencio y debes actualizarla en Ajustes fiscales.",
+    invoiceInvalidRange: "El rango fiscal es inválido. Revisa ajustes fiscales.",
+    invoiceRangeExhausted: "El rango autorizado ya se terminó. Actualiza el siguiente número de factura.",
+    invoicePrintBlockedExhausted: "No se puede mostrar la factura fiscal. El rango autorizado ya se excedió y debes actualizarlo en Ajustes fiscales.",
+    invoiceDeadlineExceeded: "La fecha límite de emisión ya venció. Actualiza los ajustes fiscales.",
+    invoicePrintBlockedExpired: "No se puede mostrar la factura fiscal. La fecha límite de emisión ya venció y debes actualizarla en Ajustes fiscales.",
     brandName: "Marca comercial",
-    legalName: "Razon social",
-    phone: "Telefono",
-    address: "Direccion",
+    legalName: "Razón social",
+    phone: "Teléfono",
+    address: "Dirección",
     email: "Correo",
-    emissionDeadline: "Fecha limite de emision",
+    emissionDeadline: "Fecha límite de emisión",
     rangeStart: "Rango autorizado inicial",
     rangeEnd: "Rango autorizado final",
-  nextInvoiceNumber: "Siguiente numero de factura",
-  duplicateNextInvoiceNumber: "Ese numero ya fue dado en una factura anterior. Ingresa otro numero de factura.",
+  nextInvoiceNumber: "Siguiente número de factura",
+  duplicateNextInvoiceNumber: "Ese número ya fue dado en una factura anterior. Ingresa otro número de factura.",
     copyLegend: "Leyenda de copia",
     generalTaxRate: "ISV general (%)",
     taxAppetizers: "ISV entradas (%)",
     taxMainCourses: "ISV principales (%)",
     taxBeverages: "ISV bebidas (%)",
     taxDesserts: "ISV postres (%)",
-    saveButton: "Guardar configuracion",
-    settingsWarning: "Cambia estos datos solo con informacion fiscal valida autorizada por SAR.",
-    invalidRange: "El rango fiscal es invalido.",
-    saved: "Configuracion guardada",
+    saveButton: "Guardar configuración",
+    settingsWarning: "Cambia estos datos solo con información fiscal válida autorizada por SAR.",
+    invalidRange: "El rango fiscal es inválido.",
+    saved: "Configuración guardada",
     invoiceTermsCash: "Contado",
     invoiceTermsPending: "Pendiente",
     invoiceStatePaid: "Pagada",
@@ -154,19 +161,19 @@ const i18n = {
     exemptAmount: "Importe exento",
     taxableAmount: "Importe gravado",
     taxAmount: "ISV",
-    legalInfoPending: "ACTUALIZA TUS DATOS LEGALES EN LA PAGINA FISCAL.",
+    legalInfoPending: "ACTUALIZA TUS DATOS LEGALES EN LA PÁGINA FISCAL.",
     fiscalRangeAlertTitle: "Advertencia fiscal",
     fiscalRangeAlertText: "Debes actualizar los datos fiscales para seguir imprimiendo facturas fiscales.",
     fiscalRangeAlertRangeText: "Debes actualizar el estado de las facturas en Ajustes fiscales. Ya llegaste a la cantidad estipulada y no puedes seguir imprimiendo factura fiscal.",
-    fiscalRangeAlertDeadlineText: "Debes actualizar el estado de las facturas en Ajustes fiscales. La fecha limite de emision ya vencio y no puedes seguir imprimiendo factura fiscal.",
+    fiscalRangeAlertDeadlineText: "Debes actualizar el estado de las facturas en Ajustes fiscales. La fecha límite de emisión ya venció y no puedes seguir imprimiendo factura fiscal.",
     fiscalRangeAlertAction: "Actualizar ahora",
-    payMethodOnline: "En linea",
+    payMethodOnline: "En línea",
     payMethodCard: "Tarjeta",
     payMethodPaypal: "PayPal",
     payMethodCash: "Efectivo",
     payMethodTransfer: "Transferencia bancaria",
     payMethodCashOnPickup: "Pago al recoger",
-    payStatusPending: "Pendiente de confirmacion",
+    payStatusPending: "Pendiente de confirmación",
     payStatusPaid: "Pagado",
     payStatusUnpaid: "No pagado",
     total: "Total",
@@ -186,50 +193,51 @@ const i18n = {
     revenueCount: "Ingresos",
     avgTicket: "Ticket promedio",
     statsSummary: "Resumen",
-    statsOps: "Operacion",
+    statsOps: "Operación",
     statsSales: "Ventas",
     topFoodTitle: "Top comida vendida",
     topFoodEmpty: "No hay ventas aceptadas para este periodo.",
     calendarTitle: "Calendario de ventas",
     calendarSub: "Selecciona fecha para revisar ventas entregadas y sus pedidos.",
-    calendarCollapsedText: "Resumen mensual listo. Abre el reporte para revisar dias, pagos y comida vendida.",
+    calendarCollapsedText: "Resumen mensual listo. Abre el reporte para revisar días, pagos y comida vendida.",
     calendarShow: "Mostrar reporte",
     calendarHide: "Ocultar reporte",
     calendarMonthSummary: "Resumen del mes",
     calendarNoSalesMonth: "No hay ventas entregadas en este mes.",
     calendarNoSalesDay: "No hay ventas entregadas en esta fecha.",
-    calendarSearchPlaceholder: "Buscar por cliente, numero de orden, factura o pedido",
-    calendarSearchEmpty: "No hay pedidos que coincidan con esa busqueda.",
+    calendarSearchPlaceholder: "Buscar por cliente, número de orden, factura o pedido",
+    calendarSearchEmpty: "No hay pedidos que coincidan con esa búsqueda.",
     calendarOrders: "Pedidos",
     calendarRevenue: "Ingresos",
-    calendarPaymentBreakdown: "Cierre por metodo de pago",
-    calendarPaymentFilter: "Ver ventas por metodo",
-    calendarPaymentAll: "Todos los metodos",
-    calendarPaymentSelected: "Seleccion actual",
-    calendarPaymentOther: "Otros metodos",
-    calendarDetailsTitle: "Detalle del dia",
+    calendarPaymentBreakdown: "Cierre por método de pago",
+    calendarPaymentFilter: "Ver ventas por método",
+    calendarPaymentAll: "Todos los métodos",
+    calendarPaymentSelected: "Selección actual",
+    calendarPaymentOther: "Otros métodos",
+    calendarDetailsTitle: "Detalle del día",
     calendarPrev: "Mes anterior",
     calendarNext: "Mes siguiente",
-    calendarFoodBreakdown: "Comida vendida ese dia",
+    calendarFoodBreakdown: "Comida vendida ese día",
     orderCreatorTitle: "Crear pedido",
     orderCreatorText: "Toma pedidos desde el CRM con productos, datos del cliente y forma de pago.",
     orderCreatorCollapsedText: "Crea pedidos internos para mesa, recoger o delivery sin salir del CRM.",
     orderCreatorShow: "Crear pedido",
     orderCreatorHide: "Ocultar pedido",
     orderCreatorSearchLabel: "Buscar producto",
-    orderCreatorSearchPlaceholder: "Buscar por nombre o categoria",
-    orderCreatorCategoryLabel: "Categoria",
+    orderCreatorSearchPlaceholder: "Buscar por nombre o categoría",
+    orderCreatorCategoryLabel: "Categoría",
     orderCreatorCartTitle: "Pedido actual",
     orderCreatorEmptyCart: "Agrega productos para crear el pedido.",
+    orderCreatorRemoveItem: "Eliminar",
     orderCreatorCustomerTitle: "Datos del cliente",
     orderCreatorTypeLabel: "Tipo de pedido",
     orderTypeDineIn: "Comer en restaurante",
     orderTypeTakeaway: "Recoger",
     orderTypeDelivery: "Delivery",
     orderCreatorNameLabel: "Nombre del cliente",
-    orderCreatorPhoneLabel: "Telefono",
+    orderCreatorPhoneLabel: "Teléfono",
     orderCreatorTableLabel: "Mesa o referencia",
-    orderCreatorAddressLabel: "Direccion de delivery",
+    orderCreatorAddressLabel: "Dirección de delivery",
     orderCreatorNotesLabel: "Notas del pedido",
     orderCreatorPaymentMethodLabel: "Forma de pago",
     orderCreatorPaymentStatusLabel: "Estado del pago",
@@ -240,22 +248,21 @@ const i18n = {
     orderCreatorReset: "Limpiar",
     orderCreatorNeedItems: "Agrega al menos un producto.",
     orderCreatorNeedCustomer: "Escribe el nombre del cliente.",
-    orderCreatorNeedAddress: "Escribe la direccion para delivery.",
+    orderCreatorNeedAddress: "Escribe la dirección para delivery.",
     orderCreatorCreated: "Pedido creado",
     orderCreatorError: "No se pudo crear el pedido.",
-    productManagerTitle: "Gestion de productos",
-    productManagerText: "Cambia precios, agrega comentarios visibles y marca productos nuevos.",
-    productManagerCollapsedText: "Ajustes de menu listos. Abre esta seccion para editar productos.",
+    productManagerTitle: "Gestión de productos",
+    productManagerText: "Cambia precios, agrega un comentario visible y marca productos nuevos.",
+    productManagerCollapsedText: "Ajustes de menú listos. Abre esta sección para editar productos.",
     productManagerShow: "Mostrar productos",
     productManagerHide: "Ocultar productos",
     productManagerSummary: "Productos",
     productSearchLabel: "Buscar producto",
-    productSearchPlaceholder: "Buscar por nombre o categoria",
-    productCategoryLabel: "Categoria",
-    productAllCategories: "Todas las categorias",
+    productSearchPlaceholder: "Buscar por nombre o categoría",
+    productCategoryLabel: "Categoría",
+    productAllCategories: "Todas las categorías",
     productPriceLabel: "Precio",
-    productNoteEsLabel: "Comentario visible en espanol",
-    productNoteEnLabel: "Comentario visible en ingles",
+    productNoteEsLabel: "Comentario visible",
     productNewLabel: "Producto nuevo",
     productSave: "Guardar producto",
     productSaved: "Producto actualizado",
@@ -269,14 +276,14 @@ const i18n = {
     savingAction: "Aplicando cambio...",
     updated: "Estado actualizado",
     paymentUpdated: "Pago actualizado",
-    paymentMethodUpdated: "Metodo de pago actualizado",
+    paymentMethodUpdated: "Método de pago actualizado",
     paymentReceived: "Pago recibido",
     crmNotificationsReady: "Avisos del CRM activados.",
-    crmNotificationsUnavailable: "El CRM esta abierto, pero este navegador no pudo activar avisos push.",
+    crmNotificationsUnavailable: "El CRM está abierto, pero este navegador no pudo activar avisos push.",
     ordersListenerError: "No se pudieron cargar los pedidos.",
     reservationsListenerError: "No se pudieron cargar las reservas.",
     staffRole: "Rol",
-    signOut: "Cerrar sesion",
+    signOut: "Cerrar sesión",
     signOutShort: "Salir"
   },
   en: {
@@ -339,12 +346,19 @@ const i18n = {
     btnSaveInvoice: "Save invoice",
     review: "Review order",
     reviewShort: "Details",
+    hideOrder: "Remove order",
+    hideOrderConfirmTitle: "Remove order",
+    hideOrderConfirmText: "Do you want to remove this order from the CRM view?",
+    hideOrderConfirmButton: "Remove",
+    cancelButton: "Cancel",
+    orderHidden: "Order removed from view.",
     emptyOrders: "No orders for this status.",
     emptyReservations: "No reservations found.",
     customer: "Customer",
     orderComments: "Order comments",
     invoiceRequestSummary: "Customer requested invoice with RTN and name",
-    orderPickupBadge: "To go",
+    orderPickupBadge: "Pickup",
+    orderDeliveryBadge: "Delivery",
     orderCashierPending: "Will pay in person",
     orderPaidMessage: "Payment made",
     orderUnpaidMessage: "Order not paid yet",
@@ -472,6 +486,7 @@ const i18n = {
     orderCreatorCategoryLabel: "Category",
     orderCreatorCartTitle: "Current order",
     orderCreatorEmptyCart: "Add products to create the order.",
+    orderCreatorRemoveItem: "Remove",
     orderCreatorCustomerTitle: "Customer details",
     orderCreatorTypeLabel: "Order type",
     orderTypeDineIn: "Dine in",
@@ -495,7 +510,7 @@ const i18n = {
     orderCreatorCreated: "Order created",
     orderCreatorError: "Could not create the order.",
     productManagerTitle: "Product management",
-    productManagerText: "Change prices, add visible notes, and mark new products.",
+    productManagerText: "Change prices, add one visible note, and mark new products.",
     productManagerCollapsedText: "Menu settings are ready. Open this section to edit products.",
     productManagerShow: "Show products",
     productManagerHide: "Hide products",
@@ -505,8 +520,7 @@ const i18n = {
     productCategoryLabel: "Category",
     productAllCategories: "All categories",
     productPriceLabel: "Price",
-    productNoteEsLabel: "Visible Spanish note",
-    productNoteEnLabel: "Visible English note",
+    productNoteEsLabel: "Visible note",
     productNewLabel: "New product",
     productSave: "Save product",
     productSaved: "Product updated",
@@ -573,6 +587,10 @@ const reviewPending = document.getElementById("reviewPending");
 const reviewProgress = document.getElementById("reviewProgress");
 const reviewAccept = document.getElementById("reviewAccept");
 const reviewReject = document.getElementById("reviewReject");
+const hideOrderConfirmModal = document.getElementById("hideOrderConfirmModal");
+const closeHideOrderConfirmBtn = document.getElementById("closeHideOrderConfirm");
+const cancelHideOrderBtn = document.getElementById("cancelHideOrder");
+const confirmHideOrderBtn = document.getElementById("confirmHideOrder");
 const fiscalSettingsModal = document.getElementById("fiscalSettingsModal");
 const fiscalSettingsForm = document.getElementById("crmFiscalSettingsForm");
 const closeFiscalSettingsBtn = document.getElementById("closeFiscalSettings");
@@ -591,6 +609,7 @@ let selectedOrderId = null;
 let currentStaffUser = null;
 let currentStaffProfile = null;
 let pendingAuthMessage = "";
+let crmPushNotificationsReady = false;
 let ordersCache = [];
 let reservationsCache = [];
 let activePeriod = "day";
@@ -628,6 +647,9 @@ let hasSeenInitialOrdersSnapshot = false;
 let hasSeenInitialReservationsSnapshot = false;
 let knownOrderIds = new Set();
 let knownReservationIds = new Set();
+const HIDDEN_ORDER_IDS_KEY = "frida_crm_hidden_order_ids_v1";
+let hiddenOrderIds = readHiddenOrderIds();
+let pendingHiddenOrderId = "";
 let knownOrderPaymentStatus = new Map();
 let audioCtx = null;
 let audioUnlocked = false;
@@ -637,6 +659,19 @@ let pendingLinkedOrderId = crmUrlParams.get("order") || crmUrlParams.get("orderI
 
 function t(key) {
   return (i18n[lang] && i18n[lang][key]) || key;
+}
+
+function readHiddenOrderIds() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(HIDDEN_ORDER_IDS_KEY) || "[]");
+    return new Set(Array.isArray(raw) ? raw.filter(Boolean).map(String) : []);
+  } catch (_error) {
+    return new Set();
+  }
+}
+
+function writeHiddenOrderIds() {
+  localStorage.setItem(HIDDEN_ORDER_IDS_KEY, JSON.stringify(Array.from(hiddenOrderIds)));
 }
 
 function setAuthMessage(message, state = "info") {
@@ -828,6 +863,10 @@ async function ensureNotificationPermission() {
   }
 }
 
+function canUseLocalCrmNotification() {
+  return !crmPushNotificationsReady && canUseBrowserNotifications() && Notification.permission === "granted";
+}
+
 function notifyNewOrder(order) {
   const orderRef = `#${order.displayId || order.id.slice(0, 6)}`;
   const customerName = order.customer?.name || "-";
@@ -840,7 +879,7 @@ function notifyNewOrder(order) {
 
   showToast(`${title}: ${orderRef}`);
   playNewOrderSound();
-  if (!canUseBrowserNotifications() || Notification.permission !== "granted") return;
+  if (!canUseLocalCrmNotification()) return;
   try {
     new Notification(title, { body });
   } catch (_e) {
@@ -856,7 +895,7 @@ function notifyNewReservation(reservation) {
 
   showToast(`${title}: ${reservation.name || partyText}`);
   playNewOrderSound();
-  if (!canUseBrowserNotifications() || Notification.permission !== "granted") return;
+  if (!canUseLocalCrmNotification()) return;
   try {
     new Notification(title, { body });
   } catch (_e) {
@@ -870,7 +909,7 @@ function notifyPaymentReceived(order) {
   const title = t("paymentReceived");
   const body = `${orderRef} | ${customerName}`;
   showToast(`${title}: ${orderRef}`);
-  if (!canUseBrowserNotifications() || Notification.permission !== "granted") return;
+  if (!canUseLocalCrmNotification()) return;
   try {
     new Notification(title, { body });
   } catch (_e) {
@@ -883,10 +922,12 @@ async function registerCRMPushNotifications(options = {}) {
   try {
     const token = await registerStaffNotificationToken("web-crm");
     if (token) {
+      crmPushNotificationsReady = true;
       showToast(t("crmNotificationsReady"));
       return true;
     }
   } catch (error) {
+    crmPushNotificationsReady = false;
     console.warn("CRM push registration failed", error);
     if (showUnavailableToast) showToast(t("crmNotificationsUnavailable"));
   }
@@ -1026,6 +1067,9 @@ function paymentDone(order) {
 function crmPaymentLine(order) {
   const done = paymentDone(order);
   const paymentText = done ? t("orderPaidMessage") : t("orderUnpaidMessage");
+  if (order?.customer?.delivery || order?.order_type === "delivery" || order?.orderType === "delivery") {
+    return `${t("orderDeliveryBadge")} | ${paymentText}`;
+  }
   if (order?.customer?.pickup) {
     return `${t("orderPickupBadge")} | ${paymentText}`;
   }
@@ -1090,6 +1134,90 @@ function menuCategoryLabel(category) {
   return labels[category] || String(category || "").replace(/_/g, " ");
 }
 
+function normalizeTextForTranslation(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function translateVisibleNoteToEnglish(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+
+  const phrase = normalizeTextForTranslation(text).replace(/[.!?]+$/g, "");
+  const phrases = {
+    "sin gluten": "Gluten-free",
+    "sin lactosa": "Lactose-free",
+    "sin azucar": "Sugar-free",
+    "bajo en azucar": "Low in sugar",
+    "vegetariano": "Vegetarian",
+    "vegano": "Vegan",
+    "picante": "Spicy",
+    "muy picante": "Very spicy",
+    "poco picante": "Mildly spicy",
+    "recomendado": "Recommended",
+    "favorito de la casa": "House favorite",
+    "nuevo": "New",
+    "producto nuevo": "New item",
+    "especial de la casa": "House special",
+    "preparado al momento": "Prepared fresh",
+    "hecho al momento": "Made fresh",
+    "ideal para compartir": "Great for sharing",
+    "perfecto para compartir": "Perfect for sharing",
+    "por tiempo limitado": "Limited time only",
+    "disponible por tiempo limitado": "Available for a limited time",
+    "acompanado de papas": "Served with fries",
+    "acompanado con papas": "Served with fries",
+    "incluye bebida": "Includes a drink"
+  };
+  if (phrases[phrase]) return phrases[phrase];
+
+  const replacements = [
+    [/\bsin\b/gi, "without"],
+    [/\bcon\b/gi, "with"],
+    [/\by\b/gi, "and"],
+    [/\bo\b/gi, "or"],
+    [/\bde la casa\b/gi, "house"],
+    [/\bcasero\b/gi, "homemade"],
+    [/\bcasera\b/gi, "homemade"],
+    [/\bfresco\b/gi, "fresh"],
+    [/\bfresca\b/gi, "fresh"],
+    [/\bnatural\b/gi, "natural"],
+    [/\bpicante\b/gi, "spicy"],
+    [/\bsuave\b/gi, "mild"],
+    [/\bdulce\b/gi, "sweet"],
+    [/\bcrujiente\b/gi, "crispy"],
+    [/\bcremoso\b/gi, "creamy"],
+    [/\bcremosa\b/gi, "creamy"],
+    [/\bartesanal\b/gi, "artisanal"],
+    [/\brecomendado\b/gi, "recommended"],
+    [/\brecomendada\b/gi, "recommended"],
+    [/\bnuevo\b/gi, "new"],
+    [/\bnueva\b/gi, "new"],
+    [/\bespecial\b/gi, "special"],
+    [/\bpollo\b/gi, "chicken"],
+    [/\bres\b/gi, "beef"],
+    [/\bcerdo\b/gi, "pork"],
+    [/\bpescado\b/gi, "fish"],
+    [/\bmariscos\b/gi, "seafood"],
+    [/\bqueso\b/gi, "cheese"],
+    [/\bpapas\b/gi, "fries"],
+    [/\bensalada\b/gi, "salad"],
+    [/\bsalsa\b/gi, "sauce"],
+    [/\blimon\b/gi, "lime"],
+    [/\blimón\b/gi, "lime"]
+  ];
+
+  let translated = text;
+  replacements.forEach(([pattern, replacement]) => {
+    translated = translated.replace(pattern, replacement);
+  });
+  return translated.trim();
+}
+
 function normalizeMenuSettings(settings) {
   const rawItems = settings?.items && typeof settings.items === "object" ? settings.items : {};
   const items = {};
@@ -1097,11 +1225,12 @@ function normalizeMenuSettings(settings) {
     const override = rawItems[baseItem.id] || {};
     const price = Number(override.price);
     const note = override.note && typeof override.note === "object" ? override.note : {};
+    const noteEs = String(note.es || note.en || "").trim();
     items[baseItem.id] = {
       price: Number.isFinite(price) && price >= 0 ? price : baseItem.price,
       note: {
-        es: String(note.es || "").trim(),
-        en: String(note.en || "").trim()
+        es: noteEs,
+        en: translateVisibleNoteToEnglish(noteEs)
       },
       isNew: Boolean(override.isNew)
     };
@@ -1142,8 +1271,7 @@ function filteredProductItems() {
         item.title.es,
         item.title.en,
         menuCategoryLabel(item.category),
-        item.note?.es,
-        item.note?.en
+        item.note?.es
       ].some((value) => String(value || "").toLowerCase().includes(search));
     });
 }
@@ -1156,8 +1284,7 @@ function renderProductManager() {
     if (!override) return false;
     return Number(override.price) !== Number(item.price)
       || Boolean(override.isNew)
-      || Boolean(override.note?.es)
-      || Boolean(override.note?.en);
+      || Boolean(override.note?.es);
   }).length;
   const rows = filteredProductItems();
 
@@ -1210,13 +1337,9 @@ function renderProductManager() {
                   <span>${t("productPriceLabel")}</span>
                   <input class="product-price-input" type="number" min="0" step="0.01" value="${Number(item.price).toFixed(2)}">
                 </label>
-                <label>
+                <label class="product-note-field">
                   <span>${t("productNoteEsLabel")}</span>
                   <textarea class="product-note-es" maxlength="180">${escapeHtml(item.note?.es || "")}</textarea>
-                </label>
-                <label>
-                  <span>${t("productNoteEnLabel")}</span>
-                  <textarea class="product-note-en" maxlength="180">${escapeHtml(item.note?.en || "")}</textarea>
                 </label>
                 <label class="product-new-toggle">
                   <input class="product-new-input" type="checkbox" ${item.isNew ? "checked" : ""}>
@@ -1242,7 +1365,7 @@ function readProductRowValues(productId) {
     price: Number.isFinite(price) && price >= 0 ? price : baseItem.price,
     note: {
       es: String(row.querySelector(".product-note-es")?.value || "").trim().slice(0, 180),
-      en: String(row.querySelector(".product-note-en")?.value || "").trim().slice(0, 180)
+      en: translateVisibleNoteToEnglish(row.querySelector(".product-note-es")?.value || "")
     },
     isNew: Boolean(row.querySelector(".product-new-input")?.checked)
   };
@@ -1355,6 +1478,12 @@ function changeOrderCreatorQty(productId, delta) {
   renderOrderCreator();
 }
 
+function removeOrderCreatorItem(productId) {
+  updateOrderCreatorDraftFromForm();
+  orderCreatorCart = orderCreatorCart.filter((row) => row.id !== productId);
+  renderOrderCreator();
+}
+
 function clearOrderCreator() {
   orderCreatorCart = [];
   orderCreatorSearchTerm = "";
@@ -1443,6 +1572,7 @@ function renderOrderCreator() {
                     <button type="button" class="btn btn-outline" data-order-qty="${item.id}" data-delta="-1">-</button>
                     <span>${Number(item.qty || 0)}</span>
                     <button type="button" class="btn btn-outline" data-order-qty="${item.id}" data-delta="1">+</button>
+                    <button type="button" class="btn btn-ghost order-creator-remove" data-order-remove="${item.id}">${t("orderCreatorRemoveItem")}</button>
                   </div>
                 </div>
               `).join("") : `<p class="order-creator-empty">${t("orderCreatorEmptyCart")}</p>`}
@@ -1868,7 +1998,7 @@ function buildPrintableOrderHtml(order) {
   const logoUrl = new URL("assets/casa-brava-logo.jpg", window.location.href).href;
   const itemRows = (order.items || [])
     .map((item) => {
-      const title = escapeHtml(item.title?.[lang] || item.title?.es || item.title?.en || "Item");
+      const title = escapeHtml(foodName(item));
       const qty = Number(item.qty || 0);
       const unitPrice = Number(item.price || 0);
       const lineTotal = qty * unitPrice;
@@ -2054,7 +2184,7 @@ function buildFiscalPrintableOrderHtml(order) {
   const breakdown = buildFiscalBreakdown(order);
   const amountInWords = escapeHtml(amountToWordsEs(breakdown.total).toUpperCase());
   const lineRows = breakdown.lines.map((row) => {
-    const itemTitle = escapeHtml(row.item.title?.[lang] || row.item.title?.es || row.item.title?.en || "Item");
+    const itemTitle = escapeHtml(foodName(row.item));
     const taxPercent = Math.round(row.taxRate * 100);
     const taxLabel = row.taxRate ? `ISV ${taxPercent}%` : "ISV 0%";
     return `
@@ -2399,7 +2529,9 @@ function applyI18n() {
 }
 
 function filteredOrders() {
-  return ordersCache.filter((o) => (activeFilter === "all" ? true : o.status === activeFilter));
+  return ordersCache
+    .filter((o) => !hiddenOrderIds.has(String(o.id)))
+    .filter((o) => (activeFilter === "all" ? true : o.status === activeFilter));
 }
 
 function renderStats() {
@@ -2440,8 +2572,36 @@ function renderStats() {
   `;
 }
 
+function meaningfulFoodText(value) {
+  const text = String(value || "").trim();
+  return text && text !== "[object Object]" ? text : "";
+}
+
 function foodName(item) {
-  return item.title?.[lang] || item.title?.es || item.title?.en || "Item";
+  const title = item?.title;
+  const candidates = [
+    title && typeof title === "object" ? title[lang] : "",
+    title && typeof title === "object" ? title.es : "",
+    title && typeof title === "object" ? title.en : "",
+    typeof title === "string" ? title : "",
+    item?.name
+  ];
+  for (const candidate of candidates) {
+    const text = meaningfulFoodText(candidate);
+    if (text) return text;
+  }
+  const source = menuItemForOrderItem(item);
+  return source?.title?.[lang] || source?.title?.es || source?.title?.en || "Item";
+}
+
+function menuItemForOrderItem(item) {
+  const byId = BASE_MENU_ITEMS.find((menuItem) => menuItem.id === item?.id || menuItem.id === item?.menu_item_id);
+  if (byId) return byId;
+
+  const price = Number(item?.price || item?.unit_price || 0);
+  if (!price) return null;
+  const samePrice = BASE_MENU_ITEMS.filter((menuItem) => Number(menuItem.price) === price);
+  return samePrice.length === 1 ? samePrice[0] : null;
 }
 
 function dayKeyFromDate(date) {
@@ -2679,7 +2839,8 @@ function renderSalesCalendar() {
                 <input
                   id="salesDaySearch"
                   class="sales-day-search-input"
-                  type="text"
+                  type="search"
+                  name="salesDaySearch"
                   inputmode="search"
                   enterkeyhint="search"
                   autocapitalize="off"
@@ -2830,9 +2991,16 @@ function renderOrders() {
             <p><strong>${crmPaymentLine(order)}</strong></p>
           </div>
           <div class="crm-side-actions">
-            <span class="badge ${order.status}">${orderStatusLabel(order.status)}</span>
-            <button class="btn btn-outline print-order print-order-small" data-id="${order.id}">${t("btnPrint")}</button>
-            <button class="btn btn-outline print-fiscal-order print-order-small" data-id="${order.id}">${fiscalPrintButtonLabel(order)}</button>
+            <div class="crm-card-controls">
+              <span class="badge ${order.status}">${orderStatusLabel(order.status)}</span>
+              <button class="crm-trash-btn hide-order" type="button" data-id="${order.id}" aria-label="${t("hideOrder")}" title="${t("hideOrder")}">
+                <span aria-hidden="true">&#128465;</span>
+              </button>
+            </div>
+            <div class="crm-print-actions">
+              <button class="btn btn-outline print-order print-order-small" data-id="${order.id}">${t("btnPrint")}</button>
+              <button class="btn btn-outline print-fiscal-order print-order-small" data-id="${order.id}">${fiscalPrintButtonLabel(order)}</button>
+            </div>
           </div>
         </div>
         <p>${t("total")}: <strong>${money(order.total)}</strong></p>
@@ -2883,9 +3051,9 @@ function renderReservations() {
           <span class="badge pending">${res.party || 1} pax</span>
         </div>
         <p>${t("date")}: ${res.date || "-"} ${res.time || ""}</p>
-        <p>Occasion: ${res.occasion || "-"}</p>
-        <p>Allergies: ${res.allergies || "-"}</p>
-        <p>Notes: ${res.notes || "-"}</p>
+        <p>${lang === "es" ? "Ocasión" : "Occasion"}: ${res.occasion || "-"}</p>
+        <p>${lang === "es" ? "Alergias" : "Allergies"}: ${res.allergies || "-"}</p>
+        <p>${lang === "es" ? "Notas" : "Notes"}: ${res.notes || "-"}</p>
       </article>
     `)
     .join("");
@@ -2902,7 +3070,7 @@ function renderReviewBody(order) {
     <p>${t("total")}: <strong>${money(order.total)}</strong></p>
     <ul>
       ${(order.items || [])
-        .map((item) => `<li>${item.title?.[lang] || item.title?.es || item.title?.en || "Item"} x ${item.qty} (${money(item.price)})</li>`)
+        .map((item) => `<li>${escapeHtml(foodName(item))} x ${item.qty} (${money(item.price)})</li>`)
         .join("")}
     </ul>
     <p><strong>${t("orderStatus")}:</strong> ${orderStatusLabel(order.status)}</p>
@@ -2957,6 +3125,28 @@ function openLinkedOrderIfReady() {
 function closeReviewModal() {
   selectedOrderId = null;
   reviewModal.classList.add("hidden");
+}
+
+function openHideOrderConfirm(orderId) {
+  if (!orderId) return;
+  pendingHiddenOrderId = orderId;
+  hideOrderConfirmModal?.classList.remove("hidden");
+}
+
+function closeHideOrderConfirm() {
+  pendingHiddenOrderId = "";
+  hideOrderConfirmModal?.classList.add("hidden");
+}
+
+function confirmHideOrder() {
+  if (!pendingHiddenOrderId) return;
+  const orderId = pendingHiddenOrderId;
+  hiddenOrderIds.add(String(orderId));
+  writeHiddenOrderIds();
+  if (selectedOrderId === orderId) closeReviewModal();
+  closeHideOrderConfirm();
+  renderOrders();
+  showToast(t("orderHidden"));
 }
 
 function closeCRMHeaderNav() {
@@ -3275,6 +3465,7 @@ function startRealtime() {
 }
 
 function lockUI() {
+  crmPushNotificationsReady = false;
   authGate.classList.remove("hidden");
   crmApp.classList.add("hidden");
   signOutBtn.classList.add("hidden");
@@ -3303,6 +3494,11 @@ ordersList.addEventListener("click", (event) => {
     openReview(reviewButton.dataset.id);
     return;
   }
+  const hideButton = event.target.closest(".hide-order");
+  if (hideButton) {
+    openHideOrderConfirm(hideButton.dataset.id);
+    return;
+  }
   const printButton = event.target.closest(".print-order");
   if (printButton) {
     printOrder(printButton.dataset.id);
@@ -3326,23 +3522,22 @@ ordersList.addEventListener("change", (event) => {
 
 
 if (salesCalendar) {
-  const focusSalesDaySearch = (event) => {
-    const searchField = event.target.closest(".sales-day-search, #salesDaySearch");
-    if (!searchField) return;
-    event.stopPropagation();
-    const searchInput = document.getElementById("salesDaySearch");
-    if (!searchInput) return;
-    searchInput.focus({ preventScroll: true });
-  };
-
-  salesCalendar.addEventListener("pointerdown", focusSalesDaySearch);
-  salesCalendar.addEventListener("touchend", focusSalesDaySearch);
   salesCalendar.addEventListener("click", (event) => {
-    const searchField = event.target.closest(".sales-day-search, #salesDaySearch");
+    const searchInputTarget = event.target.closest("#salesDaySearch");
+    if (searchInputTarget) {
+      event.stopPropagation();
+      return;
+    }
+
+    const searchField = event.target.closest(".sales-day-search");
     if (searchField) {
       event.stopPropagation();
-      const searchInput = document.getElementById("salesDaySearch");
-      if (searchInput) searchInput.focus({ preventScroll: true });
+      const searchInput = searchField.querySelector("#salesDaySearch");
+      if (searchInput) {
+        searchInput.focus();
+        const length = searchInput.value.length;
+        searchInput.setSelectionRange(length, length);
+      }
       return;
     }
 
@@ -3488,6 +3683,12 @@ if (orderCreator) {
       return;
     }
 
+    const removeBtn = event.target.closest("[data-order-remove]");
+    if (removeBtn) {
+      removeOrderCreatorItem(removeBtn.dataset.orderRemove);
+      return;
+    }
+
     const clearBtn = event.target.closest("[data-order-clear]");
     if (clearBtn) clearOrderCreator();
   });
@@ -3547,6 +3748,12 @@ if (reviewReject) reviewReject.addEventListener("click", () => selectedOrderId &
 closeReview.addEventListener("click", closeReviewModal);
 reviewModal.addEventListener("click", (event) => {
   if (event.target === reviewModal) closeReviewModal();
+});
+closeHideOrderConfirmBtn?.addEventListener("click", closeHideOrderConfirm);
+cancelHideOrderBtn?.addEventListener("click", closeHideOrderConfirm);
+confirmHideOrderBtn?.addEventListener("click", confirmHideOrder);
+hideOrderConfirmModal?.addEventListener("click", (event) => {
+  if (event.target === hideOrderConfirmModal) closeHideOrderConfirm();
 });
 if (openFiscalSettingsBtn) {
   openFiscalSettingsBtn.addEventListener("click", () => {
