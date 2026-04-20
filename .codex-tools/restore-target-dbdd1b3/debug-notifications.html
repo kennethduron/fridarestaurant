@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frida Restaurant | Diagnóstico de notificaciones</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f7f2ec;
+      color: #211915;
+    }
+
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0 0 12px;
+    }
+
+    p {
+      color: #62534a;
+      line-height: 1.5;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      background: #b96828;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 14px 18px;
+    }
+
+    pre {
+      background: #1f1915;
+      border-radius: 8px;
+      color: #f8efe6;
+      min-height: 220px;
+      overflow: auto;
+      padding: 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Diagnóstico de notificaciones</h1>
+    <p>Abre esta página desde el teléfono donde quieres recibir las notificaciones. Toca el botón y comparte el resultado si algo falla.</p>
+    <button id="runTest">Probar notificaciones</button>
+    <pre id="log">Listo para probar.</pre>
+  </main>
+
+  <script type="module">
+    const API_BASE_URL = "https://fridarestaurant-git-main-kennethduronpaz-7247s-projects.vercel.app";
+    const FCM_VAPID_KEY = "BNmfp8tu6f6EWUwnX4grqCsQxPBR35s1Qr9XF1R3JzIN-s1k8ySArkSStrFlQbjcPgTv2h3y-7bspsmmpxej2xM";
+    const FIREBASE_PUBLIC_CONFIG = {
+      apiKey: "AIzaSyAkoY3Disr5BnZWorJaAKxP4HHQ4UcHKc4",
+      authDomain: "fridarestaurant-768ab.firebaseapp.com",
+      projectId: "fridarestaurant-768ab",
+      storageBucket: "fridarestaurant-768ab.firebasestorage.app",
+      messagingSenderId: "133167188727",
+      appId: "1:133167188727:web:d0233adab39ff54ce5a1f2"
+    };
+
+    const log = document.getElementById("log");
+    const button = document.getElementById("runTest");
+
+    function write(message, data) {
+      const extra = data === undefined ? "" : `\n${JSON.stringify(data, null, 2)}`;
+      log.textContent += `\n\n${message}${extra}`;
+    }
+
+    async function runTest() {
+      button.disabled = true;
+      log.textContent = "Iniciando prueba...";
+
+      try {
+        write("1. Navegador", {
+          userAgent: navigator.userAgent,
+          notificationApi: "Notification" in window,
+          serviceWorkerApi: "serviceWorker" in navigator,
+          secureContext: window.isSecureContext,
+          currentPermission: "Notification" in window ? Notification.permission : "not_supported"
+        });
+
+        if (!("Notification" in window)) throw new Error("Este navegador no soporta Notification API.");
+        if (!("serviceWorker" in navigator)) throw new Error("Este navegador no soporta Service Worker.");
+
+        const appModule = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js");
+        const messagingModule = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-messaging.js");
+        write("2. Firebase SDK cargado.");
+
+        const supported = messagingModule.isSupported ? await messagingModule.isSupported() : true;
+        write("3. Soporte de Firebase Messaging", { supported });
+        if (!supported) throw new Error("Firebase Messaging no es compatible con este navegador.");
+
+        const permission = await Notification.requestPermission();
+        write("4. Permiso de notificaciones", { permission });
+        if (permission !== "granted") throw new Error("El permiso de notificaciones no fue concedido.");
+
+        const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+        await navigator.serviceWorker.ready;
+        write("5. Service Worker registrado", {
+          scope: registration.scope,
+          active: Boolean(registration.active)
+        });
+
+        const firebaseApp = appModule.getApps().length
+          ? appModule.getApps()[0]
+          : appModule.initializeApp(FIREBASE_PUBLIC_CONFIG);
+        const messaging = messagingModule.getMessaging(firebaseApp);
+        const token = await messagingModule.getToken(messaging, {
+          vapidKey: FCM_VAPID_KEY,
+          serviceWorkerRegistration: registration
+        });
+        write("6. Token FCM", {
+          exists: Boolean(token),
+          preview: token ? `${token.slice(0, 28)}...${token.slice(-12)}` : null
+        });
+        if (!token) throw new Error("Firebase no devolvió token.");
+
+        const response = await fetch(`${API_BASE_URL}/api/notifications/register-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token,
+            customer_phone: "debug",
+            platform: "web-debug"
+          })
+        });
+        const text = await response.text();
+        write("7. Registro en Supabase vía backend", {
+          ok: response.ok,
+          status: response.status,
+          body: text
+        });
+        if (!response.ok) throw new Error(`El backend rechazó el token con HTTP ${response.status}.`);
+
+        write("Resultado: OK. Ahora revisa Supabase > notification_tokens. Debe aparecer una fila nueva.");
+      } catch (error) {
+        write("ERROR", {
+          name: error.name,
+          message: error.message,
+          code: error.code || null,
+          stack: error.stack || null
+        });
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    button.addEventListener("click", runTest);
+  </script>
+</body>
+</html>

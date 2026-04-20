@@ -261,7 +261,8 @@ function renderOrders() {
 function applyI18n() {
   document.documentElement.lang = lang;
   langToggle.textContent = lang === "es" ? "EN" : "ES";
-  applyResponsiveChrome();
+  const shortLabel = window.matchMedia("(max-width: 560px)").matches;
+  signOutBtn.textContent = shortLabel ? t("signOutShort") : t("signOut");
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     node.textContent = t(node.dataset.i18n);
   });
@@ -301,11 +302,6 @@ function unlockUI(user, profile) {
   signOutBtn.classList.remove("hidden");
   staffBadge.textContent = `${user.email} | ${t("staffRole")}: ${profile.role}`;
   startRealtime();
-}
-
-function applyResponsiveChrome() {
-  const shortLabel = window.matchMedia("(max-width: 560px)").matches;
-  signOutBtn.textContent = shortLabel ? t("signOutShort") : t("signOut");
 }
 
 authForm.addEventListener("submit", async (event) => {
@@ -351,16 +347,16 @@ langToggle.addEventListener("click", () => {
   applyI18n();
 });
 
-let kitchenResponsiveResizeFrame = null;
-function scheduleKitchenResponsiveChrome() {
-  if (kitchenResponsiveResizeFrame !== null) return;
-  kitchenResponsiveResizeFrame = window.requestAnimationFrame(() => {
-    kitchenResponsiveResizeFrame = null;
-    applyResponsiveChrome();
+let kitchenI18nResizeFrame = null;
+function scheduleKitchenApplyI18n() {
+  if (kitchenI18nResizeFrame !== null) return;
+  kitchenI18nResizeFrame = window.requestAnimationFrame(() => {
+    kitchenI18nResizeFrame = null;
+    applyI18n();
   });
 }
 
-window.addEventListener("resize", scheduleKitchenResponsiveChrome);
+window.addEventListener("resize", scheduleKitchenApplyI18n);
 
 onAuthChange(async (user) => {
   if (!user) {

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="120" viewBox="0 0 160 120">
+  <rect width="160" height="120" rx="12" fill="#022f38"/>
+  <g fill="#06b6d4" opacity="0.95">
+    <rect x="44" y="18" width="20" height="60" rx="8"/>
+    <circle cx="110" cy="48" r="18"/>
+  </g>
+  <text x="12" y="105" fill="#9fbfc6" font-family="Inter, Arial" font-size="12">Bebidas</text>
+</svg>

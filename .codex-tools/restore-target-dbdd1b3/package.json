@@ -1,0 +1,17 @@
+{
+    "name": "frida-restaurant",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "start": "npx serve . -p 3000",
+        "dev:api": "vercel dev",
+        "deploy:hosting": "firebase deploy --only hosting"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "dependencies": {
+        "@dataconnect/generated": "file:src/dataconnect-generated",
+        "firebase-admin": "^13.6.0"
+    }
+}

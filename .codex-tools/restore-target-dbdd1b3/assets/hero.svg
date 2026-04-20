@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="540" viewBox="0 0 820 540" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0" stop-color="#F97316" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#EF4444" stop-opacity="0.95"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#021827" rx="24"/>
+  <g transform="translate(40,40)">
+    <rect x="0" y="0" width="420" height="260" rx="18" fill="url(#g)" opacity="0.14"></rect>
+    <rect x="32" y="24" width="356" height="200" rx="14" fill="#042f3c" stroke="rgba(255,255,255,0.02)"/>
+    <text x="48" y="92" fill="#e6fffa" font-size="28" font-weight="700" font-family="Inter, Arial">Plato del día</text>
+    <text x="48" y="130" fill="#9fbfc6" font-size="14">Sabor excepcional, ingredientes locales</text>
+  </g>
+</svg>

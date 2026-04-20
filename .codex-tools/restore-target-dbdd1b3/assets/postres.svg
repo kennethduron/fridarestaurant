@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="120" viewBox="0 0 160 120">
+  <rect width="160" height="120" rx="12" fill="#052f3a"/>
+  <g fill="#06d6a0" opacity="0.95">
+    <circle cx="48" cy="44" r="12"/>
+    <rect x="72" y="36" width="56" height="44" rx="8"/>
+  </g>
+  <text x="12" y="105" fill="#9fbfc6" font-family="Inter, Arial" font-size="12">Postres</text>
+</svg>

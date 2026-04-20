@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Frida Restaurant | Restaurante, Pedidos y Reservas</title>
+    <meta name="description"
+        content="Sitio profesional de restaurante: menú bilingüe, pedidos online, carrito, seguimiento de pedido y reservas de mesa.">
+    <meta name="keywords" content="restaurante, menú, pedidos online, reservas, comida, bebidas, postres">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Frida Restaurant">
+    <meta property="og:title" content="Frida Restaurant | Restaurante profesional">
+    <meta property="og:description" content="Menú bilingüe, pedidos rápidos y reservas de mesa en un solo lugar.">
+    <meta property="og:url" content="https://casabrava1.web.app/">
+    <meta property="og:image" content="https://casabrava1.web.app/assets/casa-brava-logo.jpg">
+    <meta property="og:image:width" content="1075">
+    <meta property="og:image:height" content="716">
+    <meta property="og:image:alt" content="Imagen de portada de Frida Restaurant">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Frida Restaurant | Restaurante profesional">
+    <meta name="twitter:description" content="Menú bilingüe, pedidos rápidos y reservas de mesa en un solo lugar.">
+    <meta name="twitter:image" content="https://casabrava1.web.app/assets/casa-brava-logo.jpg">
+    <meta name="twitter:url" content="https://casabrava1.web.app/">
+    <link rel="canonical" href="https://casabrava1.web.app/">
+    <link rel="icon" type="image/jpeg" href="assets/icon.jpg">
+    <link rel="shortcut icon" href="assets/icon.jpg">
+    <link rel="apple-touch-icon" href="assets/icon.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=20260419h">
+    <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "Frida Restaurant",
+    "servesCuisine": ["Contemporary", "International"],
+    "priceRange": "$$",
+    "telephone": "+1-000-000-0000",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "123 Main Street",
+      "addressLocality": "Miami",
+      "addressRegion": "FL",
+      "postalCode": "33101",
+      "addressCountry": "US"
+    }
+  }
+  </script>
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container nav-wrap">
+            <a class="brand" href="#inicio">Frida Restaurant</a>
+            <button id="navToggle" class="nav-toggle" aria-expanded="false" aria-controls="primaryNav"
+                aria-label="Abrir menú / Open menu">
+                &#9776;
+            </button>
+            <nav id="primaryNav" aria-label="Navegacion principal / Primary navigation">
+                <ul class="nav-list">
+                    <li><a href="#menu" data-i18n="navMenu">Menú</a></li>
+                    <li><a href="#pedido" data-i18n="navOrder">Pedido</a></li>
+                    <li><a href="#reservas" data-i18n="navReservations">Reservas</a></li>
+                    <li><a href="#nosotros" data-i18n="navAbout">Nosotros</a></li>
+                </ul>
+            </nav>
+            <button id="langToggle" class="btn btn-ghost" aria-label="Cambiar idioma / Change language">EN</button>
+        </div>
+    </header>
+
+    <main id="inicio">
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <p class="eyebrow" data-i18n="heroEyebrow">Restaurante y experiencias memorables</p>
+                    <h1 data-i18n="heroTitle">Frida Restaurant</h1>
+                    <p class="hero-sub" data-i18n="heroSub">Explora el menú, envía pedidos y reserva tu mesa desde
+                        cualquier dispositivo con una presentación elegante y clara.</p>
+                    <div class="hero-actions">
+                        <a href="#menu" class="btn btn-primary" data-i18n="heroCtaMenu">Ver menú</a>
+                        <a href="#reservas" class="btn btn-outline" data-i18n="heroCtaReservation">Reservar mesa</a>
+                    </div>
+                    <div class="hero-strip">
+                        <article class="hero-feature">
+                            <h3 data-i18n="strip1Title">Menú digital</h3>
+                            <p data-i18n="strip1Text">Categorías claras y recorrido intuitivo desde cualquier
+                                pantalla.</p>
+                        </article>
+                        <article class="hero-feature">
+                            <h3 data-i18n="strip2Title">Pedidos rápidos</h3>
+                            <p data-i18n="strip2Text">Carrito directo a cocina con un flujo simple y profesional.</p>
+                        </article>
+                        <article class="hero-feature">
+                            <h3 data-i18n="strip3Title">Reservas fáciles</h3>
+                            <p data-i18n="strip3Text">Solicita tu mesa en segundos desde celular, tablet o
+                                computadora.</p>
+                        </article>
+                    </div>
+                </div>
+                <div class="hero-card">
+                    <p class="hero-card-kicker" data-i18n="heroCardEyebrow">Atención y horarios</p>
+                    <h2 data-i18n="heroCardTitle">Horario</h2>
+                    <p class="hero-card-text" data-i18n="heroCardText">Todo listo para pedidos, reservas y una
+                        experiencia comoda en sala durante toda la semana.</p>
+                    <ul>
+                        <li><span data-i18n="daysWeek">Lunes a Viernes</span><strong>09:00 - 21:00</strong></li>
+                        <li><span data-i18n="daysWeekend">Sabado y Domingo</span><strong>10:00 - 00:00</strong></li>
+                    </ul>
+                    <div class="hero-live-info" aria-label="Honduras live info">
+                        <p class="hero-live-item">
+                            <strong data-i18n="hnTimeLabel">Hora en Honduras</strong>
+                            <span id="hnTimeValue">--:--:--</span>
+                        </p>
+                        <p class="hero-live-item">
+                            <strong data-i18n="hnWeatherLabel">Clima en El Progreso</strong>
+                            <span id="hnWeatherValue">Cargando clima...</span>
+                        </p>
+                    </div>
+                    <div class="hero-badges">
+                        <span data-i18n="badgeFast">Servicio rápido</span>
+                        <span data-i18n="badgeFresh">Producto fresco</span>
+                        <span data-i18n="badgeFamily">Ambiente familiar</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="menu" class="container section">
+            <div class="section-head">
+                <h2 data-i18n="menuTitle">Menú por categorías</h2>
+                <p data-i18n="menuText">Categorías formales: Entradas, Platos principales, Bebidas y Postres.</p>
+            </div>
+
+            <div class="menu-tabs" role="tablist" aria-label="Categorías del menú / Menu categories">
+                <button class="chip active" data-category="all" data-i18n="tabAll">Todo</button>
+                <button class="chip" data-category="appetizers" data-i18n="tabAppetizers">Entradas</button>
+                <button class="chip" data-category="main_courses" data-i18n="tabMain">Platos principales</button>
+                <button class="chip" data-category="beverages" data-i18n="tabBeverages">Bebidas</button>
+                <button class="chip" data-category="desserts" data-i18n="tabDesserts">Postres</button>
+            </div>
+
+            <div id="menuGrid" class="menu-grid" aria-live="polite"></div>
+        </section>
+
+        <section id="pedido" class="container section order-section">
+            <div class="section-head">
+                <h2 data-i18n="orderTitle">Pedido rápido</h2>
+                <p data-i18n="orderText">Agrega productos al carrito y envía el pedido a cocina con un clic.</p>
+            </div>
+            <div id="orderTracker" class="tracker" aria-live="polite"></div>
+        </section>
+
+        <section id="reservas" class="container section">
+            <div class="section-head">
+                <h2 data-i18n="reservationTitle">Reserva de mesa</h2>
+                <p data-i18n="reservationText">Comparte datos importantes para organizar tu experiencia.</p>
+            </div>
+
+            <form id="reservationForm" class="reservation-form" novalidate>
+                <label>
+                    <span data-i18n="fieldName">Nombre completo</span>
+                    <input name="name" required>
+                </label>
+                <label>
+                    <span data-i18n="fieldPhone">Teléfono</span>
+                    <input name="phone" required type="tel">
+                </label>
+                <label>
+                    <span data-i18n="fieldEmail">Correo</span>
+                    <input name="email" type="email">
+                </label>
+                <label>
+                    <span data-i18n="fieldDate">Fecha</span>
+                    <input name="date" required type="date">
+                </label>
+                <label>
+                    <span data-i18n="fieldTime">Hora</span>
+                    <input name="time" required type="time">
+                </label>
+                <label>
+                    <span data-i18n="fieldParty">Personas</span>
+                    <input name="party" required type="number" min="1" max="20" value="2">
+                </label>
+                <label>
+                    <span data-i18n="fieldOccasion">Ocasión</span>
+                    <input name="occasion" data-i18n-placeholder="fieldOccasionPlaceholder"
+                        placeholder="Cumpleaños, reunión, aniversario / Birthday, meeting, anniversary">
+                </label>
+                <label>
+                    <span data-i18n="fieldAllergies">Alergias</span>
+                    <input name="allergies" data-i18n-placeholder="fieldAllergiesPlaceholder"
+                        placeholder="Gluten, lactosa, frutos secos / Gluten, lactose, nuts">
+                </label>
+                <label class="full">
+                    <span data-i18n="fieldNotes">Notas especiales</span>
+                    <textarea name="notes" rows="4" data-i18n-placeholder="fieldNotesPlaceholder"
+                        placeholder="Mesa cerca de ventana, silla para bebé, etc. / Window table, baby chair, etc."></textarea>
+                </label>
+                <button type="submit" class="btn btn-primary" data-i18n="btnReserve">Enviar reserva</button>
+            </form>
+        </section>
+
+        <section id="nosotros" class="container section about-grid">
+            <article class="about-card">
+                <h3 data-i18n="about1Title">Atención profesional</h3>
+                <p data-i18n="about1Text">Equipo entrenado para tiempos de respuesta rápidos.</p>
+            </article>
+            <article class="about-card">
+                <h3 data-i18n="about2Title">Calidad constante</h3>
+                <p data-i18n="about2Text">Control interno en cocina y servicio al cliente.</p>
+            </article>
+            <article class="about-card">
+                <h3 data-i18n="about3Title">Experiencia memorable</h3>
+                <p data-i18n="about3Text">Diseno visual, sabor y confort en equilibrio.</p>
+            </article>
+        </section>
+    </main>
+
+    <div class="cart-floating">
+        <button id="cartBtn" class="cart-button" aria-label="Abrir carrito / Open cart">
+            <span aria-hidden="true">&#128722;</span>
+            <strong id="cartCount">0</strong>
+        </button>
+    </div>
+
+    <div id="overlay" class="overlay hidden"></div>
+
+    <aside id="cartDrawer" class="cart-drawer" aria-hidden="true">
+        <header>
+            <h3 data-i18n="cartTitle">Carrito</h3>
+            <button id="closeCart" class="btn btn-ghost" aria-label="Cerrar / Close">X</button>
+        </header>
+        <div id="cartItems" class="cart-items"></div>
+        <div class="cart-customer">
+            <div class="cart-order-grid cart-order-main-row">
+                <label>
+                    <span data-i18n="orderCustomerName">Nombre para el pedido</span>
+                    <input id="orderCustomerName" type="text">
+                </label>
+                <label id="orderTableGroup" class="cart-table-field">
+                    <span data-i18n="orderTableLabel">Número de mesa</span>
+                    <input id="orderTableNumber" type="text" inputmode="numeric"
+                        data-i18n-placeholder="orderTablePlaceholder" placeholder="Mesa">
+                </label>
+            </div>
+            <div class="cart-order-grid cart-order-options-row">
+                <div class="cart-invoice-box">
+                    <label class="cart-invoice-toggle">
+                        <input id="orderNeedInvoice" type="checkbox">
+                        <span data-i18n="orderNeedInvoice">Factura con RTN?</span>
+                    </label>
+                </div>
+                <label class="cart-order-type-field">
+                    <span data-i18n="orderTypeLabel">Tipo de pedido</span>
+                    <select id="orderFulfillment" name="orderFulfillment">
+                        <option value="dine_in" data-i18n="orderDineInLabel" selected>En restaurante</option>
+                        <option value="takeaway" data-i18n="orderPickupLabel">Recoger</option>
+                        <option value="delivery" data-i18n="orderDeliveryLabel">Delivery</option>
+                    </select>
+                </label>
+            </div>
+            <label>
+                <span data-i18n="orderCustomerComments">Comentarios del pedido</span>
+                <textarea id="orderCustomerComments" rows="2" data-i18n-placeholder="orderCustomerCommentsPlaceholder"
+                    placeholder="Alergias, sin picante, recoger, delivery, etc. / Allergies, no spice, pickup, delivery, etc."></textarea>
+            </label>
+        </div>
+        <footer>
+            <p><span data-i18n="cartTotal">Total</span>: <strong id="cartTotal">L 0.00</strong></p>
+            <div class="cart-actions">
+                <button id="sendToKitchen" class="btn btn-primary" data-i18n="btnSendKitchen">Enviar a cocina</button>
+                <button id="clearCart" class="btn btn-outline" data-i18n="btnClear">Vaciar</button>
+            </div>
+        </footer>
+    </aside>
+
+    <div id="invoiceDetailsModal" class="modal hidden" role="dialog" aria-modal="true">
+        <div class="modal-card invoice-step-card">
+            <header>
+                <h3 data-i18n="orderInvoiceStepTitle">Datos para factura con RTN</h3>
+                <button id="closeInvoiceDetails" class="btn btn-ghost" aria-label="Cerrar / Close">X</button>
+            </header>
+            <p data-i18n="orderInvoiceStepText">Completa estos datos para preparar la factura fiscal de este pedido.</p>
+            <div class="invoice-step-grid">
+                <label id="invoicePhoneGroup" class="hidden">
+                    <span data-i18n="pickupPhoneLabel">Teléfono de contacto</span>
+                    <input id="invoicePickupPhone" type="tel" data-i18n-placeholder="pickupPhonePlaceholder"
+                        placeholder="Teléfono de contacto">
+                </label>
+                <label id="invoiceDeliveryAddressGroup" class="hidden">
+                    <span data-i18n="deliveryAddressLabel">Dirección de entrega</span>
+                    <textarea id="invoiceDeliveryAddressInput" rows="3"
+                        data-i18n-placeholder="deliveryAddressPlaceholder"
+                        placeholder="Dirección completa para delivery"></textarea>
+                </label>
+                <label>
+                    <span data-i18n="orderBusinessName">Nombre de la empresa</span>
+                    <input id="orderBusinessName" type="text" data-i18n-placeholder="orderBusinessNamePlaceholder"
+                        placeholder="Nombre del negocio o razón social">
+                </label>
+                <label>
+                    <span data-i18n="orderBusinessRTN">RTN de la empresa</span>
+                    <input id="orderBusinessRTN" type="text" data-i18n-placeholder="orderBusinessRTNPlaceholder"
+                        placeholder="RTN del negocio o empresa">
+                </label>
+            </div>
+            <div class="cart-actions">
+                <button id="invoiceDetailsBack" class="btn btn-outline" data-i18n="orderInvoiceBack">Volver</button>
+                <button id="invoiceDetailsContinue" class="btn btn-primary"
+                    data-i18n="btnSendKitchen">Enviar a cocina</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pickupDetailsModal" class="modal hidden" role="dialog" aria-modal="true">
+        <div class="modal-card invoice-step-card">
+            <header>
+                <h3 data-i18n="pickupStepTitle">Datos del pedido</h3>
+                <button id="closePickupDetails" class="btn btn-ghost" aria-label="Cerrar / Close">X</button>
+            </header>
+            <p data-i18n="pickupStepText">Confirma los datos para enviar este pedido a cocina.</p>
+            <div class="invoice-step-grid">
+                <label>
+                    <span data-i18n="pickupPhoneLabel">Teléfono de contacto</span>
+                    <input id="pickupPhoneInput" type="tel" data-i18n-placeholder="pickupPhonePlaceholder"
+                        placeholder="Teléfono de contacto">
+                </label>
+                <label id="deliveryAddressGroup" class="hidden">
+                    <span data-i18n="deliveryAddressLabel">Dirección de entrega</span>
+                    <textarea id="deliveryAddressInput" rows="3" data-i18n-placeholder="deliveryAddressPlaceholder"
+                        placeholder="Dirección completa para delivery"></textarea>
+                </label>
+            </div>
+            <div class="cart-actions">
+                <button id="pickupDetailsBack" class="btn btn-outline" data-i18n="pickupBack">Volver</button>
+                <button id="pickupSendKitchen" class="btn btn-primary" data-i18n="btnSendKitchen">Enviar a cocina</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="trackerOrderModal" class="modal hidden" role="dialog" aria-modal="true">
+        <div class="modal-card">
+            <header>
+                <h3 id="trackerOrderModalTitle">Pedido</h3>
+                <button id="closeTrackerOrderModal" class="btn btn-ghost" aria-label="Cerrar / Close">X</button>
+            </header>
+            <div id="trackerOrderModalBody"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div id="orderViewPrompt" class="order-view-prompt hidden" role="dialog" aria-modal="false"
+        aria-labelledby="orderViewPromptTitle">
+        <button id="closeOrderViewPrompt" class="order-view-prompt-close" type="button"
+            aria-label="Cerrar / Close">X</button>
+        <div>
+            <h3 id="orderViewPromptTitle" data-i18n="orderViewPromptTitle">Orden enviada</h3>
+            <p data-i18n="orderViewPromptText">¿Deseas ver la orden?</p>
+        </div>
+        <div class="order-view-prompt-actions">
+            <button id="viewOrderPromptYes" class="btn btn-primary" type="button" data-i18n="yesButton">Sí</button>
+            <button id="viewOrderPromptNo" class="btn btn-outline" type="button" data-i18n="noButton">No</button>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="container footer-wrap">
+            <p>Frida Restaurant</p>
+            <p data-i18n="footerText">Dirección, teléfono y horarios actualizados.</p>
+            <nav class="footer-social" aria-label="Redes sociales / Social media">
+                <a class="social-link" href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+                    aria-label="Instagram">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                            d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Zm0 1.8A3.7 3.7 0 0 0 3.8 7.5v9a3.7 3.7 0 0 0 3.7 3.7h9a3.7 3.7 0 0 0 3.7-3.7v-9a3.7 3.7 0 0 0-3.7-3.7h-9Zm9.45 1.45a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z" />
+                    </svg>
+                </a>
+                <a class="social-link" href="https://facebook.com" target="_blank" rel="noopener noreferrer"
+                    aria-label="Facebook">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                            d="M13.4 22v-8.2h2.8l.4-3.2h-3.2v-2c0-.9.3-1.5 1.6-1.5h1.7V4.2c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.5-4 4.3v2.2H7.6v3.2h2.7V22h3.1Z" />
+                    </svg>
+                </a>
+                <a class="social-link" href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                            d="M18.9 3H22l-6.8 7.8L23 21h-6.2l-4.9-6.4L6.3 21H3.2l7.3-8.4L3 3h6.3l4.5 5.9L18.9 3Zm-1.1 16h1.7L8.4 4.9H6.5L17.8 19Z" />
+                    </svg>
+                </a>
+            </nav>
+        </div>
+    </footer>
+
+    <script type="module" src="js/app.js?v=20260419f"></script>
+</body>
+
+</html>

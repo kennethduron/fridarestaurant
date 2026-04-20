@@ -683,29 +683,19 @@ function editableFieldFromEvent(event) {
   const target = event.target;
   if (!(target instanceof Element)) return null;
   const directField = target.closest(CRM_EDITABLE_FIELD_SELECTOR);
-  if (directField) return directField;
+  if (directField) return null;
   const label = target.closest("label");
   return label ? label.querySelector(CRM_EDITABLE_FIELD_SELECTOR) : null;
 }
 
-function focusEditableFieldFromLabel(event) {
-  const target = event.target;
-  if (!(target instanceof Element)) return;
-  if (target.closest(CRM_EDITABLE_FIELD_SELECTOR)) return;
+function focusEditableFieldForTouch(event) {
   const field = editableFieldFromEvent(event);
   if (!field || document.activeElement === field) return;
-  field.focus({ preventScroll: true });
-}
-
-function focusedEditableField() {
-  const active = document.activeElement;
-  if (!(active instanceof HTMLElement)) return null;
-  return active.matches(CRM_EDITABLE_FIELD_SELECTOR) ? active : null;
-}
-
-function applyResponsiveChrome() {
-  const shortLabel = window.matchMedia("(max-width: 560px)").matches;
-  signOutBtn.textContent = shortLabel ? t("signOutShort") : t("signOut");
+  try {
+    field.focus({ preventScroll: true });
+  } catch (_error) {
+    field.focus();
+  }
 }
 
 function readHiddenOrderIds() {
@@ -1385,7 +1375,7 @@ function renderProductManager() {
         <div class="product-manager-toolbar">
           <label>
             <span>${t("productSearchLabel")}</span>
-            <input id="productManagerSearch" type="search" inputmode="search" autocomplete="off" value="${escapeHtml(productManagerSearchTerm)}" placeholder="${escapeHtml(t("productSearchPlaceholder"))}">
+            <input id="productManagerSearch" type="search" value="${escapeHtml(productManagerSearchTerm)}" placeholder="${escapeHtml(t("productSearchPlaceholder"))}">
           </label>
           <label>
             <span>${t("productCategoryLabel")}</span>
@@ -1410,11 +1400,11 @@ function renderProductManager() {
               <div class="product-row-fields">
                 <label>
                   <span>${t("productPriceLabel")}</span>
-                  <input class="product-price-input" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(item.price).toFixed(2)}">
+                  <input class="product-price-input" type="number" min="0" step="0.01" value="${Number(item.price).toFixed(2)}">
                 </label>
                 <label class="product-note-field">
                   <span>${t("productNoteEsLabel")}</span>
-                <textarea class="product-note-es" maxlength="180" autocomplete="off">${escapeHtml(item.note?.es || "")}</textarea>
+                  <textarea class="product-note-es" maxlength="180">${escapeHtml(item.note?.es || "")}</textarea>
                 </label>
                 <label class="product-new-toggle">
                   <input class="product-new-input" type="checkbox" ${item.isNew ? "checked" : ""}>
@@ -1609,7 +1599,7 @@ function renderOrderCreator() {
             <div class="order-creator-toolbar">
               <label>
                 <span>${t("orderCreatorSearchLabel")}</span>
-                <input id="orderCreatorSearch" type="search" inputmode="search" autocomplete="off" value="${escapeHtml(orderCreatorSearchTerm)}" placeholder="${escapeHtml(t("orderCreatorSearchPlaceholder"))}">
+                <input id="orderCreatorSearch" type="search" value="${escapeHtml(orderCreatorSearchTerm)}" placeholder="${escapeHtml(t("orderCreatorSearchPlaceholder"))}">
               </label>
               <label>
                 <span>${t("orderCreatorCategoryLabel")}</span>
@@ -1670,19 +1660,19 @@ function renderOrderCreator() {
               </label>
               <label>
                 <span>${t("orderCreatorNameLabel")}</span>
-                <input name="customerName" value="${escapeHtml(orderCreatorDraft.customerName)}" autocomplete="name" autocapitalize="words" required>
+                <input name="customerName" value="${escapeHtml(orderCreatorDraft.customerName)}" required>
               </label>
               <label>
                 <span>${t("orderCreatorPhoneLabel")}</span>
-                <input name="phone" value="${escapeHtml(orderCreatorDraft.phone)}" type="tel" inputmode="tel" autocomplete="tel">
+                <input name="phone" value="${escapeHtml(orderCreatorDraft.phone)}" inputmode="tel">
               </label>
               <label class="${tableHidden ? "hidden" : ""}">
                 <span>${t("orderCreatorTableLabel")}</span>
-                <input name="table" value="${escapeHtml(orderCreatorDraft.table)}" inputmode="numeric" autocomplete="off">
+                <input name="table" value="${escapeHtml(orderCreatorDraft.table)}">
               </label>
               <label class="${addressHidden ? "hidden" : ""}">
                 <span>${t("orderCreatorAddressLabel")}</span>
-                <input name="address" value="${escapeHtml(orderCreatorDraft.address)}" autocomplete="street-address">
+                <input name="address" value="${escapeHtml(orderCreatorDraft.address)}">
               </label>
               <label>
                 <span>${t("orderCreatorPaymentMethodLabel")}</span>
@@ -1701,7 +1691,7 @@ function renderOrderCreator() {
               </label>
               <label class="full">
                 <span>${t("orderCreatorNotesLabel")}</span>
-                <textarea name="notes" autocomplete="off">${escapeHtml(orderCreatorDraft.notes)}</textarea>
+                <textarea name="notes">${escapeHtml(orderCreatorDraft.notes)}</textarea>
               </label>
               <div class="order-creator-submit full">
                 <button type="button" class="btn btn-outline" data-order-clear>${t("orderCreatorReset")}</button>
@@ -2585,7 +2575,8 @@ function updateLanguageToggleButtons() {
 function applyI18n() {
   document.documentElement.lang = lang;
   updateLanguageToggleButtons();
-  applyResponsiveChrome();
+  const shortLabel = window.matchMedia("(max-width: 560px)").matches;
+  signOutBtn.textContent = shortLabel ? t("signOutShort") : t("signOut");
   periodButtons.forEach((button) => {
     const label = t(`period_${button.dataset.period}`);
     button.textContent = label;
@@ -3566,10 +3557,6 @@ function startRealtime() {
   realtimeAuthExpiredHandled = false;
   unsubscribeOrders = listenOrders(
     (orders) => {
-      const activeEditable = focusedEditableField();
-      const editingOrderName = Boolean(activeEditable?.classList.contains("crm-customer-name-input"));
-      const editingReviewField = Boolean(activeEditable && reviewModal?.contains(activeEditable));
-      const editingSalesSearch = Boolean(activeEditable && activeEditable.id === "salesDaySearch");
       const nextIds = new Set(orders.map((order) => order.id));
       const nextPaymentMap = new Map(orders.map((order) => [order.id, order.payment?.status || "unpaid"]));
       if (!hasSeenInitialOrdersSnapshot) {
@@ -3591,6 +3578,7 @@ function startRealtime() {
         knownOrderPaymentStatus = nextPaymentMap;
       }
 
+      const editingOrderName = isEditingOrderCustomerName();
       orders.forEach((order) => {
         if (!orderNamePendingValues.has(order.id) && !orderNameSavingIds.has(order.id)) {
           orderNameLastSavedValues.set(order.id, order.customer?.name || "");
@@ -3609,10 +3597,10 @@ function startRealtime() {
       ));
       renderStats();
       renderFoodStats();
-      if (!editingSalesSearch) renderSalesCalendar();
+      renderSalesCalendar();
       if (!editingOrderName) {
         renderOrders();
-        if (selectedOrderId && !editingReviewField) openReview(selectedOrderId);
+        if (selectedOrderId) openReview(selectedOrderId);
       }
       openLinkedOrderIfReady();
     },
@@ -4131,22 +4119,22 @@ function toggleLanguage() {
   applyI18n();
 }
 
-let crmResponsiveResizeFrame = null;
-function scheduleCRMResponsiveChrome() {
-  if (crmResponsiveResizeFrame !== null) return;
-  crmResponsiveResizeFrame = window.requestAnimationFrame(() => {
-    crmResponsiveResizeFrame = null;
-    applyResponsiveChrome();
+let crmI18nResizeFrame = null;
+function scheduleCRMApplyI18n() {
+  if (crmI18nResizeFrame !== null) return;
+  crmI18nResizeFrame = window.requestAnimationFrame(() => {
+    crmI18nResizeFrame = null;
+    applyI18n();
   });
 }
 
 if (langToggleDesktop) langToggleDesktop.addEventListener("click", toggleLanguage);
 if (langToggleMobile) langToggleMobile.addEventListener("click", toggleLanguage);
 
-window.addEventListener("resize", scheduleCRMResponsiveChrome);
+window.addEventListener("resize", scheduleCRMApplyI18n);
 window.addEventListener("pointerdown", unlockNotificationSound, { once: true });
 window.addEventListener("keydown", unlockNotificationSound, { once: true });
-document.addEventListener("click", focusEditableFieldFromLabel, { capture: true });
+document.addEventListener("click", focusEditableFieldForTouch, { capture: true });
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && currentStaffUser) {
     renewCRMNotificationsIfAllowed();
