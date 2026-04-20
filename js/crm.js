@@ -1235,6 +1235,61 @@ function salesPaymentBreakdown(orders) {
   return breakdown;
 }
 
+function selectedSalesDayOrdersForSearch() {
+  const monthSales = salesByDayForMonth(calendarMonth);
+  const selectedBucket = monthSales.get(selectedCalendarDate) || null;
+  if (!selectedBucket) return [];
+  const paymentFilteredDayOrders = salesDayPaymentFilter === "all"
+    ? selectedBucket.orders
+    : selectedBucket.orders.filter((order) => salesPaymentMethodKey(order) === salesDayPaymentFilter);
+  const normalizedSalesDaySearch = salesDaySearchTerm.trim().toLowerCase();
+  return paymentFilteredDayOrders.filter((order) => {
+    if (!normalizedSalesDaySearch) return true;
+    const customerName = String(order.customer?.name || "").toLowerCase();
+    const invoiceNumber = String(order.invoice?.invoiceNumber || "").toLowerCase();
+    const displayId = String(order.displayId || order.id.slice(0, 6) || "").toLowerCase();
+    const orderId = String(order.id || "").toLowerCase();
+    const itemNames = (order.items || [])
+      .map((item) => String(foodName(item) || "").toLowerCase())
+      .join(" ");
+    return customerName.includes(normalizedSalesDaySearch)
+      || invoiceNumber.includes(normalizedSalesDaySearch)
+      || displayId.includes(normalizedSalesDaySearch)
+      || orderId.includes(normalizedSalesDaySearch)
+      || itemNames.includes(normalizedSalesDaySearch);
+  });
+}
+
+function renderSalesDayListHtml(filteredDayOrders) {
+  return `
+    ${filteredDayOrders.length
+      ? filteredDayOrders
+        .map(
+          (order) => `
+            <article class="sales-day-row">
+              <div>
+                <strong>#${order.displayId || order.id.slice(0, 6)}</strong>
+                <p>${t("customer")}: ${order.customer?.name || "-"} (${order.customer?.phone || "-"})</p>
+                ${renderInvoiceRequestNotice(order)}
+                <p><strong>${crmPaymentLine(order)}</strong></p>
+                <p>${timeLabel(orderSalesDateValue(order))} | ${money(order.total)}</p>
+              </div>
+              <button class="btn btn-outline" data-review-order="${order.id}">${t("review")}</button>
+            </article>
+          `
+        )
+        .join("")
+      : ""}
+    ${filteredDayOrders.length ? "" : `<p class="sales-day-empty">${t("calendarSearchEmpty")}</p>`}
+  `;
+}
+
+function renderSalesDaySearchResults() {
+  const list = salesCalendar?.querySelector(".sales-day-list");
+  if (!list) return;
+  list.innerHTML = renderSalesDayListHtml(selectedSalesDayOrdersForSearch());
+}
+
 function menuCategoryLabel(category) {
   const labels = {
     appetizers: lang === "es" ? "Entradas" : "Appetizers",
@@ -2162,17 +2217,29 @@ function buildPrintableOrderHtml(order) {
       <meta charset="utf-8">
       <title>Frida Restaurant ${orderRef}</title>
       <style>
-        @page { size: 80mm auto; margin: 4mm; }
+        @page { size: 80mm auto; margin: 0; }
         * { box-sizing: border-box; }
+        html,
         body {
-          margin: 0 auto;
-          width: 72mm;
+          margin: 0;
+          padding: 0;
+          width: 80mm;
+          min-width: 80mm;
           color: #000;
           font-family: "Courier New", monospace;
           font-size: 12px;
           line-height: 1.25;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
-        .ticket { width: 100%; }
+        body {
+          overflow-x: hidden;
+        }
+        .ticket {
+          width: 80mm;
+          max-width: 80mm;
+          padding: 3mm;
+        }
         .center { text-align: center; }
         .logo {
           width: 42mm;
@@ -2230,6 +2297,17 @@ function buildPrintableOrderHtml(order) {
           margin-top: 5mm;
           text-align: center;
           font-weight: 700;
+        }
+        @media print {
+          html,
+          body,
+          .ticket {
+            width: 80mm;
+            max-width: 80mm;
+          }
+          body {
+            margin: 0;
+          }
         }
       </style>
       <script>
@@ -2415,20 +2493,32 @@ function buildFiscalPrintableOrderHtml(order) {
       <meta charset="utf-8">
       <title>${escapeHtml(fiscalSettings.brandName)} ${invoiceNumber}</title>
       <style>
-        @page { size: 80mm auto; margin: 4mm; }
+        @page { size: 80mm auto; margin: 0; }
         * { box-sizing: border-box; }
+        html,
         body {
-          margin: 0 auto;
-          width: 72mm;
+          margin: 0;
+          padding: 0;
+          width: 80mm;
+          min-width: 80mm;
           color: #000;
           font-family: "Courier New", monospace;
           font-size: 12px;
           line-height: 1.15;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
-        .ticket { width: 100%; }
+        body {
+          overflow-x: hidden;
+        }
+        .ticket {
+          width: 80mm;
+          max-width: 80mm;
+          padding: 3mm;
+        }
         .ticket-copy + .ticket-copy {
           page-break-before: always;
-          margin-top: 8mm;
+          break-before: page;
         }
         .center { text-align: center; }
         .logo {
@@ -2522,6 +2612,18 @@ function buildFiscalPrintableOrderHtml(order) {
         .notice {
           font-size: 10px;
           font-weight: 700;
+        }
+        @media print {
+          html,
+          body,
+          .ticket,
+          .ticket-copy {
+            width: 80mm;
+            max-width: 80mm;
+          }
+          body {
+            margin: 0;
+          }
         }
       </style>
       <script>
@@ -2962,24 +3064,7 @@ function renderSalesCalendar() {
     ? selectedDayOrders
     : selectedDayOrders.filter((order) => salesPaymentMethodKey(order) === salesDayPaymentFilter);
   const paymentFilteredRevenue = paymentFilteredDayOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
-  const normalizedSalesDaySearch = salesDaySearchTerm.trim().toLowerCase();
-  const filteredDayOrders = selectedBucket
-    ? paymentFilteredDayOrders.filter((order) => {
-        if (!normalizedSalesDaySearch) return true;
-        const customerName = String(order.customer?.name || "").toLowerCase();
-        const invoiceNumber = String(order.invoice?.invoiceNumber || "").toLowerCase();
-        const displayId = String(order.displayId || order.id.slice(0, 6) || "").toLowerCase();
-        const orderId = String(order.id || "").toLowerCase();
-        const itemNames = (order.items || [])
-          .map((item) => String(foodName(item) || "").toLowerCase())
-          .join(" ");
-        return customerName.includes(normalizedSalesDaySearch)
-          || invoiceNumber.includes(normalizedSalesDaySearch)
-          || displayId.includes(normalizedSalesDaySearch)
-          || orderId.includes(normalizedSalesDaySearch)
-          || itemNames.includes(normalizedSalesDaySearch);
-      })
-    : [];
+  const filteredDayOrders = selectedSalesDayOrdersForSearch();
   const dayFoodRows = (() => {
     if (!selectedBucket) return [];
     const byFood = new Map();
@@ -3084,25 +3169,7 @@ function renderSalesCalendar() {
               </label>
             </div>
             <div class="sales-day-list">
-              ${filteredDayOrders.length
-                ? filteredDayOrders
-                .map(
-                  (order) => `
-                    <article class="sales-day-row">
-                      <div>
-                        <strong>#${order.displayId || order.id.slice(0, 6)}</strong>
-                        <p>${t("customer")}: ${order.customer?.name || "-"} (${order.customer?.phone || "-"})</p>
-                        ${renderInvoiceRequestNotice(order)}
-                        <p><strong>${crmPaymentLine(order)}</strong></p>
-                        <p>${timeLabel(orderSalesDateValue(order))} | ${money(order.total)}</p>
-                      </div>
-                      <button class="btn btn-outline" data-review-order="${order.id}">${t("review")}</button>
-                    </article>
-                  `
-                )
-                .join("")
-                : ""}
-              ${filteredDayOrders.length ? "" : `<p class="sales-day-empty">${t("calendarSearchEmpty")}</p>`}
+              ${renderSalesDayListHtml(filteredDayOrders)}
             </div>
             <div class="sales-food-breakdown">
               <h5>${t("calendarFoodBreakdown")}</h5>
@@ -4023,7 +4090,7 @@ if (salesCalendar) {
     const searchInput = event.target.closest("#salesDaySearch");
     if (!searchInput) return;
     salesDaySearchTerm = searchInput.value || "";
-    renderSalesCalendarKeepingSearchPosition(searchInput.selectionStart, searchInput.selectionEnd);
+    renderSalesDaySearchResults();
   });
 
   salesCalendar.addEventListener("focusout", (event) => {
