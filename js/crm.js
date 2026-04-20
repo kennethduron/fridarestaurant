@@ -683,7 +683,7 @@ function editableFieldFromEvent(event) {
   const target = event.target;
   if (!(target instanceof Element)) return null;
   const directField = target.closest(CRM_EDITABLE_FIELD_SELECTOR);
-  if (directField) return null;
+  if (directField) return directField;
   const label = target.closest("label");
   return label ? label.querySelector(CRM_EDITABLE_FIELD_SELECTOR) : null;
 }
@@ -691,11 +691,7 @@ function editableFieldFromEvent(event) {
 function focusEditableFieldForTouch(event) {
   const field = editableFieldFromEvent(event);
   if (!field || document.activeElement === field) return;
-  try {
-    field.focus({ preventScroll: true });
-  } catch (_error) {
-    field.focus();
-  }
+  field.focus();
 }
 
 function readHiddenOrderIds() {
@@ -1375,7 +1371,7 @@ function renderProductManager() {
         <div class="product-manager-toolbar">
           <label>
             <span>${t("productSearchLabel")}</span>
-            <input id="productManagerSearch" type="search" value="${escapeHtml(productManagerSearchTerm)}" placeholder="${escapeHtml(t("productSearchPlaceholder"))}">
+            <input id="productManagerSearch" type="search" inputmode="search" autocomplete="off" value="${escapeHtml(productManagerSearchTerm)}" placeholder="${escapeHtml(t("productSearchPlaceholder"))}">
           </label>
           <label>
             <span>${t("productCategoryLabel")}</span>
@@ -1400,11 +1396,11 @@ function renderProductManager() {
               <div class="product-row-fields">
                 <label>
                   <span>${t("productPriceLabel")}</span>
-                  <input class="product-price-input" type="number" min="0" step="0.01" value="${Number(item.price).toFixed(2)}">
+                  <input class="product-price-input" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(item.price).toFixed(2)}">
                 </label>
                 <label class="product-note-field">
                   <span>${t("productNoteEsLabel")}</span>
-                  <textarea class="product-note-es" maxlength="180">${escapeHtml(item.note?.es || "")}</textarea>
+                  <textarea class="product-note-es" maxlength="180" autocomplete="off">${escapeHtml(item.note?.es || "")}</textarea>
                 </label>
                 <label class="product-new-toggle">
                   <input class="product-new-input" type="checkbox" ${item.isNew ? "checked" : ""}>
@@ -1599,7 +1595,7 @@ function renderOrderCreator() {
             <div class="order-creator-toolbar">
               <label>
                 <span>${t("orderCreatorSearchLabel")}</span>
-                <input id="orderCreatorSearch" type="search" value="${escapeHtml(orderCreatorSearchTerm)}" placeholder="${escapeHtml(t("orderCreatorSearchPlaceholder"))}">
+                <input id="orderCreatorSearch" type="search" inputmode="search" autocomplete="off" value="${escapeHtml(orderCreatorSearchTerm)}" placeholder="${escapeHtml(t("orderCreatorSearchPlaceholder"))}">
               </label>
               <label>
                 <span>${t("orderCreatorCategoryLabel")}</span>
@@ -1660,19 +1656,19 @@ function renderOrderCreator() {
               </label>
               <label>
                 <span>${t("orderCreatorNameLabel")}</span>
-                <input name="customerName" value="${escapeHtml(orderCreatorDraft.customerName)}" required>
+                <input name="customerName" type="text" value="${escapeHtml(orderCreatorDraft.customerName)}" autocomplete="name" autocapitalize="words" required>
               </label>
               <label>
                 <span>${t("orderCreatorPhoneLabel")}</span>
-                <input name="phone" value="${escapeHtml(orderCreatorDraft.phone)}" inputmode="tel">
+                <input name="phone" type="tel" value="${escapeHtml(orderCreatorDraft.phone)}" inputmode="tel" autocomplete="tel">
               </label>
               <label class="${tableHidden ? "hidden" : ""}">
                 <span>${t("orderCreatorTableLabel")}</span>
-                <input name="table" value="${escapeHtml(orderCreatorDraft.table)}">
+                <input name="table" type="text" value="${escapeHtml(orderCreatorDraft.table)}" inputmode="numeric" autocomplete="off">
               </label>
               <label class="${addressHidden ? "hidden" : ""}">
                 <span>${t("orderCreatorAddressLabel")}</span>
-                <input name="address" value="${escapeHtml(orderCreatorDraft.address)}">
+                <input name="address" type="text" value="${escapeHtml(orderCreatorDraft.address)}" autocomplete="street-address">
               </label>
               <label>
                 <span>${t("orderCreatorPaymentMethodLabel")}</span>
@@ -1691,7 +1687,7 @@ function renderOrderCreator() {
               </label>
               <label class="full">
                 <span>${t("orderCreatorNotesLabel")}</span>
-                <textarea name="notes">${escapeHtml(orderCreatorDraft.notes)}</textarea>
+                <textarea name="notes" autocomplete="off">${escapeHtml(orderCreatorDraft.notes)}</textarea>
               </label>
               <div class="order-creator-submit full">
                 <button type="button" class="btn btn-outline" data-order-clear>${t("orderCreatorReset")}</button>
@@ -4134,7 +4130,6 @@ if (langToggleMobile) langToggleMobile.addEventListener("click", toggleLanguage)
 window.addEventListener("resize", scheduleCRMApplyI18n);
 window.addEventListener("pointerdown", unlockNotificationSound, { once: true });
 window.addEventListener("keydown", unlockNotificationSound, { once: true });
-document.addEventListener("click", focusEditableFieldForTouch, { capture: true });
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && currentStaffUser) {
     renewCRMNotificationsIfAllowed();
