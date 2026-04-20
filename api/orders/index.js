@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
 
     if (req.method === "GET") {
       await requireStaff(getBearerToken(req), ["admin", "kitchen", "cashier"]);
-      const orders = await supabaseFetch("/rest/v1/orders?select=*,order_items(*)&order=created_at.desc", {
+      const orders = await supabaseFetch("/rest/v1/orders?select=*,order_items(*),order_status_events(status,created_at)&order=created_at.desc&order_status_events.order=created_at.asc", {
         admin: true,
         prefer: "return=representation"
       });

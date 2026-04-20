@@ -397,6 +397,7 @@ function mapOrder(row) {
     total: Number(item.total || 0),
     notes: item.notes || ""
   })) : [];
+  const statusEvents = mapOrderStatusEvents(row.order_status_events);
   return {
     id: row.id,
     displayId: row.display_id,
@@ -423,9 +424,29 @@ function mapOrder(row) {
       status: row.payment_status || "unpaid"
     },
     invoice: row.invoice || null,
+    statusEvents,
+    deliveredAt: deliveredAtFromStatusEvents(statusEvents),
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
+}
+
+function mapOrderStatusEvents(events) {
+  return Array.isArray(events)
+    ? events
+      .filter(Boolean)
+      .map((event) => ({
+        status: normalizeIncomingStatus(event.status),
+        createdAt: event.created_at
+      }))
+    : [];
+}
+
+function deliveredAtFromStatusEvents(events) {
+  const deliveredEvents = Array.isArray(events)
+    ? events.filter((event) => event.status === "delivered" && event.createdAt)
+    : [];
+  return deliveredEvents.length ? deliveredEvents[deliveredEvents.length - 1].createdAt : null;
 }
 
 function mapReservation(row) {
@@ -441,10 +462,16 @@ function mapReservation(row) {
     occasion: row.occasion || "",
     allergies: row.allergies || "",
     notes: row.notes || "",
-    status: row.status || "pending",
+    status: normalizeReservationStatus(row.status),
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
+}
+
+function normalizeReservationStatus(status) {
+  if (status === "accepted" || status === "confirmed" || status === "completed") return "accepted";
+  if (status === "rejected" || status === "cancelled" || status === "canceled") return "rejected";
+  return "pending";
 }
 
 function normalizeIncomingStatus(status) {
@@ -533,6 +560,13 @@ async function updateOrderCustomerName(id, customerName) {
   await apiRequest(`/api/orders/${encodeURIComponent(id)}`, {
     method: "PATCH",
     body: { customer_name: customerName }
+  });
+}
+
+async function updateReservationStatus(id, status) {
+  await apiRequest("/api/reservations", {
+    method: "PATCH",
+    body: { id, status }
   });
 }
 
@@ -750,6 +784,7 @@ export {
   updateOrderPaymentMethod,
   updateOrderInvoiceData,
   updateOrderCustomerName,
+  updateReservationStatus,
   loadFiscalSettings,
   loadMenuSettings,
   listenMenuSettings,

@@ -13,10 +13,10 @@ const { supabaseFetch, requireStaff } = require("../../lib/server/supabase");
 const { sendToTokens } = require("../../lib/server/firebaseAdmin");
 
 module.exports = async function handler(req, res) {
-  if (handleOptions(req, res, ["GET", "POST", "OPTIONS"])) return;
+  if (handleOptions(req, res, ["GET", "POST", "PATCH", "OPTIONS"])) return;
 
   try {
-    requireMethod(req, ["GET", "POST"]);
+    requireMethod(req, ["GET", "POST", "PATCH"]);
 
     if (req.method === "GET") {
       await requireStaff(getBearerToken(req), ["admin", "cashier"]);
@@ -25,6 +25,28 @@ module.exports = async function handler(req, res) {
         prefer: "return=representation"
       });
       sendJson(req, res, 200, { reservations }, ["GET", "POST", "OPTIONS"]);
+      return;
+    }
+
+    if (req.method === "PATCH") {
+      await requireStaff(getBearerToken(req), ["admin", "cashier"]);
+      const body = await readJson(req);
+      const reservationId = String(body.id || body.reservation_id || body.reservationId || "").trim();
+      if (!reservationId) throw httpError(400, "missing_reservation_id", "Missing reservation id.");
+      const status = normalizeReservationStatus(body.status);
+
+      const updatedRows = await supabaseFetch(`/rest/v1/reservations?id=eq.${encodeURIComponent(reservationId)}`, {
+        method: "PATCH",
+        admin: true,
+        body: {
+          status: dbReservationStatus(status),
+          updated_at: new Date().toISOString()
+        }
+      });
+
+      const reservation = Array.isArray(updatedRows) ? updatedRows[0] : updatedRows;
+      if (!reservation) throw httpError(404, "reservation_not_found", "Reservation not found.");
+      sendJson(req, res, 200, { reservation }, ["GET", "POST", "PATCH", "OPTIONS"]);
       return;
     }
 
@@ -41,11 +63,29 @@ module.exports = async function handler(req, res) {
 
     sendJson(req, res, 201, {
       reservation: createdReservation
-    }, ["GET", "POST", "OPTIONS"]);
+    }, ["GET", "POST", "PATCH", "OPTIONS"]);
   } catch (error) {
-    sendJson(req, res, error.statusCode || 500, errorPayload(error), ["GET", "POST", "OPTIONS"]);
+    sendJson(req, res, error.statusCode || 500, errorPayload(error), ["GET", "POST", "PATCH", "OPTIONS"]);
   }
 };
+
+const RESERVATION_STATUSES = new Set(["pending", "accepted", "rejected", "confirmed", "cancelled", "canceled"]);
+
+function normalizeReservationStatus(status) {
+  const value = String(status || "").trim();
+  if (!RESERVATION_STATUSES.has(value)) {
+    throw httpError(400, "invalid_reservation_status", "Reservation status is not valid.");
+  }
+  if (value === "confirmed") return "accepted";
+  if (value === "cancelled" || value === "canceled") return "rejected";
+  return value;
+}
+
+function dbReservationStatus(status) {
+  if (status === "accepted") return "confirmed";
+  if (status === "rejected") return "cancelled";
+  return "pending";
+}
 
 function normalizeReservation(body) {
   const name = String(body.name || "").trim();
@@ -81,7 +121,7 @@ async function notifyStaffNewReservation(reservation) {
   await sendToTokens(tokens, {
     title: "Nueva reserva recibida",
     body: `${reservation.name || "Cliente"} | ${when || "Fecha por confirmar"} | ${partyText}`,
-    link: "https://fridarestauranthn.web.app/crm.html",
+    link: `https://fridarestauranthn.web.app/crm.html?reservation=${encodeURIComponent(reservation.id)}`,
     data: {
       type: "new_reservation",
       reservationId: reservation.id,

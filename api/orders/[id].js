@@ -40,7 +40,7 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const rows = await supabaseFetch(`/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=*,order_items(*)&limit=1`, {
+    const rows = await supabaseFetch(`/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=*,order_items(*),order_status_events(status,created_at)&order_status_events.order=created_at.asc&limit=1`, {
       admin: true,
       prefer: "return=representation"
     });

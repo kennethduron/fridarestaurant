@@ -7,6 +7,7 @@ import {
   updateOrderPaymentMethod,
   updateOrderInvoiceData,
   updateOrderCustomerName,
+  updateReservationStatus,
   loadFiscalSettings,
   loadMenuSettings,
   saveFiscalSettings,
@@ -18,7 +19,7 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260419c";
+} from "./firebase-config.js?v=20260420b";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 
@@ -70,6 +71,15 @@ const i18n = {
     filterPreparing: "Preparando",
     filterDelivered: "Entregado",
     filterRejected: "Rechazado",
+    reservationStatus: "Estado de reserva",
+    reservationStatus_pending: "Pendiente",
+    reservationStatus_accepted: "Aceptado",
+    reservationStatus_rejected: "Rechazado",
+    reservationAccept: "Aceptar",
+    reservationReject: "Rechazar",
+    reservationPending: "Marcar pendiente",
+    reservationUpdated: "Reserva actualizada",
+    reservationUpdateError: "No se pudo actualizar la reserva.",
     btnPending: "Pendiente",
     btnInProgress: "Preparando",
     btnReady: "Listo",
@@ -99,6 +109,7 @@ const i18n = {
     customerNameLabel: "Nombre del cliente",
     customerNameSaved: "Nombre actualizado",
     customerNameSaveError: "No se pudo actualizar el nombre.",
+    orderTableLabel: "Mesa",
     orderComments: "Comentarios del pedido",
     invoiceRequestSummary: "Solicita factura con RTN y nombre",
     orderPickupBadge: "Recoger",
@@ -331,6 +342,15 @@ const i18n = {
     filterPreparing: "Preparing",
     filterDelivered: "Delivered",
     filterRejected: "Rejected",
+    reservationStatus: "Reservation status",
+    reservationStatus_pending: "Pending",
+    reservationStatus_accepted: "Accepted",
+    reservationStatus_rejected: "Rejected",
+    reservationAccept: "Accept",
+    reservationReject: "Reject",
+    reservationPending: "Mark pending",
+    reservationUpdated: "Reservation updated",
+    reservationUpdateError: "Could not update reservation.",
     btnPending: "Pending",
     btnInProgress: "Preparing",
     btnReady: "Ready",
@@ -360,6 +380,7 @@ const i18n = {
     customerNameLabel: "Customer name",
     customerNameSaved: "Name updated",
     customerNameSaveError: "Could not update the name.",
+    orderTableLabel: "Table",
     orderComments: "Order comments",
     invoiceRequestSummary: "Customer requested invoice with RTN and name",
     orderPickupBadge: "Pickup",
@@ -612,6 +633,7 @@ const busyScreen = createBusyScreen();
 
 let lang = "es";
 let activeFilter = "all";
+let activeReservationFilter = "all";
 let selectedOrderId = null;
 let currentStaffUser = null;
 let currentStaffProfile = null;
@@ -668,6 +690,8 @@ let audioUnlocked = false;
 let realtimeAuthExpiredHandled = false;
 let fiscalSettings = mergeFiscalSettings();
 let pendingLinkedOrderId = crmUrlParams.get("order") || crmUrlParams.get("orderId") || "";
+let pendingLinkedReservationId = crmUrlParams.get("reservation") || crmUrlParams.get("reservationId") || "";
+let highlightedReservationId = pendingLinkedReservationId;
 let lastCrmPushRegisterAt = 0;
 let toastTimer = null;
 
@@ -941,12 +965,17 @@ function notifyNewReservation(reservation) {
   const when = [reservation.date, reservation.time].filter(Boolean).join(" ");
   const partyText = `${Number(reservation.party || 1)} pax`;
   const body = `${reservation.name || "-"} | ${when || "-"} | ${partyText}`;
+  const link = `${window.location.origin}${window.location.pathname}?reservation=${encodeURIComponent(reservation.id)}`;
 
   showToast(`${title}: ${reservation.name || partyText}`);
   playNewOrderSound();
   if (!canUseLocalCrmNotification()) return;
   try {
-    new Notification(title, { body });
+    const notice = new Notification(title, { body, data: { link } });
+    notice.onclick = () => {
+      window.focus();
+      window.location.href = link;
+    };
   } catch (_e) {
     // Ignore notification errors and keep toast feedback.
   }
@@ -1017,6 +1046,16 @@ async function renewCRMNotificationsIfAllowed(options = {}) {
 
 function orderStatusLabel(status) {
   return t(`status_${status}`);
+}
+
+function normalizeReservationStatus(status) {
+  if (status === "accepted" || status === "confirmed" || status === "completed") return "accepted";
+  if (status === "rejected" || status === "cancelled" || status === "canceled") return "rejected";
+  return "pending";
+}
+
+function reservationStatusLabel(status) {
+  return t(`reservationStatus_${normalizeReservationStatus(status)}`);
 }
 
 const ORDER_STATUS_FLOW = ["pending", "preparing", "ready", "delivered"];
@@ -1130,7 +1169,7 @@ function invoicePaymentMethod(order) {
 function paymentDone(order) {
   if (order?.payment?.status === "paid") return true;
   const method = invoicePaymentMethod(order);
-  return order?.status === "delivered" && (method === "cash" || method === "card" || method === "pedidos_ya");
+  return order?.status === "delivered" && (method === "cash" || method === "card" || method === "bank_transfer" || method === "pedidos_ya");
 }
 
 function crmPaymentLine(order) {
@@ -1663,7 +1702,7 @@ function renderOrderCreator() {
             <div class="order-creator-cart">
               ${orderCreatorCart.length ? orderCreatorCart.map((item) => `
                 <div class="order-creator-cart-row">
-                  <div>
+                  <div class="order-creator-cart-info">
                     <strong>${escapeHtml(item.title?.[lang] || item.name)}</strong>
                     <p>${escapeHtml(money(item.price))} x ${Number(item.qty || 0)}</p>
                   </div>
@@ -1983,6 +2022,11 @@ function renderInvoiceRequestNotice(order) {
 function renderOrderComments(order) {
   const comments = String(order?.customer?.comments || "").trim();
   return comments ? `<p>${t("orderComments")}: ${escapeHtml(comments)}</p>` : "";
+}
+
+function renderOrderTableLine(order) {
+  const table = String(order?.customer?.table || "").trim();
+  return table ? `<p><strong>${t("orderTableLabel")}:</strong> ${escapeHtml(table)}</p>` : "";
 }
 
 function parseFiscalNumber(value) {
@@ -2589,8 +2633,13 @@ function inActivePeriod(value) {
   return date >= start && date <= end;
 }
 
+function orderSalesDateValue(order) {
+  if (!order || order.status !== "delivered") return order?.createdAt;
+  return order.deliveredAt || order.createdAt;
+}
+
 function salesRowsForPeriod() {
-  return ordersCache.filter((order) => inActivePeriod(order.createdAt));
+  return ordersCache.filter((order) => inActivePeriod(order.status === "delivered" ? orderSalesDateValue(order) : order.createdAt));
 }
 
 function reservationsForPeriod() {
@@ -2610,6 +2659,7 @@ function updateLanguageToggleButtons() {
 function applyI18n() {
   document.documentElement.lang = lang;
   updateLanguageToggleButtons();
+  updateStatusFilterButtonsForView(currentCRMView());
   const shortLabel = window.matchMedia("(max-width: 560px)").matches;
   signOutBtn.textContent = shortLabel ? t("signOutShort") : t("signOut");
   periodButtons.forEach((button) => {
@@ -2619,6 +2669,7 @@ function applyI18n() {
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     node.textContent = t(node.dataset.i18n);
   });
+  updateStatusFilterButtonsForView(currentCRMView());
   renderStats();
   renderFoodStats();
   renderSalesCalendar();
@@ -2628,10 +2679,58 @@ function applyI18n() {
   renderReservations();
 }
 
+function currentCRMView() {
+  return viewButtons.find((button) => button.classList.contains("active"))?.dataset.view || "orders";
+}
+
+function showCRMView(view) {
+  const nextView = view === "reservations" ? "reservations" : "orders";
+  viewButtons.forEach((button) => button.classList.toggle("active", button.dataset.view === nextView));
+  ordersView.classList.toggle("hidden", nextView !== "orders");
+  reservationsView.classList.toggle("hidden", nextView !== "reservations");
+  updateStatusFilterButtonsForView(nextView);
+}
+
+function updateStatusFilterButtonsForView(view) {
+  const isReservations = view === "reservations";
+  const configs = isReservations
+    ? [
+        { filter: "all", label: t("filterAll") },
+        { filter: "pending", label: t("reservationStatus_pending") },
+        { filter: "accepted", label: t("reservationStatus_accepted") },
+        { filter: "rejected", label: t("reservationStatus_rejected") }
+      ]
+    : [
+        { filter: "all", label: t("filterAll") },
+        { filter: "pending", label: t("filterPending") },
+        { filter: "preparing", label: t("filterPreparing") },
+        { filter: "ready", label: t("filterReady") },
+        { filter: "delivered", label: t("filterDelivered") },
+        { filter: "rejected", label: t("filterRejected") }
+      ];
+  const active = isReservations ? activeReservationFilter : activeFilter;
+  filterButtons.forEach((button, index) => {
+    const config = configs[index];
+    button.classList.toggle("hidden", !config);
+    if (!config) return;
+    button.dataset.filter = config.filter;
+    button.textContent = config.label;
+    button.classList.toggle("active", active === config.filter);
+  });
+}
+
 function filteredOrders() {
   return ordersCache
     .filter((o) => !hiddenOrderIds.has(String(o.id)))
     .filter((o) => (activeFilter === "all" ? true : o.status === activeFilter));
+}
+
+function filteredReservations() {
+  return reservationsCache.filter((reservation) => (
+    activeReservationFilter === "all"
+      ? true
+      : normalizeReservationStatus(reservation.status) === activeReservationFilter
+  ));
 }
 
 function renderStats() {
@@ -2738,7 +2837,7 @@ function salesByDayForMonth(referenceMonth) {
   ordersCache
     .filter((order) => order.status === "delivered")
     .forEach((order) => {
-      const when = parseDate(order.createdAt);
+      const when = parseDate(orderSalesDateValue(order));
       if (!when) return;
       if (when.getMonth() !== month || when.getFullYear() !== year) return;
       const key = dayKeyFromDate(when);
@@ -2995,7 +3094,7 @@ function renderSalesCalendar() {
                         <p>${t("customer")}: ${order.customer?.name || "-"} (${order.customer?.phone || "-"})</p>
                         ${renderInvoiceRequestNotice(order)}
                         <p><strong>${crmPaymentLine(order)}</strong></p>
-                        <p>${timeLabel(order.createdAt)} | ${money(order.total)}</p>
+                        <p>${timeLabel(orderSalesDateValue(order))} | ${money(order.total)}</p>
                       </div>
                       <button class="btn btn-outline" data-review-order="${order.id}">${t("review")}</button>
                     </article>
@@ -3089,6 +3188,7 @@ function renderOrders() {
           <div>
             <strong>#${order.displayId || order.id.slice(0, 6)}</strong>
             ${renderCustomerNameEditor(order)}
+            ${renderOrderTableLine(order)}
             ${renderInvoiceRequestNotice(order)}
             <p><strong>${crmPaymentLine(order)}</strong></p>
           </div>
@@ -3138,34 +3238,58 @@ function renderOrders() {
 }
 
 function renderReservations() {
-  if (!reservationsCache.length) {
+  const rows = filteredReservations();
+  if (!rows.length) {
     reservationsList.innerHTML = `<p>${t("emptyReservations")}</p>`;
     return;
   }
 
-  reservationsList.innerHTML = reservationsCache
-    .map((res) => `
-      <article class="crm-card">
+  reservationsList.innerHTML = rows
+    .map((res) => {
+      const status = normalizeReservationStatus(res.status);
+      return `
+      <article class="crm-card ${highlightedReservationId === res.id ? "is-linked-reservation" : ""}" data-reservation-id="${res.id}">
         <div class="crm-top">
           <div>
             <strong>${res.name || "-"}</strong>
             <p>${res.phone || ""}${res.email ? ` | ${res.email}` : ""}</p>
           </div>
-          <span class="badge pending">${res.party || 1} pax</span>
+          <div class="crm-card-controls">
+            <span class="badge ${status}">${reservationStatusLabel(status)}</span>
+            <span class="badge pending">${res.party || 1} pax</span>
+          </div>
         </div>
         <p>${t("date")}: ${res.date || "-"} ${res.time || ""}</p>
         <p>${lang === "es" ? "Ocasión" : "Occasion"}: ${res.occasion || "-"}</p>
         <p>${lang === "es" ? "Alergias" : "Allergies"}: ${res.allergies || "-"}</p>
         <p>${lang === "es" ? "Notas" : "Notes"}: ${res.notes || "-"}</p>
+        <div class="crm-actions reservation-actions" aria-label="${escapeHtml(t("reservationStatus"))}">
+          ${renderReservationStatusActions(res.id, status)}
+        </div>
       </article>
-    `)
+    `;
+    })
     .join("");
+}
+
+function renderReservationStatusActions(reservationId, status) {
+  if (status === "accepted") {
+    return `<button type="button" class="btn btn-outline reservation-status-change" data-reservation-id="${reservationId}" data-reservation-status="pending">${t("btnReopen")}</button>`;
+  }
+  if (status === "rejected") {
+    return `<button type="button" class="btn btn-outline reservation-status-change" data-reservation-id="${reservationId}" data-reservation-status="pending">${t("btnReactivate")}</button>`;
+  }
+  return `
+    <button type="button" class="btn btn-primary reservation-status-change" data-reservation-id="${reservationId}" data-reservation-status="accepted">${t("reservationAccept")}</button>
+    <button type="button" class="btn btn-outline reservation-status-change" data-reservation-id="${reservationId}" data-reservation-status="rejected">${t("reservationReject")}</button>
+  `;
 }
 
 function renderReviewBody(order) {
   const invoice = defaultInvoiceData(order);
   return `
     <p>${t("customer")}: <strong>${order.customer?.name || ""}</strong> (${order.customer?.phone || ""})</p>
+    ${renderOrderTableLine(order)}
     ${renderOrderComments(order)}
     ${renderInvoiceRequestNotice(order)}
     <p><strong>${crmPaymentLine(order)}</strong></p>
@@ -3215,14 +3339,28 @@ function openLinkedOrderIfReady() {
   const order = ordersCache.find((row) => row.id === pendingLinkedOrderId);
   if (!order) return;
   activeFilter = "all";
-  viewButtons.forEach((button) => button.classList.toggle("active", button.dataset.view === "orders"));
-  filterButtons.forEach((button) => button.classList.toggle("active", button.dataset.filter === "all"));
-  ordersView.classList.remove("hidden");
-  reservationsView.classList.add("hidden");
+  showCRMView("orders");
   renderOrders();
   openReview(pendingLinkedOrderId);
   pendingLinkedOrderId = "";
   window.history.replaceState({}, "", `${window.location.pathname}${window.location.hash}`);
+}
+
+function openLinkedReservationIfReady() {
+  if (!pendingLinkedReservationId) return;
+  const reservation = reservationsCache.find((row) => row.id === pendingLinkedReservationId);
+  if (!reservation) return;
+  activeReservationFilter = "all";
+  highlightedReservationId = pendingLinkedReservationId;
+  showCRMView("reservations");
+  renderReservations();
+  window.requestAnimationFrame(() => {
+    reservationsList
+      .querySelector(`[data-reservation-id="${CSS.escape(pendingLinkedReservationId)}"]`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    pendingLinkedReservationId = "";
+    window.history.replaceState({}, "", `${window.location.pathname}${window.location.hash}`);
+  });
 }
 
 function closeReviewModal() {
@@ -3325,6 +3463,9 @@ function patchOrderCustomerNameInCache(orderId, customerName) {
     },
     updatedAt: new Date().toISOString()
   }));
+  renderSalesCalendar();
+  renderStats();
+  renderFoodStats();
 }
 
 async function persistOrderCustomerName(orderId, rawName) {
@@ -3372,10 +3513,23 @@ async function setStatus(orderId, status) {
     return;
   }
   const previousStatus = order.status;
+  const now = new Date().toISOString();
+  if (status === "delivered") {
+    const deliveredDate = new Date(now);
+    calendarMonth = new Date(deliveredDate.getFullYear(), deliveredDate.getMonth(), 1);
+    selectedCalendarDate = dayKeyFromDate(deliveredDate);
+  }
   patchOrderInCache(orderId, (current) => ({
     ...current,
     status,
-    updatedAt: new Date().toISOString()
+    deliveredAt: status === "delivered" ? now : current.deliveredAt,
+    statusEvents: status === "delivered"
+      ? [
+          ...(Array.isArray(current.statusEvents) ? current.statusEvents : []),
+          { status: "delivered", createdAt: now }
+        ]
+      : current.statusEvents,
+    updatedAt: now
   }));
   refreshOrderViews(orderId);
   try {
@@ -3389,6 +3543,31 @@ async function setStatus(orderId, status) {
     }));
     refreshOrderViews(orderId);
     showToast("Error");
+  }
+}
+
+async function setReservationStatus(reservationId, status) {
+  const reservation = reservationsCache.find((row) => row.id === reservationId);
+  if (!reservation) return;
+  const normalizedStatus = normalizeReservationStatus(status);
+  const previousStatus = reservation.status;
+  reservationsCache = reservationsCache.map((row) => (
+    row.id === reservationId
+      ? { ...row, status: normalizedStatus, updatedAt: new Date().toISOString() }
+      : row
+  ));
+  renderStats();
+  renderReservations();
+  try {
+    await withSlowBusyScreen(t("savingAction"), () => updateReservationStatus(reservationId, normalizedStatus));
+    showToast(t("reservationUpdated"));
+  } catch (_error) {
+    reservationsCache = reservationsCache.map((row) => (
+      row.id === reservationId ? { ...row, status: previousStatus } : row
+    ));
+    renderStats();
+    renderReservations();
+    showToast(t("reservationUpdateError"));
   }
 }
 
@@ -3660,6 +3839,7 @@ function startRealtime() {
       reservationsCache = reservations;
       renderStats();
       renderReservations();
+      openLinkedReservationIfReady();
     },
     (error) => handleRealtimeError(error, "reservationsListenerError")
   );
@@ -3772,6 +3952,12 @@ ordersList.addEventListener("focusout", (event) => {
   persistOrderCustomerName(orderId, nextName).finally(() => {
     window.requestAnimationFrame(renderOrders);
   });
+});
+
+reservationsList.addEventListener("click", (event) => {
+  const statusButton = event.target.closest(".reservation-status-change");
+  if (!statusButton) return;
+  setReservationStatus(statusButton.dataset.reservationId, statusButton.dataset.reservationStatus);
 });
 
 
@@ -4118,24 +4304,21 @@ reviewBody.addEventListener("change", (event) => {
 
 viewButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    viewButtons.forEach((b) => b.classList.remove("active"));
-    button.classList.add("active");
-    const view = button.dataset.view;
-    if (view === "orders") {
-      ordersView.classList.remove("hidden");
-      reservationsView.classList.add("hidden");
-    } else {
-      ordersView.classList.add("hidden");
-      reservationsView.classList.remove("hidden");
-    }
+    showCRMView(button.dataset.view);
   });
 });
 
 filterButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    filterButtons.forEach((b) => b.classList.remove("active"));
-    button.classList.add("active");
+    const view = currentCRMView();
+    if (view === "reservations") {
+      activeReservationFilter = button.dataset.filter;
+      updateStatusFilterButtonsForView("reservations");
+      renderReservations();
+      return;
+    }
     activeFilter = button.dataset.filter;
+    updateStatusFilterButtonsForView("orders");
     renderOrders();
   });
 });
