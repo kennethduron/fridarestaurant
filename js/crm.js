@@ -692,6 +692,22 @@ function focusEditableFieldForTouch(event) {
   const field = editableFieldFromEvent(event);
   if (!field || document.activeElement === field) return;
   field.focus();
+  if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) {
+    window.setTimeout(() => {
+      if (document.activeElement !== field) field.focus();
+      try {
+        const cursorAt = String(field.value || "").length;
+        field.setSelectionRange(cursorAt, cursorAt);
+      } catch (_error) {
+        // Some input types, like number, do not support text selection.
+      }
+    }, 0);
+  }
+}
+
+function focusEditableFieldForTouchPointer(event) {
+  if (event.pointerType && event.pointerType !== "touch") return;
+  focusEditableFieldForTouch(event);
 }
 
 function readHiddenOrderIds() {
@@ -4130,6 +4146,9 @@ if (langToggleMobile) langToggleMobile.addEventListener("click", toggleLanguage)
 window.addEventListener("resize", scheduleCRMApplyI18n);
 window.addEventListener("pointerdown", unlockNotificationSound, { once: true });
 window.addEventListener("keydown", unlockNotificationSound, { once: true });
+document.addEventListener("touchstart", focusEditableFieldForTouch, { capture: true, passive: true });
+document.addEventListener("touchend", focusEditableFieldForTouch, { capture: true, passive: true });
+document.addEventListener("pointerdown", focusEditableFieldForTouchPointer, { capture: true });
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && currentStaffUser) {
     renewCRMNotificationsIfAllowed();
