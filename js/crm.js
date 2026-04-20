@@ -53,8 +53,6 @@ const i18n = {
     crmSub: "Gestión operacional en tiempo real para representantes.",
     crmToolsNav: "Configuración",
     crmToolsEyebrow: "Configuración",
-    crmToolsTitle: "Herramientas del CRM",
-    crmToolsText: "Organiza pedidos internos, menú, facturación y cocina desde un solo lugar.",
     crmToolsOpen: "Ver opciones",
     crmToolsFiscalText: "Datos legales, CAI, rango autorizado e impuestos.",
     crmToolsKitchenText: "Vista dedicada para que cocina reciba y avance pedidos.",
@@ -176,6 +174,7 @@ const i18n = {
     payMethodPaypal: "PayPal",
     payMethodCash: "Efectivo",
     payMethodTransfer: "Transferencia bancaria",
+    payMethodPedidosYa: "Pedidos Ya",
     payMethodCashOnPickup: "Pago al recoger",
     payStatusPending: "Pendiente de confirmación",
     payStatusPaid: "Pagado",
@@ -255,6 +254,7 @@ const i18n = {
     orderCreatorNeedAddress: "Escribe la dirección para delivery.",
     orderCreatorCreated: "Pedido creado",
     orderCreatorError: "No se pudo crear el pedido.",
+    addedToCart: "agregado al carrito",
     productManagerTitle: "Gestión de productos",
     productManagerText: "Cambia precios, agrega un comentario visible y marca productos nuevos.",
     productManagerCollapsedText: "Ajustes de menú listos. Abre esta sección para editar productos.",
@@ -314,8 +314,6 @@ const i18n = {
     crmSub: "Real-time operations view for representatives.",
     crmToolsNav: "Settings",
     crmToolsEyebrow: "Settings",
-    crmToolsTitle: "CRM tools",
-    crmToolsText: "Manage internal orders, menu, invoicing, and kitchen from one place.",
     crmToolsOpen: "View options",
     crmToolsFiscalText: "Legal data, CAI, authorization range, and taxes.",
     crmToolsKitchenText: "Dedicated screen for the kitchen to receive and move orders.",
@@ -437,6 +435,7 @@ const i18n = {
     payMethodPaypal: "PayPal",
     payMethodCash: "Cash",
     payMethodTransfer: "Bank transfer",
+    payMethodPedidosYa: "Pedidos Ya",
     payMethodCashOnPickup: "Pay on pickup",
     payStatusPending: "Pending confirmation",
     payStatusPaid: "Paid",
@@ -516,6 +515,7 @@ const i18n = {
     orderCreatorNeedAddress: "Enter the delivery address.",
     orderCreatorCreated: "Order created",
     orderCreatorError: "Could not create the order.",
+    addedToCart: "added to cart",
     productManagerTitle: "Product management",
     productManagerText: "Change prices, add one visible note, and mark new products.",
     productManagerCollapsedText: "Menu settings are ready. Open this section to edit products.",
@@ -669,6 +669,7 @@ let realtimeAuthExpiredHandled = false;
 let fiscalSettings = mergeFiscalSettings();
 let pendingLinkedOrderId = crmUrlParams.get("order") || crmUrlParams.get("orderId") || "";
 let lastCrmPushRegisterAt = 0;
+let toastTimer = null;
 
 function t(key) {
   return (i18n[lang] && i18n[lang][key]) || key;
@@ -688,26 +689,9 @@ function editableFieldFromEvent(event) {
   return label ? label.querySelector(CRM_EDITABLE_FIELD_SELECTOR) : null;
 }
 
-function focusEditableFieldForTouch(event) {
-  const field = editableFieldFromEvent(event);
-  if (!field || document.activeElement === field) return;
-  field.focus();
-  if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) {
-    window.setTimeout(() => {
-      if (document.activeElement !== field) field.focus();
-      try {
-        const cursorAt = String(field.value || "").length;
-        field.setSelectionRange(cursorAt, cursorAt);
-      } catch (_error) {
-        // Some input types, like number, do not support text selection.
-      }
-    }, 0);
-  }
-}
-
-function focusEditableFieldForTouchPointer(event) {
-  if (event.pointerType && event.pointerType !== "touch") return;
-  focusEditableFieldForTouch(event);
+function isCRMEditableFieldActive() {
+  const active = document.activeElement;
+  return active instanceof Element && active.matches(CRM_EDITABLE_FIELD_SELECTOR);
 }
 
 function readHiddenOrderIds() {
@@ -814,10 +798,17 @@ function amountToWordsEs(value) {
   return `${integerWords(integerPart)} con ${String(cents).padStart(2, "0")}/100`;
 }
 
-function showToast(message) {
+function showToast(message, options = {}) {
+  const { duration = 1600, center = false, highlight = false } = options;
   toast.textContent = message;
+  toast.classList.remove("center", "highlight");
+  if (center) toast.classList.add("center");
+  if (highlight) toast.classList.add("highlight");
   toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 1600);
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove("show", "center", "highlight");
+  }, duration);
 }
 
 function createBusyScreen() {
@@ -1116,6 +1107,7 @@ function renderOrderStatusActions(order) {
 
 function paymentMethodLabel(method) {
   if (method === "bank_transfer") return t("payMethodTransfer");
+  if (method === "pedidos_ya") return t("payMethodPedidosYa");
   if (method === "cash") return t("payMethodCash");
   if (method === "paypal") return t("payMethodPaypal");
   if (method === "card") return t("payMethodCard");
@@ -1138,7 +1130,7 @@ function invoicePaymentMethod(order) {
 function paymentDone(order) {
   if (order?.payment?.status === "paid") return true;
   const method = invoicePaymentMethod(order);
-  return order?.status === "delivered" && (method === "cash" || method === "card");
+  return order?.status === "delivered" && (method === "cash" || method === "card" || method === "pedidos_ya");
 }
 
 function crmPaymentLine(order) {
@@ -1159,6 +1151,7 @@ function crmPaymentLine(order) {
 function paymentMethodSelectValue(order) {
   const method = order?.payment?.method;
   if (method === "bank_transfer") return "bank_transfer";
+  if (method === "pedidos_ya") return "pedidos_ya";
   if (method === "card" || method === "paypal" || method === "online") return "card";
   if (method === "cash") return "cash";
   return "";
@@ -1172,6 +1165,7 @@ function selectedPaymentMethodLabel(order) {
 function salesPaymentMethodKey(order) {
   const method = invoicePaymentMethod(order);
   if (method === "bank_transfer") return "bank_transfer";
+  if (method === "pedidos_ya") return "pedidos_ya";
   if (method === "card" || method === "paypal" || method === "online") return "card";
   if (method === "cash" || method === "cash_on_pickup") return "cash";
   return "other";
@@ -1188,6 +1182,7 @@ function salesPaymentBreakdown(orders) {
     cash: { key: "cash", count: 0, revenue: 0 },
     card: { key: "card", count: 0, revenue: 0 },
     bank_transfer: { key: "bank_transfer", count: 0, revenue: 0 },
+    pedidos_ya: { key: "pedidos_ya", count: 0, revenue: 0 },
     other: { key: "other", count: 0, revenue: 0 }
   };
 
@@ -1353,6 +1348,44 @@ function filteredProductItems() {
     });
 }
 
+function productManagerRowsHtml(rows) {
+  return rows.length ? rows.map((item) => `
+    <article class="product-row" data-product-id="${item.id}">
+      <div class="product-row-main">
+        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title[lang])}" loading="lazy" onerror="this.onerror=null;this.src='assets/food.svg';">
+        <div>
+          <strong>${escapeHtml(item.title[lang])}</strong>
+          <span>${escapeHtml(menuCategoryLabel(item.category))}</span>
+        </div>
+      </div>
+      <div class="product-row-fields">
+        <label>
+          <span>${t("productPriceLabel")}</span>
+          <input class="product-price-input" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(item.price).toFixed(2)}">
+        </label>
+        <label class="product-note-field">
+          <span>${t("productNoteEsLabel")}</span>
+          <textarea class="product-note-es" maxlength="180" autocomplete="off">${escapeHtml(item.note?.es || "")}</textarea>
+        </label>
+        <label class="product-new-toggle">
+          <input class="product-new-input" type="checkbox" ${item.isNew ? "checked" : ""}>
+          <span>${t("productNewLabel")}</span>
+        </label>
+        <button type="button" class="btn btn-outline product-save" data-product-save="${item.id}">${t("productSave")}</button>
+      </div>
+    </article>
+  `).join("") : `<p class="product-manager-empty">${t("productNoResults")}</p>`;
+}
+
+function refreshProductManagerResults() {
+  const list = productManager?.querySelector(".product-manager-list");
+  if (!list) {
+    renderProductManager();
+    return;
+  }
+  list.innerHTML = productManagerRowsHtml(filteredProductItems());
+}
+
 function renderProductManager() {
   if (!productManager) return;
   const categories = Array.from(new Set(BASE_MENU_ITEMS.map((item) => item.category)));
@@ -1400,32 +1433,7 @@ function renderProductManager() {
           </label>
         </div>
         <div class="product-manager-list">
-          ${rows.length ? rows.map((item) => `
-            <article class="product-row" data-product-id="${item.id}">
-              <div class="product-row-main">
-                <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title[lang])}" loading="lazy" onerror="this.onerror=null;this.src='assets/food.svg';">
-                <div>
-                  <strong>${escapeHtml(item.title[lang])}</strong>
-                  <span>${escapeHtml(menuCategoryLabel(item.category))}</span>
-                </div>
-              </div>
-              <div class="product-row-fields">
-                <label>
-                  <span>${t("productPriceLabel")}</span>
-                  <input class="product-price-input" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(item.price).toFixed(2)}">
-                </label>
-                <label class="product-note-field">
-                  <span>${t("productNoteEsLabel")}</span>
-                  <textarea class="product-note-es" maxlength="180" autocomplete="off">${escapeHtml(item.note?.es || "")}</textarea>
-                </label>
-                <label class="product-new-toggle">
-                  <input class="product-new-input" type="checkbox" ${item.isNew ? "checked" : ""}>
-                  <span>${t("productNewLabel")}</span>
-                </label>
-                <button type="button" class="btn btn-outline product-save" data-product-save="${item.id}">${t("productSave")}</button>
-              </div>
-            </article>
-          `).join("") : `<p class="product-manager-empty">${t("productNoResults")}</p>`}
+          ${productManagerRowsHtml(rows)}
         </div>
       ` : ""}
     </article>
@@ -1486,6 +1494,27 @@ function filteredOrderCreatorItems() {
     });
 }
 
+function orderCreatorProductsHtml(rows) {
+  return rows.length ? rows.map((item) => `
+    <button type="button" class="order-product-card" data-order-add="${item.id}">
+      <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title[lang])}" loading="lazy" onerror="this.onerror=null;this.src='assets/food.svg';">
+      <span>
+        <strong>${escapeHtml(item.title[lang])}</strong>
+        <small>${escapeHtml(menuCategoryLabel(item.category))} | ${escapeHtml(money(item.price))}</small>
+      </span>
+    </button>
+  `).join("") : `<p class="order-creator-empty">${t("productNoResults")}</p>`;
+}
+
+function refreshOrderCreatorProducts() {
+  const grid = orderCreator?.querySelector(".order-product-grid");
+  if (!grid) {
+    renderOrderCreator();
+    return;
+  }
+  grid.innerHTML = orderCreatorProductsHtml(filteredOrderCreatorItems());
+}
+
 function orderCreatorTotal() {
   return roundMoney(orderCreatorCart.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0), 0));
 }
@@ -1544,6 +1573,7 @@ function addOrderCreatorItem(productId) {
       qty: 1
     });
   }
+  showToast(`${item.title?.[lang] || item.name} ${t("addedToCart")}`, { highlight: true, duration: 1500 });
   renderOrderCreator();
 }
 
@@ -1624,15 +1654,7 @@ function renderOrderCreator() {
               </label>
             </div>
             <div class="order-product-grid">
-              ${rows.length ? rows.map((item) => `
-                <button type="button" class="order-product-card" data-order-add="${item.id}">
-                  <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title[lang])}" loading="lazy" onerror="this.onerror=null;this.src='assets/food.svg';">
-                  <span>
-                    <strong>${escapeHtml(item.title[lang])}</strong>
-                    <small>${escapeHtml(menuCategoryLabel(item.category))} | ${escapeHtml(money(item.price))}</small>
-                  </span>
-                </button>
-              `).join("") : `<p class="order-creator-empty">${t("productNoResults")}</p>`}
+              ${orderCreatorProductsHtml(rows)}
             </div>
           </section>
 
@@ -1692,6 +1714,7 @@ function renderOrderCreator() {
                   <option value="cash" ${orderCreatorDraft.paymentMethod === "cash" ? "selected" : ""}>${paymentMethodLabel("cash")}</option>
                   <option value="card" ${orderCreatorDraft.paymentMethod === "card" ? "selected" : ""}>${paymentMethodLabel("card")}</option>
                   <option value="bank_transfer" ${orderCreatorDraft.paymentMethod === "bank_transfer" ? "selected" : ""}>${paymentMethodLabel("bank_transfer")}</option>
+                  <option value="pedidos_ya" ${orderCreatorDraft.paymentMethod === "pedidos_ya" ? "selected" : ""}>${paymentMethodLabel("pedidos_ya")}</option>
                 </select>
               </label>
               <label>
@@ -2823,6 +2846,7 @@ function renderSalesCalendar() {
     paymentBreakdown.cash,
     paymentBreakdown.card,
     paymentBreakdown.bank_transfer,
+    paymentBreakdown.pedidos_ya,
     ...(paymentBreakdown.other.count ? [paymentBreakdown.other] : [])
   ];
   const paymentFilterOptions = [
@@ -2830,6 +2854,7 @@ function renderSalesCalendar() {
     { key: "cash", label: t("payMethodCash") },
     { key: "card", label: t("payMethodCard") },
     { key: "bank_transfer", label: t("payMethodTransfer") },
+    { key: "pedidos_ya", label: t("payMethodPedidosYa") },
     ...(paymentBreakdown.other.count || salesDayPaymentFilter === "other"
       ? [{ key: "other", label: t("calendarPaymentOther") }]
       : [])
@@ -3090,6 +3115,7 @@ function renderOrders() {
               <option value="cash" ${paymentMethodSelectValue(order) === "cash" ? "selected" : ""}>${t("payMethodCash")}</option>
               <option value="card" ${paymentMethodSelectValue(order) === "card" ? "selected" : ""}>${t("payMethodCard")}</option>
               <option value="bank_transfer" ${paymentMethodSelectValue(order) === "bank_transfer" ? "selected" : ""}>${t("payMethodTransfer")}</option>
+              <option value="pedidos_ya" ${paymentMethodSelectValue(order) === "pedidos_ya" ? "selected" : ""}>${t("payMethodPedidosYa")}</option>
             </select>
           </label>
         </div>
@@ -3811,9 +3837,7 @@ if (salesCalendar) {
     const searchInput = event.target.closest("#salesDaySearch");
     if (!searchInput) return;
     salesDaySearchTerm = searchInput.value || "";
-    if (document.activeElement !== searchInput) {
-      renderSalesCalendarKeepingSearchPosition(searchInput.selectionStart, searchInput.selectionEnd);
-    }
+    renderSalesCalendarKeepingSearchPosition(searchInput.selectionStart, searchInput.selectionEnd);
   });
 
   salesCalendar.addEventListener("focusout", (event) => {
@@ -3890,7 +3914,7 @@ if (productManager) {
     const searchInput = event.target.closest("#productManagerSearch");
     if (!searchInput) return;
     productManagerSearchTerm = searchInput.value || "";
-    if (document.activeElement !== searchInput) renderProductManager();
+    refreshProductManagerResults();
   });
 
   productManager.addEventListener("focusout", (event) => {
@@ -3953,7 +3977,7 @@ if (orderCreator) {
     if (searchInput) {
       orderCreatorSearchTerm = searchInput.value || "";
       updateOrderCreatorDraftFromForm();
-      if (document.activeElement !== searchInput) renderOrderCreator();
+      refreshOrderCreatorProducts();
       return;
     }
 
@@ -4132,7 +4156,11 @@ function toggleLanguage() {
 }
 
 let crmI18nResizeFrame = null;
+let crmI18nLastViewportWidth = window.innerWidth;
 function scheduleCRMApplyI18n() {
+  const nextViewportWidth = window.innerWidth;
+  if (nextViewportWidth === crmI18nLastViewportWidth || isCRMEditableFieldActive()) return;
+  crmI18nLastViewportWidth = nextViewportWidth;
   if (crmI18nResizeFrame !== null) return;
   crmI18nResizeFrame = window.requestAnimationFrame(() => {
     crmI18nResizeFrame = null;
@@ -4146,9 +4174,6 @@ if (langToggleMobile) langToggleMobile.addEventListener("click", toggleLanguage)
 window.addEventListener("resize", scheduleCRMApplyI18n);
 window.addEventListener("pointerdown", unlockNotificationSound, { once: true });
 window.addEventListener("keydown", unlockNotificationSound, { once: true });
-document.addEventListener("touchstart", focusEditableFieldForTouch, { capture: true, passive: true });
-document.addEventListener("touchend", focusEditableFieldForTouch, { capture: true, passive: true });
-document.addEventListener("pointerdown", focusEditableFieldForTouchPointer, { capture: true });
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && currentStaffUser) {
     renewCRMNotificationsIfAllowed();
