@@ -65,7 +65,9 @@ module.exports = async function handler(req, res) {
       }
     });
 
-    await notifyStaffNewOrder(createdOrder).catch(() => null);
+    if (createdOrder.status !== "delivered") {
+      await notifyStaffNewOrder(createdOrder).catch(() => null);
+    }
 
     sendJson(req, res, 201, { order: createdOrder }, ["GET", "POST", "OPTIONS"]);
   } catch (error) {
@@ -79,6 +81,8 @@ function normalizeOrder(body) {
 
   const customerName = String(body.customer_name || body.customerName || body.name || "").trim();
   const customerPhone = String(body.customer_phone || body.customerPhone || body.phone || "").trim();
+  const paymentMethod = String(body.payment_method || body.paymentMethod || "cash").trim();
+  const paymentStatus = String(body.payment_status || body.paymentStatus || "unpaid").trim();
   if (!customerName) {
     throw httpError(400, "missing_customer", "Customer name is required.");
   }
@@ -90,7 +94,9 @@ function normalizeOrder(body) {
 
   return {
     order_type: orderType,
-    status: initialOrderStatus(orderType),
+    status: paymentMethod === "pedidos_ya" && paymentStatus === "paid"
+      ? "delivered"
+      : initialOrderStatus(orderType),
     customer_name: customerName,
     customer_phone: customerPhone,
     customer_email: String(body.customer_email || body.customerEmail || body.email || "").trim() || null,
@@ -101,8 +107,8 @@ function normalizeOrder(body) {
     tax,
     delivery_fee: deliveryFee,
     total,
-    payment_method: String(body.payment_method || body.paymentMethod || "cash").trim(),
-    payment_status: String(body.payment_status || body.paymentStatus || "unpaid").trim(),
+    payment_method: paymentMethod,
+    payment_status: paymentStatus,
     invoice: body.invoice || null,
     source: "web"
   };

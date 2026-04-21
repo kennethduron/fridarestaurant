@@ -80,6 +80,12 @@ const i18n = {
     reservationPending: "Marcar pendiente",
     reservationUpdated: "Reserva actualizada",
     reservationUpdateError: "No se pudo actualizar la reserva.",
+    reservationAreaLabel: "Área",
+    reservationAreaOpen: "Area Libre",
+    reservationAreaAir: "Area climatizada",
+    reservationAreaLabel: "Área",
+    reservationAreaOpen: "Área libre",
+    reservationAreaAir: "Área climatizada",
     btnPending: "Pendiente",
     btnInProgress: "Preparando",
     btnReady: "Listo",
@@ -107,6 +113,8 @@ const i18n = {
     emptyReservations: "No hay reservas registradas.",
     customer: "Cliente",
     customerNameLabel: "Nombre del cliente",
+    whatsappButton: "WhatsApp",
+    whatsappOpenLabel: "Abrir chat de WhatsApp",
     customerNameSaved: "Nombre actualizado",
     customerNameSaveError: "No se pudo actualizar el nombre.",
     orderTableLabel: "Mesa",
@@ -267,7 +275,7 @@ const i18n = {
     orderCreatorError: "No se pudo crear el pedido.",
     addedToCart: "agregado al carrito",
     productManagerTitle: "Gestión de productos",
-    productManagerText: "Cambia precios, agrega un comentario visible y marca productos nuevos.",
+    productManagerText: "Cambia precios, agrega un comentario visible, marca productos nuevos y controla si un producto estÃ¡ agotado.",
     productManagerCollapsedText: "Ajustes de menú listos. Abre esta sección para editar productos.",
     productManagerShow: "Mostrar productos",
     productManagerHide: "Ocultar productos",
@@ -279,6 +287,7 @@ const i18n = {
     productPriceLabel: "Precio",
     productNoteEsLabel: "Comentario visible",
     productNewLabel: "Producto nuevo",
+    productSoldOutLabel: "Agotado",
     productSave: "Guardar producto",
     productSaved: "Producto actualizado",
     productNoResults: "No hay productos con ese filtro.",
@@ -351,6 +360,9 @@ const i18n = {
     reservationPending: "Mark pending",
     reservationUpdated: "Reservation updated",
     reservationUpdateError: "Could not update reservation.",
+    reservationAreaLabel: "Area",
+    reservationAreaOpen: "Open area",
+    reservationAreaAir: "Air-conditioned area",
     btnPending: "Pending",
     btnInProgress: "Preparing",
     btnReady: "Ready",
@@ -378,6 +390,8 @@ const i18n = {
     emptyReservations: "No reservations found.",
     customer: "Customer",
     customerNameLabel: "Customer name",
+    whatsappButton: "WhatsApp",
+    whatsappOpenLabel: "Open WhatsApp chat",
     customerNameSaved: "Name updated",
     customerNameSaveError: "Could not update the name.",
     orderTableLabel: "Table",
@@ -538,7 +552,7 @@ const i18n = {
     orderCreatorError: "Could not create the order.",
     addedToCart: "added to cart",
     productManagerTitle: "Product management",
-    productManagerText: "Change prices, add one visible note, and mark new products.",
+    productManagerText: "Change prices, add one visible note, mark new products, and control when an item is sold out.",
     productManagerCollapsedText: "Menu settings are ready. Open this section to edit products.",
     productManagerShow: "Show products",
     productManagerHide: "Hide products",
@@ -550,6 +564,7 @@ const i18n = {
     productPriceLabel: "Price",
     productNoteEsLabel: "Visible note",
     productNewLabel: "New product",
+    productSoldOutLabel: "Sold out",
     productSave: "Save product",
     productSaved: "Product updated",
     productNoResults: "No products match that filter.",
@@ -685,6 +700,10 @@ let orderNameSaveTimers = new Map();
 let orderNamePendingValues = new Map();
 let orderNameLastSavedValues = new Map();
 let orderNameSavingIds = new Set();
+let invoiceDraftSaveTimers = new Map();
+let invoiceDraftPendingValues = new Map();
+let invoiceDraftLastSavedValues = new Map();
+let invoiceDraftSavingIds = new Set();
 let audioCtx = null;
 let audioUnlocked = false;
 let realtimeAuthExpiredHandled = false;
@@ -774,6 +793,31 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function normalizeWhatsAppPhone(phone) {
+  const digits = String(phone || "").replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("504")) return digits;
+  const localDigits = digits.replace(/^0+/, "");
+  return localDigits ? `504${localDigits}` : "";
+}
+
+function renderWhatsAppButton(phone, extraClass = "") {
+  const normalizedPhone = normalizeWhatsAppPhone(phone);
+  if (!normalizedPhone) return "";
+  const classes = ["crm-whatsapp-btn", extraClass].filter(Boolean).join(" ");
+  return `
+    <a
+      class="${classes}"
+      href="https://wa.me/${normalizedPhone}"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="${escapeHtml(t("whatsappOpenLabel"))}"
+      title="${escapeHtml(t("whatsappOpenLabel"))}">
+      ${escapeHtml(t("whatsappButton"))}
+    </a>
+  `;
 }
 
 function amountToWordsEs(value) {
@@ -1398,7 +1442,8 @@ function normalizeMenuSettings(settings) {
         es: noteEs,
         en: translateVisibleNoteToEnglish(noteEs)
       },
-      isNew: Boolean(override.isNew)
+      isNew: Boolean(override.isNew),
+      isSoldOut: Boolean(override.isSoldOut)
     };
   });
   return { items };
@@ -1410,7 +1455,8 @@ function productItem(baseItem) {
     ...baseItem,
     price: Number.isFinite(Number(override.price)) ? Number(override.price) : baseItem.price,
     note: override.note || { es: "", en: "" },
-    isNew: Boolean(override.isNew)
+    isNew: Boolean(override.isNew),
+    isSoldOut: Boolean(override.isSoldOut)
   };
 }
 
@@ -1465,6 +1511,14 @@ function productManagerRowsHtml(rows) {
           <input class="product-new-input" type="checkbox" ${item.isNew ? "checked" : ""}>
           <span>${t("productNewLabel")}</span>
         </label>
+        <button
+          type="button"
+          class="btn ${item.isSoldOut ? "btn-primary" : "btn-outline"} product-soldout-toggle"
+          data-product-soldout-toggle="${item.id}"
+          data-soldout="${item.isSoldOut ? "true" : "false"}"
+          aria-pressed="${item.isSoldOut ? "true" : "false"}">
+          ${t("productSoldOutLabel")}
+        </button>
         <button type="button" class="btn btn-outline product-save" data-product-save="${item.id}">${t("productSave")}</button>
       </div>
     </article>
@@ -1488,6 +1542,7 @@ function renderProductManager() {
     if (!override) return false;
     return Number(override.price) !== Number(item.price)
       || Boolean(override.isNew)
+      || Boolean(override.isSoldOut)
       || Boolean(override.note?.es);
   }).length;
   const rows = filteredProductItems();
@@ -1546,7 +1601,8 @@ function readProductRowValues(productId) {
       es: String(row.querySelector(".product-note-es")?.value || "").trim().slice(0, 180),
       en: translateVisibleNoteToEnglish(row.querySelector(".product-note-es")?.value || "")
     },
-    isNew: Boolean(row.querySelector(".product-new-input")?.checked)
+    isNew: Boolean(row.querySelector(".product-new-input")?.checked),
+    isSoldOut: String(row.querySelector(".product-soldout-toggle")?.dataset.soldout || "false") === "true"
   };
 }
 
@@ -2055,6 +2111,33 @@ function defaultInvoiceData(order) {
   };
 }
 
+function normalizeInvoiceDraftData(invoiceData = {}) {
+  return {
+    billingName: String(invoiceData.billingName || "").trim(),
+    billingRTN: String(invoiceData.billingRTN || "").trim(),
+    invoiceNumber: String(invoiceData.invoiceNumber || "").trim(),
+    notes: String(invoiceData.notes || "").trim(),
+    fiscalPrintedAt: String(invoiceData.fiscalPrintedAt || "").trim(),
+    hasExoneration: Boolean(invoiceData.hasExoneration),
+    exemptionRegister: String(invoiceData.exemptionRegister || "").trim(),
+    exemptOrderNumber: String(invoiceData.exemptOrderNumber || "").trim(),
+    sagRegister: String(invoiceData.sagRegister || "").trim()
+  };
+}
+
+function serializeInvoiceDraft(invoiceData = {}) {
+  return JSON.stringify(normalizeInvoiceDraftData(invoiceData));
+}
+
+function visibleInvoiceData(order) {
+  const base = defaultInvoiceData(order);
+  if (!order?.id || !invoiceDraftPendingValues.has(order.id)) return base;
+  return {
+    ...base,
+    ...invoiceDraftPendingValues.get(order.id)
+  };
+}
+
 function fiscalPrintButtonLabel(order) {
   const fiscalPrintedAt = String(order?.invoice?.fiscalPrintedAt || "").trim();
   return fiscalPrintedAt ? t("btnFiscalReprint") : t("btnFiscalPrint");
@@ -2226,9 +2309,9 @@ function buildPrintableOrderHtml(order) {
           width: 80mm;
           min-width: 80mm;
           color: #000;
-          font-family: "Courier New", monospace;
-          font-size: 12px;
-          line-height: 1.25;
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 11.5px;
+          line-height: 1.3;
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
@@ -2250,9 +2333,9 @@ function buildPrintableOrderHtml(order) {
         }
         h1, h2, p { margin: 0; }
         .brand-title {
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 700;
-          letter-spacing: 0.6px;
+          letter-spacing: 0.35px;
           margin-bottom: 2px;
         }
         .muted { margin-top: 1px; }
@@ -2285,7 +2368,7 @@ function buildPrintableOrderHtml(order) {
         .summary { margin-top: 2mm; }
         .summary-row { padding: 0.8mm 0; }
         .summary-row.total {
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 700;
         }
         .amount-words {
@@ -2382,7 +2465,7 @@ async function printOrder(orderId) {
     // Ignore browsers that block changing opener.
   }
   printWindow.document.open();
-  printWindow.document.write("<!doctype html><html><head><meta charset=\"utf-8\"><title>Imprimiendo...</title></head><body style=\"font-family:sans-serif;padding:16px;\">Preparando factura...</body></html>");
+  printWindow.document.write("<!doctype html><html><head><meta charset=\"utf-8\"><title>Imprimiendo...</title></head><body style=\"font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.35;padding:16px;\">Preparando factura...</body></html>");
   printWindow.document.close();
   await refreshFiscalSettings();
   printWindow.document.open();
@@ -2502,9 +2585,9 @@ function buildFiscalPrintableOrderHtml(order) {
           width: 80mm;
           min-width: 80mm;
           color: #000;
-          font-family: "Courier New", monospace;
-          font-size: 12px;
-          line-height: 1.15;
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 11.5px;
+          line-height: 1.25;
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
@@ -2532,7 +2615,7 @@ function buildFiscalPrintableOrderHtml(order) {
         .brand-title {
           font-size: 16px;
           font-weight: 700;
-          letter-spacing: 0.4px;
+          letter-spacing: 0.3px;
           margin: 1mm 0 0.4mm;
         }
         .muted { margin-top: 1px; }
@@ -2596,11 +2679,11 @@ function buildFiscalPrintableOrderHtml(order) {
           padding: 0.5mm 0;
         }
         .summary-row.total {
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 700;
         }
         .big-customer {
-          font-size: 13px;
+          font-size: 12.5px;
           font-weight: 700;
         }
         .amount-words,
@@ -2610,7 +2693,7 @@ function buildFiscalPrintableOrderHtml(order) {
           margin-top: 3mm;
         }
         .notice {
-          font-size: 10px;
+          font-size: 9.5px;
           font-weight: 700;
         }
         @media print {
@@ -2664,7 +2747,7 @@ async function printFiscalOrder(orderId) {
     // Ignore browsers that block changing opener.
   }
   printWindow.document.open();
-  printWindow.document.write("<!doctype html><html><head><meta charset=\"utf-8\"><title>Imprimiendo...</title></head><body style=\"font-family:sans-serif;padding:16px;\">Preparando factura fiscal...</body></html>");
+  printWindow.document.write("<!doctype html><html><head><meta charset=\"utf-8\"><title>Imprimiendo...</title></head><body style=\"font-family:Arial,Helvetica,sans-serif;padding:16px;\">Preparando factura fiscal...</body></html>");
   printWindow.document.close();
   const order = await ensureInvoiceDataBeforePrint(orderId);
   if (!order) {
@@ -3327,6 +3410,7 @@ function renderReservations() {
           </div>
         </div>
         <p>${t("date")}: ${res.date || "-"} ${res.time || ""}</p>
+        <p>${t("reservationAreaLabel")}: ${reservationAreaLabel(res.reservationArea)}</p>
         <p>${lang === "es" ? "Ocasión" : "Occasion"}: ${res.occasion || "-"}</p>
         <p>${lang === "es" ? "Alergias" : "Allergies"}: ${res.allergies || "-"}</p>
         <p>${lang === "es" ? "Notas" : "Notes"}: ${res.notes || "-"}</p>
@@ -3352,10 +3436,20 @@ function renderReservationStatusActions(reservationId, status) {
   `;
 }
 
+function reservationAreaLabel(value) {
+  if (value === "area_climatizada") return t("reservationAreaAir");
+  if (value === "area_libre") return t("reservationAreaOpen");
+  return "-";
+}
+
 function renderReviewBody(order) {
-  const invoice = defaultInvoiceData(order);
+  const invoice = visibleInvoiceData(order);
+  const phone = String(order.customer?.phone || "").trim();
   return `
-    <p>${t("customer")}: <strong>${order.customer?.name || ""}</strong> (${order.customer?.phone || ""})</p>
+    <p>
+      ${t("customer")}: <strong>${order.customer?.name || ""}</strong>
+      ${phone ? `<span class="crm-review-phone">(${escapeHtml(phone)}) ${renderWhatsAppButton(phone, "crm-whatsapp-btn-inline")}</span>` : ""}
+    </p>
     ${renderOrderTableLine(order)}
     ${renderOrderComments(order)}
     ${renderInvoiceRequestNotice(order)}
@@ -3498,6 +3592,15 @@ function isEditingOrderCustomerName() {
   return Boolean(focusedOrderNameInput());
 }
 
+function focusedInvoiceInput() {
+  const active = document.activeElement;
+  return active && active.classList && active.classList.contains("invoice-input") ? active : null;
+}
+
+function isEditingInvoiceData() {
+  return Boolean(focusedInvoiceInput());
+}
+
 function renderCustomerNameEditor(order) {
   const value = orderNamePendingValues.has(order.id)
     ? orderNamePendingValues.get(order.id)
@@ -3516,7 +3619,14 @@ function renderCustomerNameEditor(order) {
         value="${escapeHtml(value)}"
         aria-label="${escapeHtml(t("customerNameLabel"))}"
       >
-      ${phone ? `<small>(${escapeHtml(phone)})</small>` : ""}
+      ${
+        phone
+          ? `<span class="crm-customer-phone-actions">
+              <small>(${escapeHtml(phone)})</small>
+              ${renderWhatsAppButton(phone)}
+            </span>`
+          : ""
+      }
     </label>
   `;
 }
@@ -3744,14 +3854,65 @@ async function persistInvoiceData(orderId, invoiceData, successMessage = "") {
   }
 }
 
+function currentInvoiceDraftForOrder(orderId) {
+  const order = ordersCache.find((row) => row.id === orderId);
+  if (!order) return null;
+  return normalizeInvoiceDraftData({
+    ...defaultInvoiceData(order),
+    ...(invoiceDraftPendingValues.get(orderId) || {})
+  });
+}
+
+function scheduleInvoiceDraftSave(orderId, invoiceData, delay = 300) {
+  if (invoiceDraftSaveTimers.has(orderId)) {
+    window.clearTimeout(invoiceDraftSaveTimers.get(orderId));
+  }
+  invoiceDraftSaveTimers.set(orderId, window.setTimeout(() => {
+    invoiceDraftSaveTimers.delete(orderId);
+    persistInvoiceDraft(orderId, invoiceData);
+  }, delay));
+}
+
+async function persistInvoiceDraft(orderId, rawInvoiceData, successMessage = "") {
+  const order = ordersCache.find((row) => row.id === orderId);
+  if (!order) return false;
+  const invoiceData = normalizeInvoiceDraftData(rawInvoiceData || currentInvoiceDraftForOrder(orderId) || {});
+  const previousSerialized = invoiceDraftLastSavedValues.get(orderId) || serializeInvoiceDraft(defaultInvoiceData(order));
+  const nextSerialized = serializeInvoiceDraft(invoiceData);
+  if (nextSerialized === previousSerialized) {
+    invoiceDraftPendingValues.delete(orderId);
+    return true;
+  }
+  invoiceDraftPendingValues.set(orderId, invoiceData);
+  if (invoiceDraftSavingIds.has(orderId)) return true;
+
+  invoiceDraftSavingIds.add(orderId);
+  try {
+    const saved = await persistInvoiceData(orderId, invoiceData, successMessage);
+    if (saved) {
+      invoiceDraftLastSavedValues.set(orderId, nextSerialized);
+      if (serializeInvoiceDraft(invoiceDraftPendingValues.get(orderId) || {}) === nextSerialized) {
+        invoiceDraftPendingValues.delete(orderId);
+      }
+    }
+    return saved;
+  } finally {
+    invoiceDraftSavingIds.delete(orderId);
+    const pendingDraft = invoiceDraftPendingValues.get(orderId);
+    if (pendingDraft && serializeInvoiceDraft(pendingDraft) !== nextSerialized) {
+      scheduleInvoiceDraftSave(orderId, pendingDraft);
+    }
+  }
+}
+
 async function setInvoiceData(orderId) {
   const order = ordersCache.find((row) => row.id === orderId);
   if (!order) return false;
-  const invoiceData = {
+  const invoiceData = normalizeInvoiceDraftData({
     ...defaultInvoiceData(order),
     ...getInvoiceDraftFromReview()
-  };
-  return persistInvoiceData(orderId, invoiceData, t("invoiceSaved"));
+  });
+  return persistInvoiceDraft(orderId, invoiceData, t("invoiceSaved"));
 }
 
 async function ensureInvoiceDataBeforePrint(orderId) {
@@ -3863,9 +4024,13 @@ function startRealtime() {
       }
 
       const editingOrderName = isEditingOrderCustomerName();
+      const editingInvoiceData = isEditingInvoiceData();
       orders.forEach((order) => {
         if (!orderNamePendingValues.has(order.id) && !orderNameSavingIds.has(order.id)) {
           orderNameLastSavedValues.set(order.id, order.customer?.name || "");
+        }
+        if (!invoiceDraftPendingValues.has(order.id) && !invoiceDraftSavingIds.has(order.id)) {
+          invoiceDraftLastSavedValues.set(order.id, serializeInvoiceDraft(defaultInvoiceData(order)));
         }
       });
       ordersCache = orders.map((order) => (
@@ -3882,7 +4047,7 @@ function startRealtime() {
       renderStats();
       renderFoodStats();
       renderSalesCalendar();
-      if (!editingOrderName) {
+      if (!editingOrderName && !editingInvoiceData) {
         renderOrders();
         if (selectedOrderId) openReview(selectedOrderId);
       }
@@ -4157,6 +4322,16 @@ if (productManager) {
       return;
     }
 
+    const soldOutToggle = event.target.closest("[data-product-soldout-toggle]");
+    if (soldOutToggle) {
+      const isSoldOut = soldOutToggle.dataset.soldout === "true";
+      soldOutToggle.dataset.soldout = isSoldOut ? "false" : "true";
+      soldOutToggle.setAttribute("aria-pressed", isSoldOut ? "false" : "true");
+      soldOutToggle.classList.toggle("btn-primary", !isSoldOut);
+      soldOutToggle.classList.toggle("btn-outline", isSoldOut);
+      return;
+    }
+
     const saveBtn = event.target.closest("[data-product-save]");
     if (saveBtn) {
       saveProductSettings(saveBtn.dataset.productSave);
@@ -4356,17 +4531,69 @@ reviewBody.addEventListener("click", async (event) => {
   }
 });
 
+reviewBody.addEventListener("focusin", (event) => {
+  const input = event.target.closest(".invoice-input");
+  if (!input || input.readOnly || !selectedOrderId) return;
+  const order = ordersCache.find((row) => row.id === selectedOrderId);
+  if (order && !invoiceDraftLastSavedValues.has(selectedOrderId)) {
+    invoiceDraftLastSavedValues.set(selectedOrderId, serializeInvoiceDraft(defaultInvoiceData(order)));
+  }
+});
+
+reviewBody.addEventListener("input", (event) => {
+  const input = event.target.closest(".invoice-input");
+  if (!input || input.readOnly || !selectedOrderId) return;
+  const order = ordersCache.find((row) => row.id === selectedOrderId);
+  if (order && !invoiceDraftLastSavedValues.has(selectedOrderId)) {
+    invoiceDraftLastSavedValues.set(selectedOrderId, serializeInvoiceDraft(defaultInvoiceData(order)));
+  }
+  const nextDraft = normalizeInvoiceDraftData({
+    ...defaultInvoiceData(order),
+    ...getInvoiceDraftFromReview()
+  });
+  invoiceDraftPendingValues.set(selectedOrderId, nextDraft);
+});
+
+reviewBody.addEventListener("keydown", (event) => {
+  const input = event.target.closest(".invoice-input");
+  if (!input || input.readOnly) return;
+  if (event.key === "Enter") {
+    event.preventDefault();
+    input.blur();
+  }
+});
+
+reviewBody.addEventListener("focusout", (event) => {
+  const input = event.target.closest(".invoice-input");
+  if (!input || input.readOnly || !selectedOrderId) return;
+  const order = ordersCache.find((row) => row.id === selectedOrderId);
+  if (!order) return;
+  const nextDraft = normalizeInvoiceDraftData({
+    ...defaultInvoiceData(order),
+    ...getInvoiceDraftFromReview()
+  });
+  invoiceDraftPendingValues.set(selectedOrderId, nextDraft);
+  if (invoiceDraftSaveTimers.has(selectedOrderId)) {
+    window.clearTimeout(invoiceDraftSaveTimers.get(selectedOrderId));
+    invoiceDraftSaveTimers.delete(selectedOrderId);
+  }
+  persistInvoiceDraft(selectedOrderId, nextDraft);
+});
+
 reviewBody.addEventListener("change", (event) => {
   const toggle = event.target.closest(".invoice-checkbox");
   if (!toggle || !selectedOrderId) return;
   const order = ordersCache.find((row) => row.id === selectedOrderId);
   if (!order) return;
-  mergeOrderInvoiceInCache(selectedOrderId, {
+  const nextDraft = normalizeInvoiceDraftData({
     ...defaultInvoiceData(order),
     ...getInvoiceDraftFromReview()
   });
+  invoiceDraftPendingValues.set(selectedOrderId, nextDraft);
+  mergeOrderInvoiceInCache(selectedOrderId, nextDraft);
   const selectedOrder = ordersCache.find((row) => row.id === selectedOrderId);
   if (selectedOrder) reviewBody.innerHTML = renderReviewBody(selectedOrder);
+  persistInvoiceDraft(selectedOrderId, nextDraft);
 });
 
 viewButtons.forEach((button) => {

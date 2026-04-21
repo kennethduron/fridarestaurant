@@ -320,7 +320,6 @@ async function setupFirebaseMessaging() {
       const title = payload.notification?.title || "Frida Restaurant";
       const body = payload.notification?.body || "Tu pedido tiene una actualización.";
       const link = notificationTargetLink(payload);
-      const actionTitle = payload.data?.type === "new_order" || payload.data?.type === "new_reservation" ? "Abrir CRM" : "Ver pedido";
       if (Notification.permission === "granted") {
         registration.showNotification(title, {
           body,
@@ -328,12 +327,6 @@ async function setupFirebaseMessaging() {
           badge: "/assets/icon.jpg",
           tag: notificationTag(payload.data || {}),
           renotify: false,
-          actions: [
-            {
-              action: "open-crm",
-              title: actionTitle
-            }
-          ],
           data: {
             ...(payload.data || {}),
             link

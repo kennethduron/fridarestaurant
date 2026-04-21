@@ -123,6 +123,7 @@ function normalizeMenuSettings(settings) {
         en: translateVisibleNoteToEnglish(noteEs)
       },
       isNew: Boolean(value.isNew),
+      isSoldOut: Boolean(value.isSoldOut),
       updatedAt: new Date().toISOString()
     };
   });

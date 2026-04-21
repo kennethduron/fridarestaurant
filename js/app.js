@@ -36,6 +36,9 @@ const i18n = {
     menuTitle: "Menú por categorías",
     menuText: "Categorías formales: Entradas, Platos principales, Bebidas y Postres.",
     menuNewBadge: "Nuevo",
+    menuSoldOutBadge: "Agotado",
+    menuSoldOutAction: "Agotado",
+    menuSoldOutToast: "está agotado por el momento",
     tabAll: "Todo",
     tabAppetizers: "Entradas",
     tabMain: "Platos principales",
@@ -59,6 +62,13 @@ const i18n = {
     fieldOccasionPlaceholder: "Cumpleaños, reunión, aniversario",
     fieldAllergies: "Alergias",
     fieldAllergiesPlaceholder: "Gluten, lactosa, frutos secos",
+    fieldReservationArea: "Área de reserva",
+    reservationAreaOpen: "Area Libre",
+    reservationAreaAir: "Area climatizada",
+    fieldReservationArea: "Área de reserva",
+    reservationAreaPrompt: "Selecciona el área de reserva",
+    reservationAreaOpen: "Área libre",
+    reservationAreaAir: "Área climatizada",
     fieldNotes: "Notas especiales",
     fieldNotesPlaceholder: "Mesa cerca de ventana, silla para bebé, etc.",
     btnReserve: "Enviar reserva",
@@ -125,6 +135,10 @@ const i18n = {
     trackerDelivery: "Delivery",
     trackerItems: "Productos",
     trackerTotal: "Total",
+    trackerRejectedHelpTitle: "Esta orden fue rechazada.",
+    trackerRejectedHelpText: "Si tienes alguna pregunta o duda, llama a Frida Restaurant al +504 3198-4734.",
+    trackerRejectedHelpAction: "Llamar a Frida",
+    trackerRejectedHelpWhatsApp: "WhatsApp",
     notificationEnableAction: "Activar avisos",
     status_pending: "Pendiente",
     status_preparing: "Preparando",
@@ -176,6 +190,9 @@ const i18n = {
     menuTitle: "Menu by category",
     menuText: "Formal categories: Appetizers, Main Courses, Beverages, and Desserts.",
     menuNewBadge: "New",
+    menuSoldOutBadge: "Sold out",
+    menuSoldOutAction: "Sold out",
+    menuSoldOutToast: "is sold out for now",
     tabAll: "All",
     tabAppetizers: "Appetizers",
     tabMain: "Main Courses",
@@ -199,6 +216,10 @@ const i18n = {
     fieldOccasionPlaceholder: "Birthday, meeting, anniversary",
     fieldAllergies: "Allergies",
     fieldAllergiesPlaceholder: "Gluten, lactose, nuts",
+    fieldReservationArea: "Reservation area",
+    reservationAreaOpen: "Open area",
+    reservationAreaAir: "Air-conditioned area",
+    reservationAreaPrompt: "Choose the reservation area",
     fieldNotes: "Special notes",
     fieldNotesPlaceholder: "Window table, baby chair, etc.",
     btnReserve: "Send reservation",
@@ -265,6 +286,10 @@ const i18n = {
     trackerDelivery: "Delivery",
     trackerItems: "Items",
     trackerTotal: "Total",
+    trackerRejectedHelpTitle: "This order was rejected.",
+    trackerRejectedHelpText: "If you have any question or need help, call Frida Restaurant at +504 3198-4734.",
+    trackerRejectedHelpAction: "Call Frida",
+    trackerRejectedHelpWhatsApp: "WhatsApp",
     notificationEnableAction: "Enable alerts",
     status_pending: "Pending",
     status_preparing: "Preparing",
@@ -775,6 +800,12 @@ function applyI18n() {
   renderHondurasWeather();
 }
 
+function normalizeReservationArea(value) {
+  if (value === "area_climatizada") return "area_climatizada";
+  if (value === "area_libre") return "area_libre";
+  return "";
+}
+
 function filteredMenu() {
   return menuItems.filter((item) => (activeCategory === "all" ? true : item.category === activeCategory));
 }
@@ -889,7 +920,8 @@ function applyMenuSettings(settings) {
         es: noteEs,
         en: translateVisibleNoteToEnglish(noteEs)
       },
-      isNew: Boolean(override.isNew)
+      isNew: Boolean(override.isNew),
+      isSoldOut: Boolean(override.isSoldOut)
     };
   }));
 }
@@ -900,14 +932,20 @@ function syncCartWithMenu() {
     .map((row) => {
       const item = menuItems.find((menuItem) => menuItem.id === row.id);
       if (!item) return row;
-      if (row.price === item.price && row.title?.es === item.title.es && row.title?.en === item.title.en) return row;
+      if (
+        row.price === item.price &&
+        row.title?.es === item.title.es &&
+        row.title?.en === item.title.en &&
+        Boolean(row.isSoldOut) === Boolean(item.isSoldOut)
+      ) return row;
       changed = true;
       return {
         ...row,
         title: item.title,
         price: item.price,
         image: item.image,
-        category: item.category
+        category: item.category,
+        isSoldOut: Boolean(item.isSoldOut)
       };
     });
   if (changed) write(STORAGE.cart, cart);
@@ -926,17 +964,19 @@ function renderMenu() {
   const items = filteredMenu();
   menuGrid.innerHTML = items
     .map((item) => `
-      <article class="menu-card">
+      <article class="menu-card ${item.isSoldOut ? "is-sold-out" : ""}">
         <figure class="menu-photo-wrap">
           <img class="menu-photo" src="${itemImage(item)}" alt="${item.title[lang]}" loading="lazy" onerror="this.onerror=null;this.src='assets/postres.svg';">
         </figure>
-        ${item.isNew ? `<div class="menu-badges"><span class="menu-new-badge">${t("menuNewBadge")}</span></div>` : ""}
+        ${item.isNew ? `<div class="menu-badges">
+          ${item.isNew ? `<span class="menu-new-badge">${t("menuNewBadge")}</span>` : ""}
+        </div>` : ""}
         <h3>${item.title[lang]}</h3>
         <p class="menu-category">${categoryLabel(item.category)}</p>
         ${item.note?.[lang] ? `<p class="menu-note">${escapeHtml(item.note[lang])}</p>` : ""}
         <div class="meta">
           <span class="price">${money(item.price)}</span>
-          <button class="btn btn-primary add-item" data-id="${item.id}">${t("add")}</button>
+          <button class="btn ${item.isSoldOut ? "btn-outline menu-add-soldout" : "btn-primary"} add-item" data-id="${item.id}" data-sold-out="${item.isSoldOut ? "true" : "false"}">${item.isSoldOut ? t("menuSoldOutAction") : t("add")}</button>
         </div>
       </article>
     `)
@@ -1258,6 +1298,10 @@ function scheduleAcceptedTrackerClear(order) {
 function addToCart(id, sourceEl) {
   const item = menuItems.find((m) => m.id === id);
   if (!item) return;
+  if (item.isSoldOut) {
+    showToast(`${item.title[lang]} ${t("menuSoldOutToast")}`, { highlight: true, duration: 2000 });
+    return;
+  }
   const row = cart.find((c) => c.id === id);
   if (row) row.qty += 1;
   else cart.push({ id: item.id, title: item.title, price: item.price, qty: 1, image: item.image, category: item.category });
@@ -1354,6 +1398,18 @@ function renderTracker() {
 function openTrackerOrderModal(orderId) {
   const order = trackerOrderById.get(orderId);
   if (!order || !trackerOrderModal || !trackerOrderModalTitle || !trackerOrderModalBody) return;
+  const rejectedHelp = order.status === "rejected"
+    ? `
+      <div class="tracker-rejected-help">
+        <strong>${t("trackerRejectedHelpTitle")}</strong>
+        <p>${t("trackerRejectedHelpText")}</p>
+        <div class="tracker-rejected-help-actions">
+          <a class="btn btn-primary tracker-rejected-help-btn" href="tel:+50431984734">${t("trackerRejectedHelpAction")}</a>
+          <a class="btn btn-outline tracker-rejected-help-btn tracker-rejected-help-wa" href="https://wa.me/50431984734" target="_blank" rel="noopener noreferrer">${t("trackerRejectedHelpWhatsApp")}</a>
+        </div>
+      </div>
+    `
+    : "";
   trackerOrderModalTitle.textContent = `${t("trackerModalTitle")} #${order.displayId || order.id.slice(0, 6)}`;
   trackerOrderModalBody.innerHTML = `
     <p><strong>${t("trackerCustomer")}:</strong> ${escapeHtml(order.customer?.name || "")}</p>
@@ -1361,6 +1417,7 @@ function openTrackerOrderModal(orderId) {
     <p><strong>${t("trackerOrderType")}:</strong> ${escapeHtml(orderFulfillmentLabel(order))}</p>
     ${orderDeliveryAddressLine(order)}
     <p><strong>${t("trackerStatus")}:</strong> ${escapeHtml(statusLabel(order.status))}</p>
+    ${rejectedHelp}
     <p><strong>${t("trackerItems")}:</strong></p>
     <ul>
       ${(order.items || [])
@@ -1578,10 +1635,12 @@ function finishSuccessfulOrder(orderId, showConfirmation, customerPhone) {
 async function submitReservation(event) {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(reservationForm).entries());
-  if (!data.name || !data.phone || !data.date || !data.time || !data.party) {
+  if (!data.name || !data.phone || !data.date || !data.time || !data.party || !data.reservationArea) {
     reservationForm.reportValidity();
     return;
   }
+
+  data.reservationArea = normalizeReservationArea(data.reservationArea);
 
   try {
     await withSlowBusyScreen(t("reservationSubmitting"), () => addReservation({ ...data, language: lang }));

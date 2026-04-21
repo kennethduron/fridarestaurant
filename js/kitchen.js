@@ -45,8 +45,12 @@ const i18n = {
     total: "Total",
     status: "Estado",
     status_preparing: "Preparando",
+    btnPrint: "Imprimir orden",
     btnReady: "Marcar listo",
-    updated: "Estado actualizado"
+    updated: "Estado actualizado",
+    preparingPrint: "Preparando impresion...",
+    kitchenTicket: "Ticket de cocina",
+    table: "Mesa"
   },
   en: {
     authTitle: "Kitchen access",
@@ -83,8 +87,12 @@ const i18n = {
     total: "Total",
     status: "Status",
     status_preparing: "Preparing",
+    btnPrint: "Print order",
     btnReady: "Mark ready",
-    updated: "Status updated"
+    updated: "Status updated",
+    preparingPrint: "Preparing print...",
+    kitchenTicket: "Kitchen ticket",
+    table: "Table"
   }
 };
 
@@ -198,6 +206,19 @@ function foodName(item) {
   return byPrice?.title?.[lang] || byPrice?.title?.es || byPrice?.title?.en || "Item";
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function orderRef(order) {
+  return `#${order.displayId || order.id.slice(0, 6)}`;
+}
+
 function prepMode(order) {
   if (order?.customer?.delivery || order?.order_type === "delivery" || order?.orderType === "delivery") return t("delivery");
   return order?.customer?.pickup ? t("pickup") : t("dineIn");
@@ -210,6 +231,170 @@ async function setReady(orderId) {
   } catch (_e) {
     showToast("Error");
   }
+}
+
+function kitchenTable(order) {
+  const value = order?.customer?.table ?? order?.customer?.tableNumber ?? order?.customer?.table_number ?? "";
+  return String(value || "").trim();
+}
+
+function buildKitchenPrintableHtml(order) {
+  const ref = orderRef(order);
+  const customerName = escapeHtml(order.customer?.name || "-");
+  const customerPhone = escapeHtml(order.customer?.phone || "-");
+  const mode = escapeHtml(prepMode(order));
+  const comments = escapeHtml(order.customer?.comments || t("noComments"));
+  const address = order.customer?.deliveryAddress
+    ? `<p><strong>${t("address")}:</strong> ${escapeHtml(order.customer.deliveryAddress)}</p>`
+    : "";
+  const table = kitchenTable(order);
+  const tableLine = table ? `<p><strong>${t("table")}:</strong> ${escapeHtml(table)}</p>` : "";
+  const items = (order.items || [])
+    .map((item) => {
+      const qty = Number(item.qty || 0);
+      return `<li><span>${escapeHtml(foodName(item))}</span><strong>x${qty}</strong></li>`;
+    })
+    .join("");
+
+  return `<!doctype html>
+  <html lang="${lang}">
+    <head>
+      <meta charset="utf-8">
+      <title>Frida Restaurant ${ref}</title>
+      <style>
+        @page { size: 80mm auto; margin: 0; }
+        html,
+        body {
+          margin: 0;
+          padding: 0;
+          width: 80mm;
+          min-width: 80mm;
+          background: #ffffff;
+          color: #111111;
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 11.5px;
+          line-height: 1.3;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        body {
+          overflow-x: hidden;
+        }
+        .ticket {
+          box-sizing: border-box;
+          width: 80mm;
+          max-width: 80mm;
+          padding: 3mm;
+        }
+        h1,
+        h2,
+        p {
+          margin: 0;
+        }
+        .brand {
+          text-align: center;
+          font-size: 16px;
+          font-weight: 700;
+          margin-bottom: 4px;
+        }
+        .subtitle {
+          text-align: center;
+          font-size: 12px;
+          margin-bottom: 9px;
+        }
+        .divider {
+          margin: 8px 0;
+          border-top: 1px dashed #111111;
+        }
+        .meta,
+        .details {
+          display: grid;
+          gap: 6px;
+          font-size: 12px;
+          line-height: 1.35;
+        }
+        .items {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: grid;
+          gap: 6px;
+          font-size: 12px;
+        }
+        .items li {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+        }
+        .foot {
+          margin-top: 10px;
+          text-align: center;
+          font-size: 11px;
+        }
+        @media print {
+          html,
+          body,
+          .ticket {
+            width: 80mm;
+            max-width: 80mm;
+            margin: 0;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="ticket">
+        <p class="brand">Frida Restaurant</p>
+        <p class="subtitle">${t("kitchenTicket")}</p>
+        <div class="divider"></div>
+        <div class="meta">
+          <p><strong>ORDEN:</strong> ${ref}</p>
+          <p><strong>${t("date")}:</strong> ${escapeHtml(formatDate(order.createdAt))}</p>
+          <p><strong>${t("time")}:</strong> ${escapeHtml(formatTime(order.createdAt))}</p>
+        </div>
+        <div class="divider"></div>
+        <div class="details">
+          <p><strong>${t("customer")}:</strong> ${customerName}</p>
+          <p><strong>TEL:</strong> ${customerPhone}</p>
+          <p><strong>${t("mode")}:</strong> ${mode}</p>
+          ${tableLine}
+          ${address}
+          <p><strong>${t("comments")}:</strong> ${comments}</p>
+        </div>
+        <div class="divider"></div>
+        <ul class="items">${items}</ul>
+        <div class="divider"></div>
+        <p class="foot">${t("status_preparing")}</p>
+      </div>
+      <script>
+        window.onload = () => {
+          setTimeout(() => window.print(), 120);
+        };
+        window.onafterprint = () => {
+          window.close();
+        };
+      </script>
+    </body>
+  </html>`;
+}
+
+function printKitchenOrder(orderId) {
+  const order = ordersCache.find((entry) => entry.id === orderId);
+  if (!order) return;
+  const printWindow = window.open("", "_blank", "width=420,height=900");
+  if (!printWindow) return;
+  try {
+    printWindow.opener = null;
+  } catch (_error) {
+    // noop
+  }
+  printWindow.document.open();
+  printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Imprimiendo...</title></head><body style="font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.35;padding:16px;">${t("preparingPrint")}</body></html>`);
+  printWindow.document.close();
+  printWindow.document.open();
+  printWindow.document.write(buildKitchenPrintableHtml(order));
+  printWindow.document.close();
 }
 
 function prepOrders() {
@@ -232,7 +417,7 @@ function renderOrders() {
 
   prepOrdersList.innerHTML = rows
     .map((order) => {
-      const ref = `#${order.displayId || order.id.slice(0, 6)}`;
+      const ref = orderRef(order);
       return `
         <article class="kitchen-ticket">
           <div class="kitchen-ticket-head">
@@ -250,6 +435,7 @@ function renderOrders() {
               .join("")}
           </ul>
           <div class="kitchen-ticket-actions">
+            <button class="btn btn-outline kitchen-print-btn" data-id="${order.id}">${t("btnPrint")}</button>
             <button class="btn btn-primary kitchen-ready-btn" data-id="${order.id}">${t("btnReady")}</button>
           </div>
         </article>
@@ -337,6 +523,11 @@ signOutBtn.addEventListener("click", async () => {
 });
 
 prepOrdersList.addEventListener("click", (event) => {
+  const printBtn = event.target.closest(".kitchen-print-btn");
+  if (printBtn) {
+    printKitchenOrder(printBtn.dataset.id);
+    return;
+  }
   const readyBtn = event.target.closest(".kitchen-ready-btn");
   if (!readyBtn) return;
   setReady(readyBtn.dataset.id);

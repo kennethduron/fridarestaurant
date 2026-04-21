@@ -1,4 +1,4 @@
-self.FRIDA_SW_VERSION = "20260419a";
+self.FRIDA_SW_VERSION = "20260421a";
 
 const recentNotificationKeys = new Map();
 const NOTIFICATION_DEDUPE_MS = 12000;
@@ -19,7 +19,6 @@ self.addEventListener("push", (event) => {
   const body = notification.body || data.body || "Tu pedido tiene una actualización.";
   const link = resolveNotificationLink(data, payload);
   const notificationData = Object.assign({}, data, { link });
-  const actionTitle = data.type === "new_order" || data.type === "new_reservation" ? "Abrir CRM" : "Ver pedido";
   const notificationKey = notificationDedupeKey(data, title, body);
 
   event.waitUntil(
@@ -32,12 +31,6 @@ self.addEventListener("push", (event) => {
         tag: notificationKey,
         renotify: false,
         timestamp: Date.now(),
-        actions: [
-          {
-            action: "open-crm",
-            title: actionTitle
-          }
-        ],
         data: notificationData
       });
     })
