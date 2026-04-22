@@ -28,6 +28,7 @@ if (window.location.search === "?") {
 }
 
 const crmUrlParams = new URLSearchParams(window.location.search);
+const THERMAL_ROLL_WIDTH = "79.375mm";
 
 const i18n = {
   es: {
@@ -287,6 +288,8 @@ const i18n = {
     productPriceLabel: "Precio",
     productNoteEsLabel: "Comentario visible",
     productNewLabel: "Producto nuevo",
+    productEditedLabel: "Editado",
+    productEditedOnlyLabel: "Solo editados",
     productSoldOutLabel: "Agotado",
     productSave: "Guardar producto",
     productSaved: "Producto actualizado",
@@ -564,6 +567,8 @@ const i18n = {
     productPriceLabel: "Price",
     productNoteEsLabel: "Visible note",
     productNewLabel: "New product",
+    productEditedLabel: "Edited",
+    productEditedOnlyLabel: "Edited only",
     productSoldOutLabel: "Sold out",
     productSave: "Save product",
     productSaved: "Product updated",
@@ -671,6 +676,7 @@ let menuSettings = { items: {} };
 let productManagerExpanded = false;
 let productManagerSearchTerm = "";
 let productManagerCategory = "all";
+let productManagerEditedOnly = false;
 let orderCreatorExpanded = false;
 let orderCreatorSearchTerm = "";
 let orderCreatorCategory = "all";
@@ -1460,6 +1466,15 @@ function productItem(baseItem) {
   };
 }
 
+function isProductEdited(item) {
+  const baseItem = BASE_MENU_ITEMS.find((row) => row.id === item.id);
+  if (!baseItem) return false;
+  return Number(item.price) !== Number(baseItem.price)
+    || Boolean(item.isNew)
+    || Boolean(item.isSoldOut)
+    || Boolean(String(item.note?.es || "").trim());
+}
+
 async function refreshMenuSettings() {
   try {
     menuSettings = normalizeMenuSettings(await loadMenuSettings());
@@ -1477,6 +1492,7 @@ function filteredProductItems() {
   return BASE_MENU_ITEMS
     .map(productItem)
     .filter((item) => productManagerCategory === "all" || item.category === productManagerCategory)
+    .filter((item) => !productManagerEditedOnly || isProductEdited(item))
     .filter((item) => {
       if (!search) return true;
       return [
@@ -1496,6 +1512,7 @@ function productManagerRowsHtml(rows) {
         <div>
           <strong>${escapeHtml(item.title[lang])}</strong>
           <span>${escapeHtml(menuCategoryLabel(item.category))}</span>
+          ${isProductEdited(item) ? `<span class="product-edited-badge">${escapeHtml(t("productEditedLabel"))}</span>` : ""}
         </div>
       </div>
       <div class="product-row-fields">
@@ -1511,14 +1528,10 @@ function productManagerRowsHtml(rows) {
           <input class="product-new-input" type="checkbox" ${item.isNew ? "checked" : ""}>
           <span>${t("productNewLabel")}</span>
         </label>
-        <button
-          type="button"
-          class="btn ${item.isSoldOut ? "btn-primary" : "btn-outline"} product-soldout-toggle"
-          data-product-soldout-toggle="${item.id}"
-          data-soldout="${item.isSoldOut ? "true" : "false"}"
-          aria-pressed="${item.isSoldOut ? "true" : "false"}">
-          ${t("productSoldOutLabel")}
-        </button>
+        <label class="product-new-toggle product-soldout-toggle">
+          <input class="product-soldout-input" type="checkbox" ${item.isSoldOut ? "checked" : ""}>
+          <span>${t("productSoldOutLabel")}</span>
+        </label>
         <button type="button" class="btn btn-outline product-save" data-product-save="${item.id}">${t("productSave")}</button>
       </div>
     </article>
@@ -1580,6 +1593,13 @@ function renderProductManager() {
               `).join("")}
             </select>
           </label>
+          <button
+            type="button"
+            class="btn ${productManagerEditedOnly ? "btn-primary" : "btn-outline"} product-manager-filter-toggle"
+            data-product-edited-filter-toggle
+            aria-pressed="${productManagerEditedOnly ? "true" : "false"}">
+            ${t("productEditedOnlyLabel")}
+          </button>
         </div>
         <div class="product-manager-list">
           ${productManagerRowsHtml(rows)}
@@ -1602,7 +1622,7 @@ function readProductRowValues(productId) {
       en: translateVisibleNoteToEnglish(row.querySelector(".product-note-es")?.value || "")
     },
     isNew: Boolean(row.querySelector(".product-new-input")?.checked),
-    isSoldOut: String(row.querySelector(".product-soldout-toggle")?.dataset.soldout || "false") === "true"
+    isSoldOut: Boolean(row.querySelector(".product-soldout-input")?.checked)
   };
 }
 
@@ -2300,14 +2320,14 @@ function buildPrintableOrderHtml(order) {
       <meta charset="utf-8">
       <title>Frida Restaurant ${orderRef}</title>
       <style>
-        @page { size: 80mm auto; margin: 0; }
+        @page { size: ${THERMAL_ROLL_WIDTH} auto; margin: 0; }
         * { box-sizing: border-box; }
         html,
         body {
           margin: 0;
           padding: 0;
-          width: 80mm;
-          min-width: 80mm;
+          width: ${THERMAL_ROLL_WIDTH};
+          min-width: ${THERMAL_ROLL_WIDTH};
           color: #000;
           font-family: Arial, Helvetica, sans-serif;
           font-size: 11.5px;
@@ -2319,8 +2339,8 @@ function buildPrintableOrderHtml(order) {
           overflow-x: hidden;
         }
         .ticket {
-          width: 80mm;
-          max-width: 80mm;
+          width: ${THERMAL_ROLL_WIDTH};
+          max-width: ${THERMAL_ROLL_WIDTH};
           padding: 3mm;
         }
         .center { text-align: center; }
@@ -2385,8 +2405,8 @@ function buildPrintableOrderHtml(order) {
           html,
           body,
           .ticket {
-            width: 80mm;
-            max-width: 80mm;
+            width: ${THERMAL_ROLL_WIDTH};
+            max-width: ${THERMAL_ROLL_WIDTH};
           }
           body {
             margin: 0;
@@ -2576,14 +2596,14 @@ function buildFiscalPrintableOrderHtml(order) {
       <meta charset="utf-8">
       <title>${escapeHtml(fiscalSettings.brandName)} ${invoiceNumber}</title>
       <style>
-        @page { size: 80mm auto; margin: 0; }
+        @page { size: ${THERMAL_ROLL_WIDTH} auto; margin: 0; }
         * { box-sizing: border-box; }
         html,
         body {
           margin: 0;
           padding: 0;
-          width: 80mm;
-          min-width: 80mm;
+          width: ${THERMAL_ROLL_WIDTH};
+          min-width: ${THERMAL_ROLL_WIDTH};
           color: #000;
           font-family: Arial, Helvetica, sans-serif;
           font-size: 11.5px;
@@ -2595,8 +2615,8 @@ function buildFiscalPrintableOrderHtml(order) {
           overflow-x: hidden;
         }
         .ticket {
-          width: 80mm;
-          max-width: 80mm;
+          width: ${THERMAL_ROLL_WIDTH};
+          max-width: ${THERMAL_ROLL_WIDTH};
           padding: 3mm;
         }
         .ticket-copy + .ticket-copy {
@@ -2701,8 +2721,8 @@ function buildFiscalPrintableOrderHtml(order) {
           body,
           .ticket,
           .ticket-copy {
-            width: 80mm;
-            max-width: 80mm;
+            width: ${THERMAL_ROLL_WIDTH};
+            max-width: ${THERMAL_ROLL_WIDTH};
           }
           body {
             margin: 0;
@@ -4313,7 +4333,7 @@ if (productManagerModal) {
   });
 }
 
-if (productManager) {
+  if (productManager) {
   productManager.addEventListener("click", (event) => {
     const toggle = event.target.closest("[data-product-manager-toggle]");
     if (toggle) {
@@ -4322,13 +4342,10 @@ if (productManager) {
       return;
     }
 
-    const soldOutToggle = event.target.closest("[data-product-soldout-toggle]");
-    if (soldOutToggle) {
-      const isSoldOut = soldOutToggle.dataset.soldout === "true";
-      soldOutToggle.dataset.soldout = isSoldOut ? "false" : "true";
-      soldOutToggle.setAttribute("aria-pressed", isSoldOut ? "false" : "true");
-      soldOutToggle.classList.toggle("btn-primary", !isSoldOut);
-      soldOutToggle.classList.toggle("btn-outline", isSoldOut);
+    const editedFilterToggle = event.target.closest("[data-product-edited-filter-toggle]");
+    if (editedFilterToggle) {
+      productManagerEditedOnly = !productManagerEditedOnly;
+      renderProductManager();
       return;
     }
 

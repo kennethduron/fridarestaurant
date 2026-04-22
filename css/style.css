@@ -2412,7 +2412,7 @@ textarea:focus,
 
 .product-manager-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(190px, 280px);
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 280px) auto;
   gap: 10px;
   margin-top: 14px;
 }
@@ -2502,6 +2502,28 @@ textarea:focus,
   margin-top: 3px;
 }
 
+.product-edited-badge {
+  display: inline-flex !important;
+  align-items: center;
+  width: fit-content;
+  margin-top: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid #d6be8b;
+  background: linear-gradient(180deg, #fff7e3 0%, #ffefc9 100%);
+  color: #7c5716 !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  box-shadow: 0 8px 18px rgba(124, 87, 22, 0.08);
+}
+
+.product-manager-filter-toggle {
+  min-width: 150px;
+  min-height: 46px;
+  align-self: end;
+  white-space: nowrap;
+}
+
 .product-row-fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -2518,7 +2540,8 @@ textarea:focus,
   grid-column: span 2;
 }
 
-.product-new-toggle {
+.product-new-toggle,
+.product-soldout-toggle {
   border: 1px solid #e1cfbb;
   border-radius: 8px;
   background: #fffdf9;
@@ -2532,7 +2555,8 @@ textarea:focus,
   min-height: 46px;
 }
 
-.product-new-toggle .product-new-input {
+.product-new-toggle .product-new-input,
+.product-soldout-toggle .product-soldout-input {
   flex: 0 0 auto;
   width: 18px;
   height: 18px;
@@ -2549,20 +2573,6 @@ textarea:focus,
   line-height: 1.2;
   padding-left: 12px;
   padding-right: 12px;
-}
-
-.product-soldout-toggle {
-  width: 100%;
-  min-width: 0;
-  min-height: 46px;
-  white-space: normal;
-  line-height: 1.2;
-}
-
-.product-soldout-toggle.btn-primary {
-  background: linear-gradient(135deg, #c54f3c, #a92f33);
-  border-color: #a92f33;
-  box-shadow: 0 10px 20px rgba(169, 47, 51, 0.18);
 }
 
 .product-manager-empty {
@@ -3834,6 +3844,10 @@ textarea:focus,
   .product-manager-toolbar,
   .product-row {
     grid-template-columns: 1fr;
+  }
+
+  .product-manager-filter-toggle {
+    width: 100%;
   }
 
   .product-row-fields {

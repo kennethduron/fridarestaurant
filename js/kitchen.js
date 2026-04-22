@@ -8,6 +8,7 @@ import {
   isStaffAuthorized
 } from "./firebase-config.js?v=20260419b";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
+const THERMAL_ROLL_WIDTH = "79.375mm";
 
 const i18n = {
   es: {
@@ -262,13 +263,13 @@ function buildKitchenPrintableHtml(order) {
       <meta charset="utf-8">
       <title>Frida Restaurant ${ref}</title>
       <style>
-        @page { size: 80mm auto; margin: 0; }
+        @page { size: ${THERMAL_ROLL_WIDTH} auto; margin: 0; }
         html,
         body {
           margin: 0;
           padding: 0;
-          width: 80mm;
-          min-width: 80mm;
+          width: ${THERMAL_ROLL_WIDTH};
+          min-width: ${THERMAL_ROLL_WIDTH};
           background: #ffffff;
           color: #111111;
           font-family: Arial, Helvetica, sans-serif;
@@ -282,8 +283,8 @@ function buildKitchenPrintableHtml(order) {
         }
         .ticket {
           box-sizing: border-box;
-          width: 80mm;
-          max-width: 80mm;
+          width: ${THERMAL_ROLL_WIDTH};
+          max-width: ${THERMAL_ROLL_WIDTH};
           padding: 3mm;
         }
         h1,
@@ -336,8 +337,8 @@ function buildKitchenPrintableHtml(order) {
           html,
           body,
           .ticket {
-            width: 80mm;
-            max-width: 80mm;
+            width: ${THERMAL_ROLL_WIDTH};
+            max-width: ${THERMAL_ROLL_WIDTH};
             margin: 0;
           }
         }
