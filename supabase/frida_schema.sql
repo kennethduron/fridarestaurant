@@ -8,7 +8,7 @@ create table if not exists public.staff_profiles (
   user_id uuid not null unique references auth.users(id) on delete cascade,
   login_email text,
   username text not null unique check (username ~ '^[a-z0-9._-]+$'),
-  role text not null check (role in ('admin', 'kitchen', 'cashier')),
+  role text not null check (role in ('admin', 'representative', 'kitchen', 'cashier', 'agent')),
   active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

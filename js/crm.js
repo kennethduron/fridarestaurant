@@ -8,6 +8,7 @@ import {
   updateOrderPaymentMethod,
   updateOrderInvoiceData,
   updateOrderCustomerName,
+  updateOrderItems,
   updateReservationStatus,
   loadFiscalSettings,
   loadMenuSettings,
@@ -20,7 +21,7 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260422a";
+} from "./firebase-config.js?v=20260422e";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 
@@ -136,6 +137,18 @@ const i18n = {
     paymentStatus: "Estado",
     orderStatus: "Estado del pedido",
     invoiceSectionTitle: "Datos de factura",
+    reviewItemsTitle: "Productos del pedido",
+    reviewItemsEdit: "Editar items",
+    reviewItemsAdd: "+ Agregar item",
+    reviewItemsAddInline: "+ Agregar otro item",
+    reviewItemsSave: "Guardar cambios",
+    reviewItemsCancel: "Cancelar",
+    reviewItemsQty: "Cantidad",
+    reviewItemsProduct: "Producto",
+    reviewItemsRemove: "Quitar",
+    reviewItemsNeedItems: "Agrega al menos un item a la orden.",
+    reviewItemsUpdated: "Pedido actualizado",
+    reviewItemsUpdateError: "No se pudieron actualizar los items.",
     invoiceBillingName: "Nombre de facturación",
     invoiceBillingRTN: "RTN del cliente",
     invoiceNumber: "Número de factura",
@@ -438,6 +451,18 @@ const i18n = {
     paymentStatus: "Status",
     orderStatus: "Order status",
     invoiceSectionTitle: "Invoice details",
+    reviewItemsTitle: "Order items",
+    reviewItemsEdit: "Edit items",
+    reviewItemsAdd: "+ Add item",
+    reviewItemsAddInline: "+ Add another item",
+    reviewItemsSave: "Save changes",
+    reviewItemsCancel: "Cancel",
+    reviewItemsQty: "Qty",
+    reviewItemsProduct: "Product",
+    reviewItemsRemove: "Remove",
+    reviewItemsNeedItems: "Add at least one item to the order.",
+    reviewItemsUpdated: "Order updated",
+    reviewItemsUpdateError: "Could not update the items.",
     invoiceBillingName: "Billing name",
     invoiceBillingRTN: "Customer RTN",
     invoiceNumber: "Invoice number",
@@ -768,6 +793,9 @@ let invoiceDraftSaveTimers = new Map();
 let invoiceDraftPendingValues = new Map();
 let invoiceDraftLastSavedValues = new Map();
 let invoiceDraftSavingIds = new Set();
+let reviewItemsEditMode = false;
+let reviewItemsDraft = [];
+let reviewItemsSaving = false;
 let audioCtx = null;
 let audioUnlocked = false;
 let realtimeAuthExpiredHandled = false;
@@ -2933,6 +2961,19 @@ function parseDate(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function routeForStaffRole(role) {
+  if (role === "agent") return "/agent.html";
+  if (role === "kitchen") return "/kitchen.html";
+  return "/crm.html";
+}
+
+function redirectIfWrongPanel(profile) {
+  const targetPath = routeForStaffRole(profile?.role || "");
+  if (!targetPath || window.location.pathname.endsWith(targetPath)) return false;
+  window.location.replace(`${targetPath}${window.location.search}${window.location.hash}`);
+  return true;
+}
+
 function activePeriodRange() {
   const now = new Date();
   if (activePeriod === "day") {
@@ -4008,6 +4049,183 @@ function reservationAreaLabel(value) {
   return "-";
 }
 
+function canEditReviewItems(order) {
+  const role = String(currentStaffProfile?.role || "").toLowerCase();
+  return role === "admin" && order && !["delivered", "rejected"].includes(order.status);
+}
+
+function reviewCatalogItems() {
+  return orderCreatorItems();
+}
+
+function reviewCatalogItemById(productId) {
+  return reviewCatalogItems().find((item) => item.id === productId) || null;
+}
+
+function normalizeReviewDraftItem(item = {}) {
+  const source = reviewCatalogItemById(item.id || item.menu_item_id || item.menuItemId || "");
+  const name = String(
+    source?.title?.es
+      || source?.title?.[lang]
+      || item.name
+      || item.title?.es
+      || item.title?.en
+      || ""
+  ).trim();
+  const price = Number.isFinite(Number(item.price))
+    ? Number(item.price)
+    : Number.isFinite(Number(item.unit_price))
+      ? Number(item.unit_price)
+      : Number(source?.price || 0);
+  const qty = Math.max(1, Math.round(Number(item.qty || item.quantity || 1)));
+
+  return {
+    id: source?.id || item.id || item.menu_item_id || item.menuItemId || "",
+    name,
+    title: source?.title ? { ...source.title } : { es: name, en: name },
+    category: source?.category || item.category || "",
+    image: source?.image || item.image || "",
+    price: roundMoney(price),
+    qty,
+    total: roundMoney(price * qty),
+    notes: String(item.notes || "").trim()
+  };
+}
+
+function buildReviewItemsDraft(order) {
+  const items = Array.isArray(order?.items) ? order.items : [];
+  return items.length ? items.map((item) => normalizeReviewDraftItem(item)) : [];
+}
+
+function createReviewDraftItem(productId = "") {
+  const source = reviewCatalogItemById(productId) || reviewCatalogItems()[0] || null;
+  return normalizeReviewDraftItem({
+    id: source?.id || productId || "",
+    name: source?.title?.es || "",
+    title: source?.title ? { ...source.title } : undefined,
+    price: source?.price || 0,
+    qty: 1
+  });
+}
+
+function reviewDraftSubtotal() {
+  return roundMoney(reviewItemsDraft.reduce((sum, item) => sum + roundMoney(Number(item.price || 0) * Number(item.qty || 0)), 0));
+}
+
+function reviewDraftGrandTotal(order) {
+  return roundMoney(reviewDraftSubtotal() + Number(order?.tax || 0) + Number(order?.deliveryFee || 0));
+}
+
+function reviewDisplayedTotal(order) {
+  if (reviewItemsEditMode && selectedOrderId === order.id) {
+    return reviewDraftGrandTotal(order);
+  }
+  return Number(order.total || 0);
+}
+
+function reviewProductOptionsHtml(currentId = "", fallbackLabel = "") {
+  const catalog = reviewCatalogItems();
+  const knownIds = new Set(catalog.map((item) => item.id));
+  const options = [];
+
+  if (currentId && !knownIds.has(currentId)) {
+    options.push({
+      id: currentId,
+      label: fallbackLabel || currentId
+    });
+  }
+
+  catalog.forEach((item) => {
+    options.push({
+      id: item.id,
+      label: item.title?.[lang] || item.title?.es || item.name || item.id
+    });
+  });
+
+  return options
+    .map((option) => `
+      <option value="${escapeHtml(option.id)}" ${option.id === currentId ? "selected" : ""}>
+        ${escapeHtml(option.label)}
+      </option>
+    `)
+    .join("");
+}
+
+function renderReviewItemsStatic(order) {
+  return `
+    <ul class="review-items-list">
+      ${(order.items || [])
+        .map((item) => `<li>${escapeHtml(foodName(item))} x ${Number(item.qty || 0)} (${money(item.price)})</li>`)
+        .join("")}
+    </ul>
+  `;
+}
+
+function renderReviewItemsEditor(order) {
+  if (!reviewItemsDraft.length) {
+    reviewItemsDraft = [createReviewDraftItem()];
+  }
+
+  return `
+    <div class="review-items-editor">
+      <div class="review-item-editor-list">
+        ${reviewItemsDraft.map((item, index) => `
+          <article class="review-item-editor-row" data-review-item-row="${index}">
+            <label class="review-item-field review-item-product-field">
+              <span>${t("reviewItemsProduct")}</span>
+              <select class="review-item-select" data-review-item-product="${index}">
+                ${reviewProductOptionsHtml(item.id, foodName(item))}
+              </select>
+            </label>
+            <div class="review-item-field review-item-qty-field">
+              <span>${t("reviewItemsQty")}</span>
+              <div class="review-item-qty-controls">
+                <button type="button" class="btn btn-outline review-item-icon-btn" data-review-item-qty="${index}" data-review-item-step="-1" aria-label="Disminuir cantidad">-</button>
+                <strong>${Number(item.qty || 1)}</strong>
+                <button type="button" class="btn btn-outline review-item-icon-btn" data-review-item-qty="${index}" data-review-item-step="1" aria-label="Aumentar cantidad">+</button>
+              </div>
+            </div>
+            <div class="review-item-meta">
+              <strong>${escapeHtml(money(item.price))}</strong>
+              <span>${escapeHtml(foodName(item))}</span>
+            </div>
+            <button type="button" class="btn btn-outline review-item-remove-btn" data-review-item-remove="${index}">${t("reviewItemsRemove")}</button>
+          </article>
+        `).join("")}
+      </div>
+      <div class="review-items-editor-actions">
+        <button type="button" class="btn btn-outline" data-review-items-add-row>${t("reviewItemsAddInline")}</button>
+        <button type="button" class="btn btn-outline" data-review-items-cancel>${t("reviewItemsCancel")}</button>
+        <button type="button" class="btn btn-primary" data-review-items-save>${t("reviewItemsSave")}</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderReviewItemsSection(order) {
+  const canEdit = canEditReviewItems(order);
+  const editing = canEdit && reviewItemsEditMode && selectedOrderId === order.id;
+
+  return `
+    <section class="review-items-section">
+      <div class="review-items-head">
+        <h4>${t("reviewItemsTitle")}</h4>
+        ${
+          canEdit && !editing
+            ? `
+              <div class="review-items-head-actions">
+                <button type="button" class="btn btn-outline crm-review-mini-btn" data-review-items-edit>${t("reviewItemsEdit")}</button>
+                <button type="button" class="btn btn-primary crm-review-mini-btn" data-review-items-start-add>${t("reviewItemsAdd")}</button>
+              </div>
+            `
+            : ""
+        }
+      </div>
+      ${editing ? renderReviewItemsEditor(order) : renderReviewItemsStatic(order)}
+    </section>
+  `;
+}
+
 function renderReviewBody(order) {
   const invoice = visibleInvoiceData(order);
   const phone = String(order.customer?.phone || "").trim();
@@ -4021,12 +4239,8 @@ function renderReviewBody(order) {
     ${renderInvoiceRequestNotice(order)}
     <p><strong>${crmPaymentLine(order)}</strong></p>
     <p>${t("date")}: ${formatDate(order.createdAt)}</p>
-    <p>${t("total")}: <strong>${money(order.total)}</strong></p>
-    <ul>
-      ${(order.items || [])
-        .map((item) => `<li>${escapeHtml(foodName(item))} x ${item.qty} (${money(item.price)})</li>`)
-        .join("")}
-    </ul>
+    <p>${t("total")}: <strong>${money(reviewDisplayedTotal(order))}</strong></p>
+    ${renderReviewItemsSection(order)}
     <p><strong>${t("orderStatus")}:</strong> ${orderStatusLabel(order.status)}</p>
     <p><strong>${t("paymentMethodSelect")}:</strong> ${escapeHtml(selectedPaymentMethodLabel(order))}</p>
     <section class="invoice-editor">
@@ -4056,6 +4270,9 @@ function openReview(orderId) {
   const order = ordersCache.find((o) => o.id === orderId);
   if (!order) return;
   selectedOrderId = orderId;
+  reviewItemsEditMode = false;
+  reviewItemsDraft = buildReviewItemsDraft(order);
+  reviewItemsSaving = false;
   reviewTitle.textContent = `#${order.displayId || order.id.slice(0, 6)}`;
   reviewBody.innerHTML = renderReviewBody(order);
   reviewModal.classList.remove("hidden");
@@ -4092,6 +4309,9 @@ function openLinkedReservationIfReady() {
 
 function closeReviewModal() {
   selectedOrderId = null;
+  reviewItemsEditMode = false;
+  reviewItemsDraft = [];
+  reviewItemsSaving = false;
   reviewModal.classList.add("hidden");
 }
 
@@ -5162,6 +5382,105 @@ reviewBody.addEventListener("click", async (event) => {
     await setInvoiceData(saveInvoiceButton.dataset.id);
     return;
   }
+
+  const reviewEditItemsButton = event.target.closest("[data-review-items-edit]");
+  if (reviewEditItemsButton && selectedOrderId) {
+    const order = ordersCache.find((row) => row.id === selectedOrderId);
+    if (!order || !canEditReviewItems(order)) return;
+    reviewItemsEditMode = true;
+    reviewItemsDraft = buildReviewItemsDraft(order);
+    reviewBody.innerHTML = renderReviewBody(order);
+    return;
+  }
+
+  const reviewStartAddButton = event.target.closest("[data-review-items-start-add]");
+  if (reviewStartAddButton && selectedOrderId) {
+    const order = ordersCache.find((row) => row.id === selectedOrderId);
+    if (!order || !canEditReviewItems(order)) return;
+    reviewItemsEditMode = true;
+    reviewItemsDraft = buildReviewItemsDraft(order);
+    reviewItemsDraft.push(createReviewDraftItem());
+    reviewBody.innerHTML = renderReviewBody(order);
+    return;
+  }
+
+  const reviewAddRowButton = event.target.closest("[data-review-items-add-row]");
+  if (reviewAddRowButton && selectedOrderId) {
+    const order = ordersCache.find((row) => row.id === selectedOrderId);
+    if (!order || !canEditReviewItems(order)) return;
+    reviewItemsDraft.push(createReviewDraftItem());
+    reviewBody.innerHTML = renderReviewBody(order);
+    return;
+  }
+
+  const reviewCancelItemsButton = event.target.closest("[data-review-items-cancel]");
+  if (reviewCancelItemsButton && selectedOrderId) {
+    const order = ordersCache.find((row) => row.id === selectedOrderId);
+    if (!order) return;
+    reviewItemsEditMode = false;
+    reviewItemsDraft = buildReviewItemsDraft(order);
+    reviewBody.innerHTML = renderReviewBody(order);
+    return;
+  }
+
+  const reviewRemoveItemButton = event.target.closest("[data-review-item-remove]");
+  if (reviewRemoveItemButton && selectedOrderId) {
+    const order = ordersCache.find((row) => row.id === selectedOrderId);
+    if (!order || !canEditReviewItems(order)) return;
+    const index = Number(reviewRemoveItemButton.dataset.reviewItemRemove);
+    reviewItemsDraft = reviewItemsDraft.filter((_item, itemIndex) => itemIndex !== index);
+    if (!reviewItemsDraft.length) {
+      reviewItemsDraft = [createReviewDraftItem()];
+    }
+    reviewBody.innerHTML = renderReviewBody(order);
+    return;
+  }
+
+  const reviewQtyButton = event.target.closest("[data-review-item-qty]");
+  if (reviewQtyButton && selectedOrderId) {
+    const order = ordersCache.find((row) => row.id === selectedOrderId);
+    if (!order || !canEditReviewItems(order)) return;
+    const index = Number(reviewQtyButton.dataset.reviewItemQty);
+    const step = Number(reviewQtyButton.dataset.reviewItemStep || 0);
+    reviewItemsDraft = reviewItemsDraft.map((item, itemIndex) => itemIndex !== index
+      ? item
+      : normalizeReviewDraftItem({
+          ...item,
+          qty: Math.max(1, Number(item.qty || 1) + step)
+        }));
+    reviewBody.innerHTML = renderReviewBody(order);
+    return;
+  }
+
+  const reviewSaveItemsButton = event.target.closest("[data-review-items-save]");
+  if (reviewSaveItemsButton && selectedOrderId && !reviewItemsSaving) {
+    const order = ordersCache.find((row) => row.id === selectedOrderId);
+    if (!order || !canEditReviewItems(order)) return;
+    const nextItems = reviewItemsDraft
+      .map((item) => normalizeReviewDraftItem(item))
+      .filter((item) => item.id && item.qty > 0);
+    if (!nextItems.length) {
+      showToast(t("reviewItemsNeedItems"));
+      return;
+    }
+
+    reviewItemsSaving = true;
+    try {
+      const updatedOrder = await withSlowBusyScreen(t("savingAction"), () => updateOrderItems(selectedOrderId, nextItems));
+      if (!updatedOrder) throw new Error("missing_updated_order");
+      patchOrderInCache(selectedOrderId, () => updatedOrder);
+      reviewItemsEditMode = false;
+      reviewItemsDraft = buildReviewItemsDraft(updatedOrder);
+      refreshOrderViews(selectedOrderId);
+      showToast(t("reviewItemsUpdated"));
+    } catch (_error) {
+      showToast(t("reviewItemsUpdateError"));
+    } finally {
+      reviewItemsSaving = false;
+    }
+    return;
+  }
+
   const fiscalPrintButton = event.target.closest(".print-fiscal-order");
   if (fiscalPrintButton) {
     await printFiscalOrder(fiscalPrintButton.dataset.id);
@@ -5218,6 +5537,23 @@ reviewBody.addEventListener("focusout", (event) => {
 });
 
 reviewBody.addEventListener("change", (event) => {
+  const productSelect = event.target.closest("[data-review-item-product]");
+  if (productSelect && selectedOrderId) {
+    const order = ordersCache.find((row) => row.id === selectedOrderId);
+    if (!order || !canEditReviewItems(order)) return;
+    const index = Number(productSelect.dataset.reviewItemProduct);
+    const currentDraft = reviewItemsDraft[index];
+    reviewItemsDraft = reviewItemsDraft.map((item, itemIndex) => itemIndex !== index
+      ? item
+      : normalizeReviewDraftItem({
+          ...currentDraft,
+          id: productSelect.value,
+          qty: Number(currentDraft?.qty || 1)
+        }));
+    reviewBody.innerHTML = renderReviewBody(order);
+    return;
+  }
+
   const toggle = event.target.closest(".invoice-checkbox");
   if (!toggle || !selectedOrderId) return;
   const order = ordersCache.find((row) => row.id === selectedOrderId);
@@ -5388,6 +5724,7 @@ onAuthChange(async (user) => {
     }
 
     currentStaffProfile = access.profile;
+    if (redirectIfWrongPanel(currentStaffProfile)) return;
     setAuthMessage("");
     await unlockUI(user, currentStaffProfile);
   } catch (_error) {

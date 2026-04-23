@@ -24,8 +24,8 @@ module.exports = async function handler(req, res) {
     requireMethod(req, ["GET", "POST"]);
 
     if (req.method === "GET") {
-      await requireStaff(getBearerToken(req), ["admin", "kitchen", "cashier"]);
-      const orders = await loadOrdersForQuery(req.query || {});
+      const staff = await requireStaff(getBearerToken(req), ["admin", "representative", "kitchen", "cashier", "agent"]);
+      const orders = await loadOrdersForQuery(req.query || {}, staff);
       sendJson(req, res, 200, { orders }, ["GET", "POST", "OPTIONS"]);
       return;
     }
@@ -73,13 +73,25 @@ module.exports = async function handler(req, res) {
 };
 
 const ORDER_SELECT = "*,order_items(*),order_status_events(status,created_at)";
+const AGENT_TIMEZONE = "America/Tegucigalpa";
 
-async function loadOrdersForQuery(query) {
+async function loadOrdersForQuery(query, staff) {
+  if (staff && staff.role === "agent") {
+    return loadAgentOrders();
+  }
   const scope = String(query.scope || "").trim();
   if (scope === "ops") {
     return loadOperationalOrders(query);
   }
   return loadFilteredOrders(query);
+}
+
+async function loadAgentOrders() {
+  const { startDate, endDate } = currentBusinessDayBounds();
+  return fetchOrdersWithFilters({
+    startDate,
+    endDate
+  });
 }
 
 async function loadOperationalOrders(query) {
@@ -194,6 +206,23 @@ function normalizeLimit(value) {
   const limit = Number(value);
   if (!Number.isFinite(limit) || limit <= 0) return 0;
   return Math.min(Math.round(limit), 5000);
+}
+
+function currentBusinessDayBounds() {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: AGENT_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  });
+  const parts = formatter.formatToParts(new Date());
+  const year = parts.find((part) => part.type === "year")?.value || "1970";
+  const month = parts.find((part) => part.type === "month")?.value || "01";
+  const day = parts.find((part) => part.type === "day")?.value || "01";
+  return {
+    startDate: new Date(`${year}-${month}-${day}T00:00:00-06:00`).toISOString(),
+    endDate: new Date(`${year}-${month}-${day}T23:59:59.999-06:00`).toISOString()
+  };
 }
 
 function normalizeOrder(body) {

@@ -6,7 +6,7 @@ import {
   onAuthChange,
   signOutUser,
   isStaffAuthorized
-} from "./firebase-config.js?v=20260422a";
+} from "./firebase-config.js?v=20260422b";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 const THERMAL_ROLL_WIDTH = "79.375mm";
 
@@ -163,6 +163,19 @@ function parseDate(value) {
   if (!value) return null;
   const date = value.toDate ? value.toDate() : new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function routeForStaffRole(role) {
+  if (role === "agent") return "/agent.html";
+  if (role === "admin" || role === "cashier" || role === "representative") return "/crm.html";
+  return "/kitchen.html";
+}
+
+function redirectIfWrongPanel(profile) {
+  const targetPath = routeForStaffRole(profile?.role || "");
+  if (!targetPath || window.location.pathname.endsWith(targetPath)) return false;
+  window.location.replace(`${targetPath}${window.location.search}${window.location.hash}`);
+  return true;
 }
 
 function formatDate(value) {
@@ -573,6 +586,7 @@ onAuthChange(async (user) => {
   }
 
   currentStaffProfile = access.profile;
+  if (redirectIfWrongPanel(currentStaffProfile)) return;
   setAuthMessage("");
   unlockUI(user, currentStaffProfile);
 });

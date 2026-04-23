@@ -573,6 +573,14 @@ async function updateOrderCustomerName(id, customerName) {
   });
 }
 
+async function updateOrderItems(id, items) {
+  const result = await apiRequest(`/api/orders/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: { items: Array.isArray(items) ? items : [] }
+  });
+  return result.order ? mapOrder(result.order) : null;
+}
+
 async function updateReservationStatus(id, status) {
   await apiRequest("/api/reservations", {
     method: "PATCH",
@@ -795,6 +803,7 @@ export {
   updateOrderPaymentMethod,
   updateOrderInvoiceData,
   updateOrderCustomerName,
+  updateOrderItems,
   updateReservationStatus,
   loadFiscalSettings,
   loadMenuSettings,

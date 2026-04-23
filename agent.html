@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frida Restaurant | Panel de meseros</title>
+  <meta name="description" content="Panel de meseros para consultar las órdenes del día sin editar información sensible.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=20260422d">
+  <link rel="icon" type="image/jpeg" href="assets/icon.jpg">
+  <link rel="shortcut icon" href="assets/icon.jpg">
+  <link rel="apple-touch-icon" href="assets/icon.jpg">
+</head>
+
+<body class="agent-page">
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="agent.html">Frida Restaurant Meseros</a>
+      <div class="crm-head-actions">
+        <button id="agentLangToggle" class="btn btn-ghost" aria-label="Cambiar idioma">EN</button>
+        <button id="agentSignOut" class="btn btn-outline hidden">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container section">
+    <section id="authGate" class="auth-gate">
+      <h1 data-i18n="authTitle">Acceso del personal de servicio</h1>
+      <p data-i18n="authText">Ingresa con usuario y contraseña para revisar únicamente las órdenes del día.</p>
+      <form id="agentAuthForm" class="reservation-form" novalidate>
+        <label class="full">
+          <span data-i18n="authUserLabel">Usuario</span>
+          <input id="agentUser" type="text" autocomplete="username" required>
+        </label>
+        <label class="full">
+          <span data-i18n="authPassLabel">Contraseña</span>
+          <input id="agentPassword" type="password" autocomplete="current-password" required>
+        </label>
+        <div class="full">
+          <button type="submit" class="btn btn-primary" data-i18n="authButton">Ingresar</button>
+        </div>
+      </form>
+      <p id="authMessage" class="muted-line"></p>
+    </section>
+
+    <section id="agentApp" class="hidden agent-shell">
+      <div class="section-head">
+        <h1 data-i18n="screenTitle">Órdenes del día</h1>
+        <p data-i18n="screenSub">Vista de solo lectura para que meseros consulten órdenes activas del día sin editar información sensible.</p>
+        <p id="staffBadge" class="muted-line"></p>
+      </div>
+
+      <section class="agent-toolbar">
+        <label class="agent-search">
+          <span data-i18n="searchLabel">Buscar orden</span>
+          <input id="agentSearch" type="search" data-i18n-placeholder="searchPlaceholder" placeholder="Buscar por mesa, cliente o número de orden">
+        </label>
+      </section>
+
+      <section id="agentSummary" class="agent-summary"></section>
+
+      <section class="crm-controls">
+        <div class="menu-tabs" id="agentStatusFilters">
+          <button class="chip active" data-filter="all" data-i18n="filterAll">Todas</button>
+          <button class="chip" data-filter="pending" data-i18n="filterPending">Pendientes</button>
+          <button class="chip" data-filter="accepted" data-i18n="filterAccepted">Aceptadas</button>
+          <button class="chip" data-filter="preparing" data-i18n="filterPreparing">Preparando</button>
+          <button class="chip" data-filter="ready" data-i18n="filterReady">Listas</button>
+          <button class="chip" data-filter="delivered" data-i18n="filterDelivered">Entregadas</button>
+          <button class="chip" data-filter="rejected" data-i18n="filterRejected">Rechazadas</button>
+        </div>
+      </section>
+
+      <section id="agentOrdersList" class="agent-grid"></section>
+    </section>
+  </main>
+
+  <div id="agentDetailModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="agentDetailTitle">
+    <div class="modal-card review-modal-card agent-detail-card">
+      <header>
+        <h3 id="agentDetailTitle">Orden</h3>
+        <button id="closeAgentDetail" class="btn btn-ghost" aria-label="Cerrar">X</button>
+      </header>
+      <div id="agentDetailBody" class="agent-detail-body"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/agent.js?v=20260422a"></script>
+</body>
+
+</html>
