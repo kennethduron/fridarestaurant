@@ -1,5 +1,6 @@
 import {
   addOrder,
+  loadOrders,
   listenOrders,
   listenReservations,
   updateOrderStatus,
@@ -19,7 +20,7 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260420b";
+} from "./firebase-config.js?v=20260422a";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 
@@ -29,6 +30,7 @@ if (window.location.search === "?") {
 
 const crmUrlParams = new URLSearchParams(window.location.search);
 const THERMAL_ROLL_WIDTH = "79.375mm";
+const CRM_RECENT_OPERATIONS_DAYS = 120;
 
 const i18n = {
   es: {
@@ -241,6 +243,29 @@ const i18n = {
     calendarPrev: "Mes anterior",
     calendarNext: "Mes siguiente",
     calendarFoodBreakdown: "Comida vendida ese día",
+    termsReportTitle: "Facturas por términos",
+    termsReportToolText: "Filtra ventas entregadas por fecha y término para revisar e imprimir reportes.",
+    termsReportText: "Genera un reporte bajo demanda por rango de fechas y método de pago sin recargar el CRM.",
+    termsReportStart: "Fecha inicio",
+    termsReportEnd: "Fecha final",
+    termsReportTerms: "Términos",
+    termsReportAll: "Todos los términos",
+    termsReportDay: "Día",
+    termsReportMonth: "Mes",
+    termsReportYear: "Año",
+    termsReportCurrent: "Actual",
+    termsReportPreview: "Vista previa",
+    termsReportPrint: "Imprimir reporte",
+    termsReportCount: "Facturas",
+    termsReportRowsEmpty: "No hay facturas entregadas para ese filtro.",
+    termsReportPreviewTitle: "Vista previa del reporte",
+    termsReportRangeLabel: "Rango",
+    termsReportMethodLabel: "Término",
+    termsReportInvoiceOrOrder: "Factura / Orden",
+    termsReportTax: "Impuesto",
+    termsReportSummaryNote: "Solo toma pedidos entregados y usa el término de pago seleccionado.",
+    termsReportLoading: "Cargando reporte histórico...",
+    termsReportError: "No se pudo cargar el reporte histórico.",
     orderCreatorTitle: "Crear pedido",
     orderCreatorText: "Toma pedidos desde el CRM con productos, datos del cliente y forma de pago.",
     orderCreatorCollapsedText: "Crea pedidos internos para mesa, recoger o delivery sin salir del CRM.",
@@ -276,7 +301,7 @@ const i18n = {
     orderCreatorError: "No se pudo crear el pedido.",
     addedToCart: "agregado al carrito",
     productManagerTitle: "Gestión de productos",
-    productManagerText: "Cambia precios, agrega un comentario visible, marca productos nuevos y controla si un producto estÃ¡ agotado.",
+    productManagerText: "Cambia precios, agrega un comentario visible, marca productos nuevos y controla si un producto está agotado.",
     productManagerCollapsedText: "Ajustes de menú listos. Abre esta sección para editar productos.",
     productManagerShow: "Mostrar productos",
     productManagerHide: "Ocultar productos",
@@ -520,6 +545,29 @@ const i18n = {
     calendarPrev: "Previous month",
     calendarNext: "Next month",
     calendarFoodBreakdown: "Food sold that day",
+    termsReportTitle: "Invoices by terms",
+    termsReportToolText: "Filter delivered sales by date range and payment term to review and print reports.",
+    termsReportText: "Generate an on-demand report by date range and payment method without slowing down the CRM.",
+    termsReportStart: "Start date",
+    termsReportEnd: "End date",
+    termsReportTerms: "Terms",
+    termsReportAll: "All terms",
+    termsReportDay: "Day",
+    termsReportMonth: "Month",
+    termsReportYear: "Year",
+    termsReportCurrent: "Current",
+    termsReportPreview: "Preview",
+    termsReportPrint: "Print report",
+    termsReportCount: "Invoices",
+    termsReportRowsEmpty: "No delivered invoices match that filter.",
+    termsReportPreviewTitle: "Report preview",
+    termsReportRangeLabel: "Range",
+    termsReportMethodLabel: "Term",
+    termsReportInvoiceOrOrder: "Invoice / Order",
+    termsReportTax: "Tax",
+    termsReportSummaryNote: "This only includes delivered orders and uses the selected payment term.",
+    termsReportLoading: "Loading historical report...",
+    termsReportError: "Could not load the historical report.",
     orderCreatorTitle: "Create order",
     orderCreatorText: "Take CRM orders with products, customer details, and payment method.",
     orderCreatorCollapsedText: "Create internal dine-in, pickup, or delivery orders without leaving the CRM.",
@@ -621,6 +669,9 @@ const closeOrderCreatorModalBtn = document.getElementById("closeOrderCreatorModa
 const productManagerModal = document.getElementById("productManagerModal");
 const closeProductManagerModalBtn = document.getElementById("closeProductManagerModal");
 const productManager = document.getElementById("productManager");
+const termsReportModal = document.getElementById("termsReportModal");
+const closeTermsReportModalBtn = document.getElementById("closeTermsReportModal");
+const termsReport = document.getElementById("termsReport");
 const orderCreator = document.getElementById("orderCreator");
 const viewButtons = Array.from(document.querySelectorAll(".chip[data-view]"));
 const filterButtons = Array.from(document.querySelectorAll(".chip[data-filter]"));
@@ -677,6 +728,13 @@ let productManagerExpanded = false;
 let productManagerSearchTerm = "";
 let productManagerCategory = "all";
 let productManagerEditedOnly = false;
+let termsReportPreset = "day";
+let termsReportPayment = "all";
+let termsReportRange = { start: null, end: null };
+let termsReportRowsCache = [];
+let termsReportLoading = false;
+let termsReportError = "";
+let termsReportRequestId = 0;
 let orderCreatorExpanded = false;
 let orderCreatorSearchTerm = "";
 let orderCreatorCategory = "all";
@@ -1210,6 +1268,70 @@ function paymentStatusLabel(status) {
   return t("payStatusUnpaid");
 }
 
+function startOfDay(date) {
+  const copy = new Date(date);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function endOfDay(date) {
+  const copy = new Date(date);
+  copy.setHours(23, 59, 59, 999);
+  return copy;
+}
+
+function formatDateInputValue(date) {
+  if (!date) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseDateInputValue(value, boundary = "start") {
+  if (!value) return null;
+  const date = new Date(`${value}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return null;
+  return boundary === "end" ? endOfDay(date) : startOfDay(date);
+}
+
+function buildTermsReportPresetRange(preset, anchorDate = new Date()) {
+  const anchor = parseDate(anchorDate) || new Date();
+  if (preset === "month") {
+    const start = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+    const end = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0);
+    return { start: startOfDay(start), end: endOfDay(end) };
+  }
+
+  if (preset === "year") {
+    const start = new Date(anchor.getFullYear(), 0, 1);
+    const end = new Date(anchor.getFullYear(), 11, 31);
+    return { start: startOfDay(start), end: endOfDay(end) };
+  }
+
+  return { start: startOfDay(anchor), end: endOfDay(anchor) };
+}
+
+function syncTermsReportRange() {
+  const start = parseDate(termsReportRange.start) || new Date();
+  const end = parseDate(termsReportRange.end) || start;
+  if (start > end) {
+    termsReportRange = { start: startOfDay(end), end: endOfDay(start) };
+    return;
+  }
+  termsReportRange = { start: startOfDay(start), end: endOfDay(end) };
+}
+
+function setTermsReportPreset(preset, anchorDate = new Date()) {
+  termsReportPreset = preset;
+  termsReportRange = buildTermsReportPresetRange(preset, anchorDate);
+  syncTermsReportRange();
+}
+
+function resetTermsReportToCurrentPreset() {
+  setTermsReportPreset(termsReportPreset === "custom" ? "day" : termsReportPreset || "day", new Date());
+}
+
 function invoicePaymentMethod(order) {
   const method = order?.payment?.method;
   if (method === "cash_on_pickup" && order?.status === "delivered") return "cash";
@@ -1264,6 +1386,11 @@ function salesPaymentMethodLabel(method) {
   if (method === "all") return t("calendarPaymentAll");
   if (method === "other") return t("calendarPaymentOther");
   return paymentMethodLabel(method);
+}
+
+function termsReportPaymentLabel(method) {
+  if (method === "all") return t("termsReportAll");
+  return salesPaymentMethodLabel(method);
 }
 
 function salesPaymentBreakdown(orders) {
@@ -2042,12 +2169,18 @@ function closeProductManagerModal() {
   productManagerModal.classList.add("hidden");
 }
 
+function closeTermsReportModal() {
+  if (!termsReportModal) return;
+  termsReportModal.classList.add("hidden");
+}
+
 function closeCrmWorkModals() {
   closeOrderCreatorModal();
   closeProductManagerModal();
+  closeTermsReportModal();
 }
 
-function showCrmWorkspaceTool(tool) {
+async function showCrmWorkspaceTool(tool) {
   closeCrmSettingsModal();
 
   if (tool === "order") {
@@ -2064,6 +2197,15 @@ function showCrmWorkspaceTool(tool) {
     renderProductManager();
     closeOrderCreatorModal();
     productManagerModal?.classList.remove("hidden");
+    return;
+  }
+
+  if (tool === "terms-report") {
+    closeOrderCreatorModal();
+    closeProductManagerModal();
+    termsReportModal?.classList.remove("hidden");
+    renderTermsReport();
+    await refreshTermsReportData();
   }
 }
 
@@ -2880,6 +3022,7 @@ function applyI18n() {
   renderSalesCalendar();
   renderOrderCreator();
   renderProductManager();
+  renderTermsReport();
   renderOrders();
   renderReservations();
 }
@@ -3342,6 +3485,409 @@ function renderSalesCalendarKeepingSearchPosition(selectionStart = null, selecti
   const end = Number.isInteger(selectionEnd) ? Math.min(selectionEnd, inputLength) : start;
   nextSearchInput.setSelectionRange(start, end);
   window.scrollTo({ top: previousScrollY, behavior: "auto" });
+}
+
+function reportAmountsForOrder(order) {
+  const storedSubtotal = Number(order?.subtotal);
+  const storedTax = Number(order?.tax);
+  const storedTotal = Number(order?.total);
+  if (Number.isFinite(storedSubtotal) && Number.isFinite(storedTax)) {
+    return {
+      subtotal: roundMoney(storedSubtotal),
+      tax: roundMoney(storedTax),
+      total: Number.isFinite(storedTotal) ? roundMoney(storedTotal) : roundMoney(storedSubtotal + storedTax)
+    };
+  }
+
+  const breakdown = buildFiscalBreakdown(order);
+  return {
+    subtotal: roundMoney(breakdown.subtotal),
+    tax: roundMoney(breakdown.taxAmount),
+    total: Number.isFinite(storedTotal) ? roundMoney(storedTotal) : roundMoney(breakdown.total)
+  };
+}
+
+function termsReportRows() {
+  syncTermsReportRange();
+  return termsReportRowsCache
+    .filter((order) => order.status === "delivered")
+    .sort((left, right) => {
+      const leftDate = parseDate(orderSalesDateValue(left))?.getTime() || 0;
+      const rightDate = parseDate(orderSalesDateValue(right))?.getTime() || 0;
+      return leftDate - rightDate;
+    })
+    .map((order) => {
+      const when = parseDate(orderSalesDateValue(order)) || new Date();
+      const amounts = reportAmountsForOrder(order);
+      return {
+        order,
+        when,
+        paymentMethod: salesPaymentMethodKey(order),
+        invoiceOrOrder: String(order.invoice?.invoiceNumber || "").trim() || `#${order.displayId || String(order.id || "").slice(0, 6)}`,
+        customerName: String(order.customer?.name || "").trim() || t("customerFinalConsumer"),
+        subtotal: amounts.subtotal,
+        tax: amounts.tax,
+        total: amounts.total
+      };
+    });
+}
+
+function termsReportSummary(rows) {
+  return rows.reduce((summary, row) => ({
+    count: summary.count + 1,
+    subtotal: roundMoney(summary.subtotal + row.subtotal),
+    tax: roundMoney(summary.tax + row.tax),
+    total: roundMoney(summary.total + row.total)
+  }), { count: 0, subtotal: 0, tax: 0, total: 0 });
+}
+
+function termsReportRangeText() {
+  syncTermsReportRange();
+  const locale = lang === "es" ? "es-HN" : "en-US";
+  const startText = termsReportRange.start.toLocaleDateString(locale);
+  const endText = termsReportRange.end.toLocaleDateString(locale);
+  return `${startText} - ${endText}`;
+}
+
+function shiftTermsReportRange(direction) {
+  const factor = Number(direction || 0);
+  if (!factor) return;
+  syncTermsReportRange();
+  if (termsReportPreset === "month") {
+    const anchor = new Date(termsReportRange.start);
+    anchor.setMonth(anchor.getMonth() + factor);
+    setTermsReportPreset("month", anchor);
+    return;
+  }
+  if (termsReportPreset === "year") {
+    const anchor = new Date(termsReportRange.start);
+    anchor.setFullYear(anchor.getFullYear() + factor);
+    setTermsReportPreset("year", anchor);
+    return;
+  }
+  const anchor = new Date(termsReportRange.start);
+  anchor.setDate(anchor.getDate() + factor);
+  setTermsReportPreset("day", anchor);
+}
+
+function buildTermsReportPrintableHtml(rows, summary) {
+  const printedAt = new Date();
+  const printedAtText = printedAt.toLocaleString(lang === "es" ? "es-HN" : "en-US");
+  const tableRows = rows.map((row) => `
+      <tr>
+        <td>${escapeHtml(row.when.toLocaleDateString(lang === "es" ? "es-HN" : "en-US"))}</td>
+        <td>${escapeHtml(row.customerName)}</td>
+        <td>${escapeHtml(row.invoiceOrOrder)}</td>
+        <td>${escapeHtml(termsReportPaymentLabel(row.paymentMethod))}</td>
+        <td class="num">${escapeHtml(money(row.subtotal))}</td>
+        <td class="num">${escapeHtml(money(row.tax))}</td>
+        <td class="num">${escapeHtml(money(row.total))}</td>
+      </tr>
+    `).join("");
+
+  return `
+    <!doctype html>
+    <html lang="${lang}">
+    <head>
+      <meta charset="utf-8">
+      <title>${escapeHtml(t("termsReportTitle"))}</title>
+      <style>
+        @page { margin: 12mm; }
+        * { box-sizing: border-box; }
+        body {
+          margin: 0;
+          color: #111;
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 12px;
+          line-height: 1.35;
+        }
+        h1, p { margin: 0; }
+        .head {
+          display: flex;
+          justify-content: space-between;
+          gap: 18px;
+          align-items: flex-start;
+          margin-bottom: 12mm;
+        }
+        .head h1 {
+          font-size: 24px;
+          margin-bottom: 4px;
+        }
+        .meta {
+          text-align: right;
+        }
+        .summary {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 8px;
+          margin-bottom: 10mm;
+        }
+        .summary-card {
+          border: 1px solid #d6d6d6;
+          border-radius: 10px;
+          padding: 10px 12px;
+        }
+        .summary-card span {
+          display: block;
+          font-size: 11px;
+          color: #666;
+          margin-bottom: 4px;
+        }
+        .summary-card strong {
+          font-size: 18px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        th, td {
+          border-bottom: 1px solid #ddd;
+          padding: 7px 8px;
+          text-align: left;
+          vertical-align: top;
+        }
+        th {
+          font-size: 11px;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+        .num {
+          text-align: right;
+          white-space: nowrap;
+        }
+        tfoot td {
+          font-weight: 700;
+          border-top: 2px solid #aaa;
+        }
+      </style>
+      <script>
+        window.addEventListener("load", () => {
+          setTimeout(() => {
+            window.focus();
+            window.print();
+          }, 150);
+        });
+      </script>
+    </head>
+    <body>
+      <section class="head">
+        <div>
+          <h1>Frida Restaurant</h1>
+          <p><strong>${escapeHtml(t("termsReportTitle"))}</strong></p>
+          <p>${escapeHtml(t("termsReportRangeLabel"))}: ${escapeHtml(termsReportRangeText())}</p>
+          <p>${escapeHtml(t("termsReportMethodLabel"))}: ${escapeHtml(termsReportPaymentLabel(termsReportPayment))}</p>
+        </div>
+        <div class="meta">
+          <p><strong>${lang === "es" ? "Impreso" : "Printed"}:</strong></p>
+          <p>${escapeHtml(printedAtText)}</p>
+        </div>
+      </section>
+      <section class="summary">
+        <article class="summary-card"><span>${escapeHtml(t("termsReportCount"))}</span><strong>${summary.count}</strong></article>
+        <article class="summary-card"><span>${escapeHtml(t("subtotal"))}</span><strong>${escapeHtml(money(summary.subtotal))}</strong></article>
+        <article class="summary-card"><span>${escapeHtml(t("termsReportTax"))}</span><strong>${escapeHtml(money(summary.tax))}</strong></article>
+        <article class="summary-card"><span>${escapeHtml(t("total"))}</span><strong>${escapeHtml(money(summary.total))}</strong></article>
+      </section>
+      <table>
+        <thead>
+          <tr>
+            <th>${escapeHtml(t("date"))}</th>
+            <th>${escapeHtml(t("customer"))}</th>
+            <th>${escapeHtml(t("termsReportInvoiceOrOrder"))}</th>
+            <th>${escapeHtml(t("termsReportTerms"))}</th>
+            <th class="num">${escapeHtml(t("subtotal"))}</th>
+            <th class="num">${escapeHtml(t("termsReportTax"))}</th>
+            <th class="num">${escapeHtml(t("total"))}</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows || `<tr><td colspan="7">${escapeHtml(t("termsReportRowsEmpty"))}</td></tr>`}</tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4">${lang === "es" ? "Totales" : "Totals"}</td>
+            <td class="num">${escapeHtml(money(summary.subtotal))}</td>
+            <td class="num">${escapeHtml(money(summary.tax))}</td>
+            <td class="num">${escapeHtml(money(summary.total))}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
+function printTermsReport() {
+  if (termsReportLoading) return;
+  const rows = termsReportRows();
+  const summary = termsReportSummary(rows);
+  if (!rows.length) return;
+  const printWindow = window.open("", "_blank", "width=1100,height=900");
+  if (!printWindow) return;
+  try {
+    printWindow.opener = null;
+  } catch (_error) {
+    // Ignore browsers that block changing opener.
+  }
+  printWindow.document.open();
+  printWindow.document.write("<!doctype html><html><head><meta charset=\"utf-8\"><title>Imprimiendo...</title></head><body style=\"font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.35;padding:16px;\">Preparando reporte...</body></html>");
+  printWindow.document.close();
+  printWindow.document.open();
+  printWindow.document.write(buildTermsReportPrintableHtml(rows, summary));
+  printWindow.document.close();
+}
+
+async function refreshTermsReportData() {
+  if (!termsReportRange.start || !termsReportRange.end) setTermsReportPreset("day");
+  syncTermsReportRange();
+  const requestId = ++termsReportRequestId;
+  termsReportLoading = true;
+  termsReportError = "";
+  termsReportRowsCache = [];
+  renderTermsReport();
+
+  try {
+    const rows = await loadOrders({
+      statuses: ["delivered"],
+      startDate: termsReportRange.start,
+      endDate: termsReportRange.end,
+      paymentMethod: termsReportPayment === "all" ? "" : termsReportPayment
+    });
+    if (requestId !== termsReportRequestId) return;
+    termsReportRowsCache = rows;
+  } catch (error) {
+    console.warn("Terms report load failed", error);
+    if (requestId !== termsReportRequestId) return;
+    termsReportRowsCache = [];
+    termsReportError = t("termsReportError");
+  } finally {
+    if (requestId !== termsReportRequestId) return;
+    termsReportLoading = false;
+    renderTermsReport();
+  }
+}
+
+function renderTermsReport() {
+  if (!termsReport) return;
+  if (!termsReportRange.start || !termsReportRange.end) setTermsReportPreset("day");
+  syncTermsReportRange();
+  const rows = termsReportRows();
+  const summary = termsReportSummary(rows);
+  const previewMarkup = termsReportLoading
+    ? `<p class="terms-report-empty">${t("termsReportLoading")}</p>`
+    : termsReportError
+      ? `<p class="terms-report-empty">${escapeHtml(termsReportError)}</p>`
+      : rows.length
+        ? `
+              <div class="terms-report-table-wrap">
+                <table class="terms-report-table">
+                  <thead>
+                    <tr>
+                      <th>${t("date")}</th>
+                      <th>${t("customer")}</th>
+                      <th>${t("termsReportInvoiceOrOrder")}</th>
+                      <th>${t("termsReportTerms")}</th>
+                      <th class="num">${t("subtotal")}</th>
+                      <th class="num">${t("termsReportTax")}</th>
+                      <th class="num">${t("total")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${rows.map((row) => `
+                      <tr>
+                        <td>${escapeHtml(row.when.toLocaleDateString(lang === "es" ? "es-HN" : "en-US"))}</td>
+                        <td>${escapeHtml(row.customerName)}</td>
+                        <td>${escapeHtml(row.invoiceOrOrder)}</td>
+                        <td>${escapeHtml(termsReportPaymentLabel(row.paymentMethod))}</td>
+                        <td class="num">${escapeHtml(money(row.subtotal))}</td>
+                        <td class="num">${escapeHtml(money(row.tax))}</td>
+                        <td class="num">${escapeHtml(money(row.total))}</td>
+                      </tr>
+                    `).join("")}
+                  </tbody>
+                </table>
+              </div>
+            `
+        : `<p class="terms-report-empty">${t("termsReportRowsEmpty")}</p>`;
+
+  termsReport.innerHTML = `
+    <article class="terms-report-card">
+      <header class="terms-report-head">
+        <div>
+          <h3>${t("termsReportTitle")}</h3>
+          <p>${t("termsReportText")}</p>
+        </div>
+        <div class="terms-report-head-actions">
+          <button type="button" class="btn btn-outline" data-terms-report-preview>${t("termsReportPreview")}</button>
+          <button type="button" class="btn btn-primary" data-terms-report-print ${!rows.length || termsReportLoading || termsReportError ? "disabled" : ""}>${t("termsReportPrint")}</button>
+        </div>
+      </header>
+      <div class="terms-report-toolbar">
+        <label>
+          <span>${t("termsReportStart")}</span>
+          <input id="termsReportStart" type="date" value="${escapeHtml(formatDateInputValue(termsReportRange.start))}">
+        </label>
+        <label>
+          <span>${t("termsReportEnd")}</span>
+          <input id="termsReportEnd" type="date" value="${escapeHtml(formatDateInputValue(termsReportRange.end))}">
+        </label>
+        <label>
+          <span>${t("termsReportTerms")}</span>
+          <select id="termsReportPayment">
+            <option value="all" ${termsReportPayment === "all" ? "selected" : ""}>${t("termsReportAll")}</option>
+            <option value="cash" ${termsReportPayment === "cash" ? "selected" : ""}>${t("payMethodCash")}</option>
+            <option value="card" ${termsReportPayment === "card" ? "selected" : ""}>${t("payMethodCard")}</option>
+            <option value="bank_transfer" ${termsReportPayment === "bank_transfer" ? "selected" : ""}>${t("payMethodTransfer")}</option>
+            <option value="pedidos_ya" ${termsReportPayment === "pedidos_ya" ? "selected" : ""}>${t("payMethodPedidosYa")}</option>
+          </select>
+        </label>
+      </div>
+      <div class="terms-report-controls">
+        <div class="terms-report-shift">
+          <button type="button" class="btn btn-outline" data-terms-report-shift="-1" aria-label="${escapeHtml(t("actionBack"))}">&lt;</button>
+          <button type="button" class="btn btn-outline" data-terms-report-current>${t("termsReportCurrent")}</button>
+          <button type="button" class="btn btn-outline" data-terms-report-shift="1" aria-label="${escapeHtml(t("actionNext"))}">&gt;</button>
+        </div>
+        <div class="terms-report-presets">
+          <button type="button" class="btn ${termsReportPreset === "day" ? "btn-primary" : "btn-outline"}" data-terms-report-preset="day" ${termsReportLoading ? "disabled" : ""}>${t("termsReportDay")}</button>
+          <button type="button" class="btn ${termsReportPreset === "month" ? "btn-primary" : "btn-outline"}" data-terms-report-preset="month" ${termsReportLoading ? "disabled" : ""}>${t("termsReportMonth")}</button>
+          <button type="button" class="btn ${termsReportPreset === "year" ? "btn-primary" : "btn-outline"}" data-terms-report-preset="year" ${termsReportLoading ? "disabled" : ""}>${t("termsReportYear")}</button>
+        </div>
+      </div>
+      <div class="terms-report-summary">
+        <article class="terms-report-summary-card">
+          <span>${t("termsReportCount")}</span>
+          <strong>${summary.count}</strong>
+        </article>
+        <article class="terms-report-summary-card">
+          <span>${t("subtotal")}</span>
+          <strong>${money(summary.subtotal)}</strong>
+        </article>
+        <article class="terms-report-summary-card">
+          <span>${t("termsReportTax")}</span>
+          <strong>${money(summary.tax)}</strong>
+        </article>
+        <article class="terms-report-summary-card">
+          <span>${t("total")}</span>
+          <strong>${money(summary.total)}</strong>
+        </article>
+      </div>
+      <section class="terms-report-preview">
+        <div class="terms-report-preview-head">
+          <div>
+            <h4>${t("termsReportPreviewTitle")}</h4>
+            <p><strong>${t("termsReportRangeLabel")}:</strong> ${termsReportRangeText()}</p>
+            <p><strong>${t("termsReportMethodLabel")}:</strong> ${termsReportPaymentLabel(termsReportPayment)}</p>
+          </div>
+          <p class="terms-report-note">${t("termsReportSummaryNote")}</p>
+        </div>
+        ${previewMarkup}
+      </section>
+    </article>
+  `;
+}
+
+function refreshTermsReportIfOpen() {
+  if (!termsReportModal || termsReportModal.classList.contains("hidden")) return;
+  renderTermsReport();
 }
 
 function renderOrders() {
@@ -4067,13 +4613,15 @@ function startRealtime() {
       renderStats();
       renderFoodStats();
       renderSalesCalendar();
+      refreshTermsReportIfOpen();
       if (!editingOrderName && !editingInvoiceData) {
         renderOrders();
         if (selectedOrderId) openReview(selectedOrderId);
       }
       openLinkedOrderIfReady();
     },
-    (error) => handleRealtimeError(error, "ordersListenerError")
+    (error) => handleRealtimeError(error, "ordersListenerError"),
+    { scope: "ops", recentDays: CRM_RECENT_OPERATIONS_DAYS }
   );
 
   unsubscribeReservations = listenReservations(
@@ -4332,8 +4880,13 @@ if (productManagerModal) {
     if (event.target === productManagerModal) closeProductManagerModal();
   });
 }
+if (termsReportModal) {
+  termsReportModal.addEventListener("click", (event) => {
+    if (event.target === termsReportModal) closeTermsReportModal();
+  });
+}
 
-  if (productManager) {
+if (productManager) {
   productManager.addEventListener("click", (event) => {
     const toggle = event.target.closest("[data-product-manager-toggle]");
     if (toggle) {
@@ -4382,6 +4935,72 @@ if (productManagerModal) {
     if (!categorySelect) return;
     productManagerCategory = categorySelect.value || "all";
     renderProductManager();
+  });
+}
+
+if (termsReport) {
+  termsReport.addEventListener("click", (event) => {
+    const presetButton = event.target.closest("[data-terms-report-preset]");
+    if (presetButton) {
+      setTermsReportPreset(presetButton.dataset.termsReportPreset || "day");
+      refreshTermsReportData();
+      return;
+    }
+
+    const shiftButton = event.target.closest("[data-terms-report-shift]");
+    if (shiftButton) {
+      shiftTermsReportRange(shiftButton.dataset.termsReportShift);
+      refreshTermsReportData();
+      return;
+    }
+
+    const currentButton = event.target.closest("[data-terms-report-current]");
+    if (currentButton) {
+      resetTermsReportToCurrentPreset();
+      refreshTermsReportData();
+      return;
+    }
+
+    const previewButton = event.target.closest("[data-terms-report-preview]");
+    if (previewButton) {
+      refreshTermsReportData();
+      return;
+    }
+
+    const printButton = event.target.closest("[data-terms-report-print]");
+    if (printButton) {
+      printTermsReport();
+    }
+  });
+
+  termsReport.addEventListener("change", (event) => {
+    const startInput = event.target.closest("#termsReportStart");
+    if (startInput) {
+      termsReportPreset = "custom";
+      termsReportRange = {
+        start: parseDateInputValue(startInput.value, "start") || termsReportRange.start || startOfDay(new Date()),
+        end: termsReportRange.end || endOfDay(new Date())
+      };
+      refreshTermsReportData();
+      return;
+    }
+
+    const endInput = event.target.closest("#termsReportEnd");
+    if (endInput) {
+      termsReportPreset = "custom";
+      termsReportRange = {
+        start: termsReportRange.start || startOfDay(new Date()),
+        end: parseDateInputValue(endInput.value, "end") || termsReportRange.end || endOfDay(new Date())
+      };
+      refreshTermsReportData();
+      return;
+    }
+
+    const paymentSelect = event.target.closest("#termsReportPayment");
+    if (paymentSelect) {
+      termsReportPayment = paymentSelect.value || "all";
+      refreshTermsReportData();
+    }
   });
 }
 
@@ -4514,6 +5133,7 @@ if (closeFiscalSettingsBtn) closeFiscalSettingsBtn.addEventListener("click", clo
 if (closeCrmSettingsBtn) closeCrmSettingsBtn.addEventListener("click", closeCrmSettingsModal);
 if (closeOrderCreatorModalBtn) closeOrderCreatorModalBtn.addEventListener("click", closeOrderCreatorModal);
 if (closeProductManagerModalBtn) closeProductManagerModalBtn.addEventListener("click", closeProductManagerModal);
+if (closeTermsReportModalBtn) closeTermsReportModalBtn.addEventListener("click", closeTermsReportModal);
 if (crmNavToggle) crmNavToggle.addEventListener("click", toggleCRMHeaderNav);
 if (crmHeaderNav) {
   crmHeaderNav.addEventListener("click", (event) => {

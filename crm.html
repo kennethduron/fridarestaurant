@@ -13,7 +13,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=20260420u">
+    <link rel="stylesheet" href="css/style.css?v=20260421c">
     <link rel="icon" type="image/jpeg" href="assets/icon.jpg">
     <link rel="shortcut icon" href="assets/icon.jpg">
     <link rel="apple-touch-icon" href="assets/icon.jpg">
@@ -156,6 +156,10 @@
                     <strong data-i18n="productManagerTitle">Gestión de productos</strong>
                     <span data-i18n="productManagerCollapsedText">Ajustes de menú listos. Abre esta sección para editar productos.</span>
                 </button>
+                <button class="crm-tool-action" type="button" data-open-crm-tool="terms-report">
+                    <strong data-i18n="termsReportTitle">Facturas por términos</strong>
+                    <span data-i18n="termsReportToolText">Filtra ventas entregadas por fecha y término para revisar e imprimir reportes.</span>
+                </button>
                 <button id="openFiscalSettings" class="crm-tool-action" type="button">
                     <strong data-i18n="fiscalSettingsPage">Ajustes fiscales</strong>
                     <span data-i18n="crmToolsFiscalText">Datos legales, CAI, rango autorizado e impuestos.</span>
@@ -193,6 +197,16 @@
                 <button id="closeProductManagerModal" class="btn btn-ghost" aria-label="Cerrar">X</button>
             </header>
             <section id="productManager" class="product-manager"></section>
+        </div>
+    </div>
+
+    <div id="termsReportModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="termsReportModalTitle">
+        <div class="modal-card crm-work-modal-card">
+            <header class="crm-work-modal-head">
+                <h3 id="termsReportModalTitle" data-i18n="termsReportTitle">Facturas por términos</h3>
+                <button id="closeTermsReportModal" class="btn btn-ghost" aria-label="Cerrar">X</button>
+            </header>
+            <section id="termsReport" class="terms-report"></section>
         </div>
     </div>
 
@@ -283,7 +297,7 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <script type="module" src="js/crm.js?v=20260420t"></script>
+    <script type="module" src="js/crm.js?v=20260422b"></script>
 </body>
 
 </html>

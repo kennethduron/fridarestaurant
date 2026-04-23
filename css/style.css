@@ -2341,7 +2341,8 @@ textarea:focus,
 }
 
 .crm-work-modal-card > .order-creator,
-.crm-work-modal-card > .product-manager {
+.crm-work-modal-card > .product-manager,
+.crm-work-modal-card > .terms-report {
   width: 100%;
   min-height: 0;
   overflow: visible;
@@ -2581,6 +2582,192 @@ textarea:focus,
   background: #fffaf3;
   padding: 12px;
   color: #6d6359;
+}
+
+.terms-report {
+  margin-bottom: 0;
+}
+
+.terms-report-card {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.terms-report-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.terms-report-head h3 {
+  margin: 0 0 6px;
+}
+
+.terms-report-head p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 760px;
+}
+
+.terms-report-head-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.terms-report-toolbar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.terms-report-toolbar label {
+  display: grid;
+  gap: 6px;
+}
+
+.terms-report-toolbar span {
+  color: #6f5b45;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.terms-report-toolbar input,
+.terms-report-toolbar select {
+  width: 100%;
+  border: 1px solid #dcc5ae;
+  border-radius: 8px;
+  background: #fffdf9;
+  color: inherit;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.terms-report-controls {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.terms-report-shift,
+.terms-report-presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.terms-report-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.terms-report-summary-card {
+  border: 1px solid #e5d3bf;
+  border-radius: 12px;
+  background: #fff9f1;
+  padding: 12px;
+  box-shadow: 0 12px 24px rgba(31, 24, 12, 0.05);
+}
+
+.terms-report-summary-card span {
+  display: block;
+  color: #6f5b45;
+  font-size: 0.84rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.terms-report-summary-card strong {
+  font-size: 1.28rem;
+  line-height: 1.1;
+}
+
+.terms-report-preview {
+  margin-top: 14px;
+  border: 1px solid #e5d3bf;
+  border-radius: 12px;
+  background: #fff9f1;
+  padding: 12px;
+}
+
+.terms-report-preview-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.terms-report-preview-head h4 {
+  margin: 0 0 6px;
+}
+
+.terms-report-preview-head p {
+  margin: 0;
+  color: #5f513f;
+}
+
+.terms-report-note {
+  max-width: 360px;
+  color: #6f5b45;
+  margin: 0;
+}
+
+.terms-report-table-wrap {
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid #ecd8c2;
+  background: #fffdf9;
+}
+
+.terms-report-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+.terms-report-table th,
+.terms-report-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0dfcc;
+  text-align: left;
+  vertical-align: top;
+}
+
+.terms-report-table th {
+  background: #fff5e8;
+  color: #6f5b45;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.terms-report-table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.terms-report-empty {
+  margin: 0;
+  border: 1px dashed #dec7af;
+  border-radius: 10px;
+  background: #fffdf9;
+  color: #6d6359;
+  padding: 14px;
 }
 
 .order-creator {
@@ -3816,6 +4003,14 @@ textarea:focus,
     align-items: flex-start;
   }
 
+  .terms-report-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .terms-report-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .crm-tools-summary {
     align-items: flex-start;
     flex-direction: column;
@@ -3881,7 +4076,8 @@ textarea:focus,
   }
 
   .crm-work-modal-card > .order-creator,
-  .crm-work-modal-card > .product-manager {
+  .crm-work-modal-card > .product-manager,
+  .crm-work-modal-card > .terms-report {
     padding: 12px;
   }
 
@@ -4382,7 +4578,8 @@ textarea:focus,
   }
 
   .crm-work-modal-card > .order-creator,
-  .crm-work-modal-card > .product-manager {
+  .crm-work-modal-card > .product-manager,
+  .crm-work-modal-card > .terms-report {
     padding: 10px;
   }
 
@@ -4572,6 +4769,7 @@ textarea:focus,
 
   .crm-work-modal-card > .order-creator,
   .crm-work-modal-card > .product-manager,
+  .crm-work-modal-card > .terms-report,
   .order-creator-card,
   .order-creator-layout,
   .order-product-panel,
@@ -4617,7 +4815,8 @@ textarea:focus,
   }
 
   .crm-work-modal-card > .order-creator,
-  .crm-work-modal-card > .product-manager {
+  .crm-work-modal-card > .product-manager,
+  .crm-work-modal-card > .terms-report {
     padding-left: 8px;
     padding-right: 8px;
     overflow-x: hidden;
@@ -4735,6 +4934,27 @@ textarea:focus,
 
   .crm-tool-action {
     min-height: 96px;
+  }
+
+  .terms-report-head-actions,
+  .terms-report-controls,
+  .terms-report-shift,
+  .terms-report-presets {
+    width: 100%;
+  }
+
+  .terms-report-head-actions .btn,
+  .terms-report-shift .btn,
+  .terms-report-presets .btn {
+    flex: 1 1 0;
+  }
+
+  .terms-report-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .terms-report-preview {
+    padding: 10px;
   }
 
   .product-manager-actions {
@@ -5088,7 +5308,8 @@ textarea:focus,
   }
 
   .crm-work-modal-card > .order-creator,
-  .crm-work-modal-card > .product-manager {
+  .crm-work-modal-card > .product-manager,
+  .crm-work-modal-card > .terms-report {
     overflow: visible;
     padding: 0;
   }

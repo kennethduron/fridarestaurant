@@ -500,10 +500,27 @@ function startPolling(load, successCb, errorCb) {
   };
 }
 
-function listenOrders(successCb, errorCb) {
+function buildOrdersQuery(options = {}) {
+  const params = new URLSearchParams();
+  if (options.scope) params.set("scope", String(options.scope));
+  if (Number.isFinite(Number(options.recentDays))) params.set("recent_days", String(Math.round(Number(options.recentDays))));
+  if (options.paymentMethod) params.set("payment_method", String(options.paymentMethod));
+  if (options.startDate) params.set("start_date", new Date(options.startDate).toISOString());
+  if (options.endDate) params.set("end_date", new Date(options.endDate).toISOString());
+  if (Array.isArray(options.statuses) && options.statuses.length) params.set("statuses", options.statuses.join(","));
+  if (Number.isFinite(Number(options.limit))) params.set("limit", String(Math.round(Number(options.limit))));
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}
+
+async function loadOrders(options = {}) {
+  const result = await apiRequest(`/api/orders${buildOrdersQuery(options)}`);
+  return Array.isArray(result.orders) ? result.orders.map(mapOrder) : [];
+}
+
+function listenOrders(successCb, errorCb, options = {}) {
   return startPolling(async () => {
-    const result = await apiRequest("/api/orders");
-    return Array.isArray(result.orders) ? result.orders.map(mapOrder) : [];
+    return loadOrders(options);
   }, successCb, errorCb);
 }
 
@@ -769,6 +786,7 @@ export {
   auth,
   addOrder,
   addReservation,
+  loadOrders,
   listenOrders,
   listenReservations,
   listenOrderById,
