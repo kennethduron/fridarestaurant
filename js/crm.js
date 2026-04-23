@@ -4266,13 +4266,22 @@ function renderReviewBody(order) {
   `;
 }
 
-function openReview(orderId) {
+function openReview(orderId, options = {}) {
   const order = ordersCache.find((o) => o.id === orderId);
   if (!order) return;
+  const preserveState = Boolean(options.preserveState);
+  const isSameOrder = selectedOrderId === orderId;
   selectedOrderId = orderId;
-  reviewItemsEditMode = false;
-  reviewItemsDraft = buildReviewItemsDraft(order);
-  reviewItemsSaving = false;
+  if (!preserveState || !isSameOrder) {
+    reviewItemsEditMode = false;
+    reviewItemsDraft = buildReviewItemsDraft(order);
+    reviewItemsSaving = false;
+  } else if (!canEditReviewItems(order)) {
+    reviewItemsEditMode = false;
+    reviewItemsDraft = buildReviewItemsDraft(order);
+  } else if (!reviewItemsEditMode) {
+    reviewItemsDraft = buildReviewItemsDraft(order);
+  }
   reviewTitle.textContent = `#${order.displayId || order.id.slice(0, 6)}`;
   reviewBody.innerHTML = renderReviewBody(order);
   reviewModal.classList.remove("hidden");
@@ -4354,7 +4363,7 @@ function refreshOrderViews(orderId) {
   renderFoodStats();
   renderSalesCalendar();
   renderOrders();
-  if (selectedOrderId === orderId) openReview(orderId);
+  if (selectedOrderId === orderId) openReview(orderId, { preserveState: true });
 }
 
 function patchOrderInCache(orderId, patcher) {
