@@ -16,7 +16,7 @@ module.exports = async function handler(req, res) {
 
   try {
     requireMethod(req, ["POST"]);
-    const staff = await requireStaff(getBearerToken(req), ["admin", "kitchen", "cashier"]);
+    const staff = await requireStaff(getBearerToken(req), ["admin", "kitchen", "cashier", "agent"]);
     const body = await readJson(req);
     const token = String(body.token || "").trim();
     if (!token) throw httpError(400, "missing_token", "Notification token is required.");

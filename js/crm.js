@@ -21,7 +21,7 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260422e";
+} from "./firebase-config.js?v=20260424b";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 
@@ -139,8 +139,8 @@ const i18n = {
     invoiceSectionTitle: "Datos de factura",
     reviewItemsTitle: "Productos del pedido",
     reviewItemsEdit: "Editar items",
-    reviewItemsAdd: "+ Agregar item",
-    reviewItemsAddInline: "+ Agregar otro item",
+    reviewItemsAdd: "Agregar item",
+    reviewItemsAddInline: "Agregar otro item",
     reviewItemsSave: "Guardar cambios",
     reviewItemsCancel: "Cancelar",
     reviewItemsQty: "Cantidad",
@@ -453,8 +453,8 @@ const i18n = {
     invoiceSectionTitle: "Invoice details",
     reviewItemsTitle: "Order items",
     reviewItemsEdit: "Edit items",
-    reviewItemsAdd: "+ Add item",
-    reviewItemsAddInline: "+ Add another item",
+    reviewItemsAdd: "Add item",
+    reviewItemsAddInline: "Add another item",
     reviewItemsSave: "Save changes",
     reviewItemsCancel: "Cancel",
     reviewItemsQty: "Qty",
@@ -4058,6 +4058,52 @@ function reviewCatalogItems() {
   return orderCreatorItems();
 }
 
+function reviewIconMarkup(type) {
+  if (type === "add") {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 5v14"/>
+        <path d="M5 12h14"/>
+      </svg>
+    `;
+  }
+  if (type === "edit") {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+      </svg>
+    `;
+  }
+  if (type === "cancel") {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M18 6 6 18"/>
+        <path d="m6 6 12 12"/>
+      </svg>
+    `;
+  }
+  if (type === "save") {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="m20 6-11 11-5-5"/>
+      </svg>
+    `;
+  }
+  if (type === "remove") {
+    return `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M3 6h18"/>
+        <path d="M8 6V4h8v2"/>
+        <path d="m19 6-1 14H6L5 6"/>
+        <path d="M10 11v6"/>
+        <path d="M14 11v6"/>
+      </svg>
+    `;
+  }
+  return reviewIconMarkup("add");
+}
+
 function reviewCatalogItemById(productId) {
   return reviewCatalogItems().find((item) => item.id === productId) || null;
 }
@@ -4181,7 +4227,7 @@ function renderReviewItemsEditor(order) {
               <span>${t("reviewItemsQty")}</span>
               <div class="review-item-qty-controls">
                 <button type="button" class="btn btn-outline review-item-icon-btn" data-review-item-qty="${index}" data-review-item-step="-1" aria-label="Disminuir cantidad">-</button>
-                <strong>${Number(item.qty || 1)}</strong>
+                <strong class="review-item-qty-value">${Number(item.qty || 1)}</strong>
                 <button type="button" class="btn btn-outline review-item-icon-btn" data-review-item-qty="${index}" data-review-item-step="1" aria-label="Aumentar cantidad">+</button>
               </div>
             </div>
@@ -4189,14 +4235,46 @@ function renderReviewItemsEditor(order) {
               <strong>${escapeHtml(money(item.price))}</strong>
               <span>${escapeHtml(foodName(item))}</span>
             </div>
-            <button type="button" class="btn btn-outline review-item-remove-btn" data-review-item-remove="${index}">${t("reviewItemsRemove")}</button>
+            <button
+              type="button"
+              class="btn btn-outline review-item-remove-btn review-items-action-btn"
+              data-review-item-remove="${index}"
+              aria-label="${escapeHtml(t("reviewItemsRemove"))}"
+              title="${escapeHtml(t("reviewItemsRemove"))}">
+              ${reviewIconMarkup("remove")}
+              <span class="review-item-remove-label">${t("reviewItemsRemove")}</span>
+            </button>
           </article>
         `).join("")}
       </div>
       <div class="review-items-editor-actions">
-        <button type="button" class="btn btn-outline" data-review-items-add-row>${t("reviewItemsAddInline")}</button>
-        <button type="button" class="btn btn-outline" data-review-items-cancel>${t("reviewItemsCancel")}</button>
-        <button type="button" class="btn btn-primary" data-review-items-save>${t("reviewItemsSave")}</button>
+        <button
+          type="button"
+          class="btn btn-outline review-items-action-btn"
+          data-review-items-add-row
+          aria-label="${escapeHtml(t("reviewItemsAddInline"))}"
+          title="${escapeHtml(t("reviewItemsAddInline"))}">
+          ${reviewIconMarkup("add")}
+          <span class="review-items-action-label">${t("reviewItemsAddInline")}</span>
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline review-items-action-btn"
+          data-review-items-cancel
+          aria-label="${escapeHtml(t("reviewItemsCancel"))}"
+          title="${escapeHtml(t("reviewItemsCancel"))}">
+          ${reviewIconMarkup("cancel")}
+          <span class="review-items-action-label">${t("reviewItemsCancel")}</span>
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary review-items-action-btn"
+          data-review-items-save
+          aria-label="${escapeHtml(t("reviewItemsSave"))}"
+          title="${escapeHtml(t("reviewItemsSave"))}">
+          ${reviewIconMarkup("save")}
+          <span class="review-items-action-label">${t("reviewItemsSave")}</span>
+        </button>
       </div>
     </div>
   `;
@@ -4214,8 +4292,22 @@ function renderReviewItemsSection(order) {
           canEdit && !editing
             ? `
               <div class="review-items-head-actions">
-                <button type="button" class="btn btn-outline crm-review-mini-btn" data-review-items-edit>${t("reviewItemsEdit")}</button>
-                <button type="button" class="btn btn-primary crm-review-mini-btn" data-review-items-start-add>${t("reviewItemsAdd")}</button>
+                <button
+                  type="button"
+                  class="btn btn-outline review-items-icon-action"
+                  data-review-items-edit
+                  aria-label="${escapeHtml(t("reviewItemsEdit"))}"
+                  title="${escapeHtml(t("reviewItemsEdit"))}">
+                  ${reviewIconMarkup("edit")}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary review-items-icon-action"
+                  data-review-items-start-add
+                  aria-label="${escapeHtml(t("reviewItemsAdd"))}"
+                  title="${escapeHtml(t("reviewItemsAdd"))}">
+                  ${reviewIconMarkup("add")}
+                </button>
               </div>
             `
             : ""
@@ -4820,6 +4912,7 @@ function startRealtime() {
 
       const editingOrderName = isEditingOrderCustomerName();
       const editingInvoiceData = isEditingInvoiceData();
+      const editingReviewItems = reviewItemsEditMode && Boolean(selectedOrderId);
       orders.forEach((order) => {
         if (!orderNamePendingValues.has(order.id) && !orderNameSavingIds.has(order.id)) {
           orderNameLastSavedValues.set(order.id, order.customer?.name || "");
@@ -4843,14 +4936,16 @@ function startRealtime() {
       renderFoodStats();
       renderSalesCalendar();
       refreshTermsReportIfOpen();
-      if (!editingOrderName && !editingInvoiceData) {
+      if (!editingOrderName && !editingInvoiceData && !editingReviewItems) {
         renderOrders();
-        if (selectedOrderId) openReview(selectedOrderId);
+        if (selectedOrderId) openReview(selectedOrderId, { preserveState: true });
+      } else if (editingReviewItems) {
+        renderOrders();
       }
       openLinkedOrderIfReady();
     },
     (error) => handleRealtimeError(error, "ordersListenerError"),
-    { scope: "ops", recentDays: CRM_RECENT_OPERATIONS_DAYS }
+    { scope: "ops", recentDays: CRM_RECENT_OPERATIONS_DAYS, limit: 250, intervalMs: 6000, hiddenIntervalMs: 18000 }
   );
 
   unsubscribeReservations = listenReservations(
@@ -4870,7 +4965,8 @@ function startRealtime() {
       renderReservations();
       openLinkedReservationIfReady();
     },
-    (error) => handleRealtimeError(error, "reservationsListenerError")
+    (error) => handleRealtimeError(error, "reservationsListenerError"),
+    { intervalMs: 12000, hiddenIntervalMs: 30000 }
   );
 }
 
@@ -5552,11 +5648,15 @@ reviewBody.addEventListener("change", (event) => {
     if (!order || !canEditReviewItems(order)) return;
     const index = Number(productSelect.dataset.reviewItemProduct);
     const currentDraft = reviewItemsDraft[index];
+    const sourceItem = reviewCatalogItemById(productSelect.value);
     reviewItemsDraft = reviewItemsDraft.map((item, itemIndex) => itemIndex !== index
       ? item
       : normalizeReviewDraftItem({
           ...currentDraft,
           id: productSelect.value,
+          name: sourceItem?.title?.es || sourceItem?.title?.[lang] || currentDraft?.name || "",
+          title: sourceItem?.title ? { ...sourceItem.title } : currentDraft?.title,
+          price: Number(sourceItem?.price || 0),
           qty: Number(currentDraft?.qty || 1)
         }));
     reviewBody.innerHTML = renderReviewBody(order);

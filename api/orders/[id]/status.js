@@ -53,6 +53,7 @@ module.exports = async function handler(req, res) {
     });
 
     await notifyOrderStatus(order).catch(() => null);
+    await closeOrderNotificationsIfTerminal(order).catch(() => null);
 
     sendJson(req, res, 200, { order }, ["PATCH", "OPTIONS"]);
   } catch (error) {
@@ -81,6 +82,22 @@ async function notifyOrderStatus(order) {
       displayId: order.display_id || ""
     }
   });
+}
+
+async function closeOrderNotificationsIfTerminal(order) {
+  if (!isTerminalStatus(order?.status)) return;
+  await supabaseFetch(`/rest/v1/notification_tokens?order_id=eq.${encodeURIComponent(order.id)}&active=eq.true`, {
+    method: "PATCH",
+    admin: true,
+    body: {
+      active: false,
+      updated_at: new Date().toISOString()
+    }
+  });
+}
+
+function isTerminalStatus(status) {
+  return status === "delivered" || status === "rejected" || status === "cancelled";
 }
 
 function statusMessage(status) {

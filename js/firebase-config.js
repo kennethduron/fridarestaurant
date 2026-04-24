@@ -1,12 +1,22 @@
+function defaultApiBaseUrl() {
+  const origin = String(window.location.origin || "").replace(/\/$/, "");
+  const hostname = String(window.location.hostname || "").toLowerCase();
+  if (!origin) return "https://fridarestaurant.vercel.app";
+  if (hostname.endsWith(".vercel.app")) return origin;
+  return "https://fridarestaurant.vercel.app";
+}
+
 const API_BASE_URL = (
   window.FRIDA_API_BASE_URL ||
   localStorage.getItem("frida_api_base_url") ||
-  "https://fridarestaurant.vercel.app"
+  defaultApiBaseUrl()
 ).replace(/\/$/, "");
 
 const SESSION_KEY = "frida_staff_session_v1";
 const POLL_INTERVAL_MS = 5000;
-const MENU_SETTINGS_SYNC_INTERVAL_MS = 1500;
+const POLL_HIDDEN_INTERVAL_MS = 15000;
+const MENU_SETTINGS_SYNC_INTERVAL_MS = 12000;
+const MENU_SETTINGS_HIDDEN_INTERVAL_MS = 45000;
 const MENU_SETTINGS_CHANNEL = "frida_menu_settings_v1";
 const MENU_SETTINGS_STORAGE_KEY = "frida_menu_settings_changed_v1";
 const STAFF_EMAIL_DOMAIN = "frida.local";
@@ -478,25 +488,58 @@ function normalizeOutgoingStatus(status) {
   return status;
 }
 
-function startPolling(load, successCb, errorCb) {
+function clampPollingMs(value, fallback) {
+  const interval = Number(value);
+  if (!Number.isFinite(interval) || interval <= 0) return fallback;
+  return Math.max(1000, Math.round(interval));
+}
+
+function nextPollingDelay(intervalMs, hiddenIntervalMs) {
+  const base = document.hidden ? hiddenIntervalMs : intervalMs;
+  const jitter = Math.round(base * 0.08 * Math.random());
+  return base + jitter;
+}
+
+function startPolling(load, successCb, errorCb, options = {}) {
   let active = true;
   let timeoutId = null;
+  let loading = false;
+  const intervalMs = clampPollingMs(options.intervalMs, POLL_INTERVAL_MS);
+  const hiddenIntervalMs = clampPollingMs(options.hiddenIntervalMs, Math.max(POLL_HIDDEN_INTERVAL_MS, intervalMs * 3));
 
-  async function tick() {
+  async function tick(force = false) {
+    if (!active) return;
+    if (loading && !force) return;
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+    loading = true;
     try {
       const rows = await load();
       if (active) successCb(rows);
     } catch (error) {
       if (active && typeof errorCb === "function") errorCb(error);
     } finally {
-      if (active) timeoutId = window.setTimeout(tick, POLL_INTERVAL_MS);
+      loading = false;
+      if (active) timeoutId = window.setTimeout(() => tick(), nextPollingDelay(intervalMs, hiddenIntervalMs));
     }
   }
 
-  tick();
+  const handleVisibility = () => {
+    if (!document.hidden) tick(true);
+  };
+  const handleFocus = () => tick(true);
+
+  document.addEventListener("visibilitychange", handleVisibility);
+  window.addEventListener("focus", handleFocus);
+
+  tick(true);
   return () => {
     active = false;
     if (timeoutId) window.clearTimeout(timeoutId);
+    document.removeEventListener("visibilitychange", handleVisibility);
+    window.removeEventListener("focus", handleFocus);
   };
 }
 
@@ -521,21 +564,21 @@ async function loadOrders(options = {}) {
 function listenOrders(successCb, errorCb, options = {}) {
   return startPolling(async () => {
     return loadOrders(options);
-  }, successCb, errorCb);
+  }, successCb, errorCb, options);
 }
 
-function listenReservations(successCb, errorCb) {
+function listenReservations(successCb, errorCb, options = {}) {
   return startPolling(async () => {
     const result = await apiRequest("/api/reservations");
     return Array.isArray(result.reservations) ? result.reservations.map(mapReservation) : [];
-  }, successCb, errorCb);
+  }, successCb, errorCb, options);
 }
 
-function listenOrderById(orderId, successCb, errorCb) {
+function listenOrderById(orderId, successCb, errorCb, options = {}) {
   return startPolling(async () => {
     const result = await apiRequest(`/api/orders/${encodeURIComponent(orderId)}`);
     return result.order ? mapOrder(result.order) : null;
-  }, successCb, errorCb);
+  }, successCb, errorCb, options);
 }
 
 async function updateOrderStatus(id, status) {
@@ -649,10 +692,14 @@ function notifyMenuSettingsChanged(settings) {
 }
 
 function listenMenuSettings(callback, options = {}) {
-  const intervalMs = Number(options.intervalMs || MENU_SETTINGS_SYNC_INTERVAL_MS);
+  const intervalMs = clampPollingMs(options.intervalMs, MENU_SETTINGS_SYNC_INTERVAL_MS);
+  const hiddenIntervalMs = clampPollingMs(
+    options.hiddenIntervalMs,
+    Math.max(MENU_SETTINGS_HIDDEN_INTERVAL_MS, intervalMs * 3)
+  );
   let stopped = false;
   let loading = false;
-  let intervalId = null;
+  let timeoutId = null;
   let channel = null;
 
   const applySettings = (settings, force = false) => {
@@ -673,7 +720,14 @@ function listenMenuSettings(callback, options = {}) {
       // Keep the last rendered menu if the API blinks.
     } finally {
       loading = false;
+      scheduleNextPull();
     }
+  };
+
+  const scheduleNextPull = () => {
+    if (stopped) return;
+    if (timeoutId) window.clearTimeout(timeoutId);
+    timeoutId = window.setTimeout(() => pullSettings(), nextPollingDelay(intervalMs, hiddenIntervalMs));
   };
 
   const handleStorage = (event) => {
@@ -686,9 +740,9 @@ function listenMenuSettings(callback, options = {}) {
     }
   };
 
-  const handleFocus = () => pullSettings();
+  const handleFocus = () => pullSettings(true);
   const handleVisibility = () => {
-    if (!document.hidden) pullSettings();
+    if (!document.hidden) pullSettings(true);
   };
 
   if ("BroadcastChannel" in window) {
@@ -708,11 +762,10 @@ function listenMenuSettings(callback, options = {}) {
   document.addEventListener("visibilitychange", handleVisibility);
 
   pullSettings(true);
-  intervalId = window.setInterval(() => pullSettings(), intervalMs);
 
   return () => {
     stopped = true;
-    if (intervalId) window.clearInterval(intervalId);
+    if (timeoutId) window.clearTimeout(timeoutId);
     window.removeEventListener("storage", handleStorage);
     window.removeEventListener("focus", handleFocus);
     document.removeEventListener("visibilitychange", handleVisibility);

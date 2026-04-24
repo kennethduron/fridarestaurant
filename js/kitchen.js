@@ -6,7 +6,7 @@ import {
   onAuthChange,
   signOutUser,
   isStaffAuthorized
-} from "./firebase-config.js?v=20260422b";
+} from "./firebase-config.js?v=20260424b";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 const THERMAL_ROLL_WIDTH = "79.375mm";
 
@@ -485,7 +485,7 @@ function startRealtime() {
       renderOrders();
     },
     () => showToast("Orders listener error"),
-    { statuses: ["preparing"] }
+    { statuses: ["preparing"], intervalMs: 4000, hiddenIntervalMs: 12000 }
   );
 }
 

@@ -10,6 +10,13 @@ const {
   httpError
 } = require("../../lib/server/http");
 const { supabaseFetch, requireStaff } = require("../../lib/server/supabase");
+const {
+  buildOrderAmounts,
+  loadFiscalSettings,
+  loadMenuCatalog,
+  normalizeOrderItems,
+  sanitizePublicOrder
+} = require("../../lib/server/order-security");
 
 const ORDER_SELECT = "*,order_items(*),order_status_events(status,created_at)";
 
@@ -45,26 +52,17 @@ module.exports = async function handler(req, res) {
       }
 
       if (hasItemsPatch) {
-        const items = normalizePatchItems(body.items);
-        const subtotal = roundMoney(items.reduce((sum, item) => sum + Number(item.total || 0), 0));
-        const tax = Number(currentOrder.tax || 0);
-        const deliveryFee = Number(currentOrder.delivery_fee || 0);
-        patch.subtotal = subtotal;
-        patch.total = roundMoney(subtotal + tax + deliveryFee);
+        const [menuCatalog, fiscalSettings] = await Promise.all([
+          loadMenuCatalog(),
+          loadFiscalSettings()
+        ]);
+        const items = normalizePatchItems(body.items, menuCatalog);
+        const amounts = buildOrderAmounts(items, fiscalSettings, Number(currentOrder.delivery_fee || 0));
+        patch.subtotal = amounts.subtotal;
+        patch.tax = amounts.tax;
+        patch.total = amounts.total;
 
-        await supabaseFetch(`/rest/v1/order_items?order_id=eq.${encodeURIComponent(orderId)}`, {
-          method: "DELETE",
-          admin: true
-        });
-
-        await supabaseFetch("/rest/v1/order_items", {
-          method: "POST",
-          admin: true,
-          body: items.map((item) => ({
-            ...item,
-            order_id: orderId
-          }))
-        });
+        await replaceOrderItemsSafely(orderId, items, currentOrder.order_items);
       }
 
       await supabaseFetch(`/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}`, {
@@ -79,9 +77,10 @@ module.exports = async function handler(req, res) {
       return;
     }
 
+    const staff = await resolveViewingStaff(getBearerToken(req));
     const order = await fetchOrderById(orderId);
     if (!order) throw httpError(404, "order_not_found", "Order not found.");
-    sendJson(req, res, 200, { order }, ["GET", "PATCH", "OPTIONS"]);
+    sendJson(req, res, 200, { order: staff ? order : sanitizePublicOrder(order) }, ["GET", "PATCH", "OPTIONS"]);
   } catch (error) {
     sendJson(req, res, error.statusCode || 500, errorPayload(error), ["GET", "PATCH", "OPTIONS"]);
   }
@@ -95,44 +94,72 @@ async function fetchOrderById(orderId) {
   return Array.isArray(rows) ? rows[0] || null : null;
 }
 
-function normalizePatchItems(items) {
-  if (!Array.isArray(items) || !items.length) {
-    throw httpError(400, "missing_items", "At least one order item is required.");
-  }
+async function resolveViewingStaff(accessToken) {
+  if (!accessToken) return null;
+  return requireStaff(accessToken, ["admin", "representative", "kitchen", "cashier", "agent"]);
+}
 
-  return items.map((item) => {
-    const quantity = Math.max(1, Math.round(Number(item.quantity || item.qty || 1)));
-    const unitPrice = Number(item.unit_price || item.unitPrice || item.price || 0);
-    const name = itemDisplayName(item);
-    if (!name) {
-      throw httpError(400, "invalid_item", "Each item needs a valid name.");
-    }
-    return {
-      menu_item_id: item.menu_item_id || item.menuItemId || item.id || null,
-      name,
-      quantity,
-      unit_price: roundMoney(unitPrice),
-      total: roundMoney(Number(item.total || unitPrice * quantity)),
-      notes: item.notes ? String(item.notes).trim() : null
-    };
+function normalizePatchItems(items, menuCatalog) {
+  return normalizeOrderItems(items, menuCatalog, { allowSoldOut: true }).map((item) => ({
+    menu_item_id: item.menu_item_id,
+    name: item.name,
+    quantity: item.quantity,
+    unit_price: item.unit_price,
+    total: item.total,
+    notes: item.notes
+  }));
+}
+
+async function replaceOrderItemsSafely(orderId, nextItems, previousItems) {
+  const backupItems = Array.isArray(previousItems)
+    ? previousItems
+      .map((item) => normalizeStoredOrderItem(item, orderId))
+      .filter(Boolean)
+    : [];
+
+  await supabaseFetch(`/rest/v1/order_items?order_id=eq.${encodeURIComponent(orderId)}`, {
+    method: "DELETE",
+    admin: true
   });
+
+  try {
+    await supabaseFetch("/rest/v1/order_items", {
+      method: "POST",
+      admin: true,
+      body: nextItems.map((item) => ({
+        ...item,
+        order_id: orderId
+      }))
+    });
+  } catch (error) {
+    try {
+      if (backupItems.length) {
+        await supabaseFetch("/rest/v1/order_items", {
+          method: "POST",
+          admin: true,
+          body: backupItems
+        });
+      }
+    } catch (restoreError) {
+      error.details = {
+        ...(error.details && typeof error.details === "object" ? error.details : {}),
+        rollback_failed: true,
+        rollback_message: restoreError?.message || "Rollback failed."
+      };
+    }
+    throw error;
+  }
 }
 
-function itemDisplayName(item) {
-  const directName = String(item?.name || "").trim();
-  if (directName && directName !== "[object Object]") return directName;
-  const title = item?.title;
-  if (typeof title === "string") {
-    const text = title.trim();
-    return text === "[object Object]" ? "" : text;
-  }
-  if (title && typeof title === "object") {
-    return String(title.es || title.en || title[Object.keys(title)[0]] || "").trim();
-  }
-  return "";
-}
-
-function roundMoney(value) {
-  const amount = Number(value || 0);
-  return Math.round(amount * 100) / 100;
+function normalizeStoredOrderItem(item, orderId) {
+  if (!item) return null;
+  return {
+    order_id: orderId,
+    menu_item_id: item.menu_item_id || item.id || null,
+    name: item.name || "",
+    quantity: Math.max(1, Math.round(Number(item.quantity || 1))),
+    unit_price: Number(item.unit_price || 0),
+    total: Number(item.total || 0),
+    notes: item.notes || null
+  };
 }

@@ -1,4 +1,4 @@
-import { addOrder, addReservation, listenOrderById, listenMenuSettings, registerOrderNotificationToken } from "./firebase-config.js?v=20260419b";
+import { addOrder, addReservation, listenOrderById, listenMenuSettings, registerOrderNotificationToken } from "./firebase-config.js?v=20260424b";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 
 const STORAGE = {
@@ -1454,7 +1454,8 @@ function subscribeTrackerOrder(orderId) {
     () => {
       trackerOrderById.delete(orderId);
       renderTracker();
-    }
+    },
+    { intervalMs: 7000, hiddenIntervalMs: 20000 }
   );
   trackerUnsubs.set(orderId, unsub);
 }

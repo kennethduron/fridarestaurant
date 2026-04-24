@@ -109,7 +109,7 @@ function normalizeReservation(body) {
 }
 
 async function notifyStaffNewReservation(reservation) {
-  const rows = await supabaseFetch("/rest/v1/staff_notification_tokens?active=eq.true&select=token,staff_profile_id,updated_at,created_at&order=updated_at.desc", {
+  const rows = await supabaseFetch("/rest/v1/staff_notification_tokens?active=eq.true&platform=neq.web-agent&select=token,staff_profile_id,updated_at,created_at&order=updated_at.desc", {
     admin: true,
     prefer: "return=representation"
   });

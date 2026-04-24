@@ -1,11 +1,12 @@
 import {
   listenOrders,
+  registerStaffNotificationToken,
   signInWithEmailPassword,
   getEmailByUsername,
   onAuthChange,
   signOutUser,
   isStaffAuthorized
-} from "./firebase-config.js?v=20260422b";
+} from "./firebase-config.js?v=20260424b";
 
 const i18n = {
   es: {
@@ -28,6 +29,12 @@ const i18n = {
     staffRole: "Rol",
     signOut: "Salir",
     signOutShort: "Salir",
+    agentNotificationsAction: "Activar avisos",
+    agentNotificationsActionText: "Activa avisos para recibir nuevas órdenes en este dispositivo.",
+    agentNotificationsAppleTitle: "Aviso para iPhone y iPad",
+    agentNotificationsAppleText: "En Android los avisos funcionan desde Chrome. En iPhone o iPad, abre este panel en Safari, agrégalo a pantalla de inicio y activa los avisos desde ese ícono.",
+    agentNotificationsReady: "Avisos del panel de meseros activados.",
+    agentNotificationsUnavailable: "Este dispositivo no pudo activar los avisos del panel de meseros.",
     searchLabel: "Buscar orden",
     searchPlaceholder: "Buscar por mesa, cliente o número de orden",
     filterAll: "Todas",
@@ -83,6 +90,12 @@ const i18n = {
     staffRole: "Role",
     signOut: "Sign out",
     signOutShort: "Out",
+    agentNotificationsAction: "Enable alerts",
+    agentNotificationsActionText: "Enable alerts to receive new orders on this device.",
+    agentNotificationsAppleTitle: "iPhone and iPad notice",
+    agentNotificationsAppleText: "On Android, alerts work from Chrome. On iPhone or iPad, open this panel in Safari, add it to the Home Screen, and enable alerts from that icon.",
+    agentNotificationsReady: "Waitstaff panel alerts enabled.",
+    agentNotificationsUnavailable: "This device could not enable waitstaff panel alerts.",
     searchLabel: "Search order",
     searchPlaceholder: "Search by table, customer or order number",
     filterAll: "All",
@@ -131,6 +144,7 @@ const appSection = document.getElementById("agentApp");
 const langToggle = document.getElementById("agentLangToggle");
 const staffBadge = document.getElementById("staffBadge");
 const searchInput = document.getElementById("agentSearch");
+const enableAgentNotificationsBtn = document.getElementById("enableAgentNotifications");
 const summaryGrid = document.getElementById("agentSummary");
 const statusFilters = document.getElementById("agentStatusFilters");
 const ordersList = document.getElementById("agentOrdersList");
@@ -145,9 +159,22 @@ let ordersCache = [];
 let unsubscribeOrders = null;
 let currentStaffUser = null;
 let currentStaffProfile = null;
+let agentPushNotificationsReady = false;
 let statusFilter = "all";
 let searchTerm = "";
 let selectedOrderId = "";
+let searchFocusRestoreTimer = 0;
+let lastSummaryMarkup = "";
+let lastOrdersMarkup = "";
+let hasSeenInitialOrdersSnapshot = false;
+let knownOrderIds = new Set();
+let audioCtx = null;
+let audioUnlocked = false;
+let lastAgentPushRegisterAt = 0;
+const compactSignOutQuery = window.matchMedia("(max-width: 560px)");
+const AGENT_NOTIFICATIONS_ENABLED_KEY = "frida_agent_notifications_enabled_v1";
+const agentUrlParams = new URLSearchParams(window.location.search);
+let pendingLinkedOrderId = agentUrlParams.get("order") || agentUrlParams.get("orderId") || "";
 
 function t(key) {
   return (i18n[lang] && i18n[lang][key]) || key;
@@ -181,6 +208,130 @@ function showToast(message) {
   toast.textContent = message;
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 1600);
+}
+
+function canUseBrowserNotifications() {
+  return typeof window !== "undefined" && "Notification" in window;
+}
+
+function canUseWebAudio() {
+  return typeof window !== "undefined" && ("AudioContext" in window || "webkitAudioContext" in window);
+}
+
+function getAudioContext() {
+  if (!canUseWebAudio()) return null;
+  if (audioCtx) return audioCtx;
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioCtx();
+  } catch (_error) {
+    audioCtx = null;
+  }
+  return audioCtx;
+}
+
+async function unlockNotificationSound() {
+  const ctx = getAudioContext();
+  if (!ctx) return false;
+  try {
+    if (ctx.state === "suspended") await ctx.resume();
+    audioUnlocked = ctx.state === "running";
+  } catch (_error) {
+    audioUnlocked = false;
+  }
+  return audioUnlocked;
+}
+
+function playNewOrderSound() {
+  if (!audioUnlocked) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  [0, 0.23].forEach((offset) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, now + offset);
+    gain.gain.setValueAtTime(0.0001, now + offset);
+    gain.gain.exponentialRampToValueAtTime(0.18, now + offset + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.18);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + offset);
+    osc.stop(now + offset + 0.2);
+  });
+}
+
+async function ensureNotificationPermission() {
+  if (!canUseBrowserNotifications()) return "unsupported";
+  if (Notification.permission === "granted") return "granted";
+  if (Notification.permission === "denied") return "denied";
+  try {
+    return await Notification.requestPermission();
+  } catch (_error) {
+    return "denied";
+  }
+}
+
+function readAgentNotificationsEnabled() {
+  return localStorage.getItem(AGENT_NOTIFICATIONS_ENABLED_KEY) === "true";
+}
+
+function writeAgentNotificationsEnabled(enabled) {
+  if (enabled) localStorage.setItem(AGENT_NOTIFICATIONS_ENABLED_KEY, "true");
+  else localStorage.removeItem(AGENT_NOTIFICATIONS_ENABLED_KEY);
+}
+
+function canUseLocalAgentNotification() {
+  return !agentPushNotificationsReady && canUseBrowserNotifications() && Notification.permission === "granted";
+}
+
+function notifyNewOrder(order) {
+  const title = lang === "es" ? "Nuevo pedido recibido" : "New order received";
+  const body = `${orderRef(order)} | ${order?.customer?.name || "-"} | ${money(order.total || 0)}`;
+  showToast(`${title}: ${orderRef(order)}`);
+  playNewOrderSound();
+  if (!canUseLocalAgentNotification()) return;
+  try {
+    new Notification(title, { body });
+  } catch (_error) {
+    // Keep toast and sound feedback even if the browser notification fails.
+  }
+}
+
+function normalizeSearchValue(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function preserveSearchFocus(callback) {
+  if (!searchInput) {
+    callback();
+    return;
+  }
+  const shouldRestoreFocus = document.activeElement === searchInput;
+  const selectionStart = shouldRestoreFocus ? searchInput.selectionStart : null;
+  const selectionEnd = shouldRestoreFocus ? searchInput.selectionEnd : null;
+  callback();
+  if (!shouldRestoreFocus) return;
+  if (document.activeElement === searchInput) {
+    if (typeof selectionStart === "number" && typeof selectionEnd === "number") {
+      searchInput.setSelectionRange(selectionStart, selectionEnd);
+    }
+    return;
+  }
+  window.clearTimeout(searchFocusRestoreTimer);
+  searchFocusRestoreTimer = window.setTimeout(() => {
+    if (document.activeElement === searchInput) return;
+    searchInput.focus({ preventScroll: true });
+    if (typeof selectionStart === "number" && typeof selectionEnd === "number") {
+      searchInput.setSelectionRange(selectionStart, selectionEnd);
+    }
+  }, 0);
 }
 
 function parseDate(value) {
@@ -255,19 +406,24 @@ function redirectIfWrongPanel(profile) {
 }
 
 function searchableOrderText(order) {
+  const itemNames = Array.isArray(order?.items)
+    ? order.items.map((item) => item?.name || "").join(" ")
+    : "";
   return [
     orderRef(order),
     order?.customer?.name || "",
     order?.customer?.table || "",
-    orderTypeLabel(order)
-  ].join(" ").toLowerCase();
+    orderTypeLabel(order),
+    orderComments(order),
+    itemNames
+  ].join(" ");
 }
 
 function filteredOrders() {
-  const query = searchTerm.trim().toLowerCase();
+  const query = normalizeSearchValue(searchTerm);
   return ordersCache
     .filter((order) => statusFilter === "all" || order.status === statusFilter)
-    .filter((order) => !query || searchableOrderText(order).includes(query))
+    .filter((order) => !query || normalizeSearchValue(searchableOrderText(order)).includes(query))
     .sort((left, right) => {
       const leftTime = parseDate(left.createdAt)?.getTime() || 0;
       const rightTime = parseDate(right.createdAt)?.getTime() || 0;
@@ -288,7 +444,7 @@ function summaryCounts() {
 function renderSummary() {
   if (!summaryGrid) return;
   const summary = summaryCounts();
-  summaryGrid.innerHTML = `
+  const markup = `
     <article class="agent-summary-card">
       <span>${t("summaryTotal")}</span>
       <strong>${summary.total}</strong>
@@ -306,6 +462,9 @@ function renderSummary() {
       <strong>${summary.delivered}</strong>
     </article>
   `;
+  if (markup === lastSummaryMarkup) return;
+  summaryGrid.innerHTML = markup;
+  lastSummaryMarkup = markup;
 }
 
 function renderOrderItems(order) {
@@ -352,11 +511,12 @@ function renderOrderCard(order) {
 function renderOrders() {
   if (!ordersList) return;
   const rows = filteredOrders();
-  if (!rows.length) {
-    ordersList.innerHTML = `<p class="agent-empty">${t("emptyOrders")}</p>`;
-    return;
-  }
-  ordersList.innerHTML = rows.map(renderOrderCard).join("");
+  const markup = !rows.length
+    ? `<p class="agent-empty">${t("emptyOrders")}</p>`
+    : rows.map(renderOrderCard).join("");
+  if (markup === lastOrdersMarkup) return;
+  ordersList.innerHTML = markup;
+  lastOrdersMarkup = markup;
 }
 
 function renderDetail(order) {
@@ -398,10 +558,67 @@ function closeDetail() {
   detailModal?.classList.add("hidden");
 }
 
+function openLinkedOrderIfReady() {
+  if (!pendingLinkedOrderId || !ordersCache.length) return;
+  const order = ordersCache.find((row) => row.id === pendingLinkedOrderId);
+  if (!order) return;
+  openDetail(order.id);
+  pendingLinkedOrderId = "";
+}
+
+async function registerAgentPushNotifications(options = {}) {
+  const { showUnavailableToast = true, remember = false, force = false } = options;
+  const now = Date.now();
+  if (!force && agentPushNotificationsReady && now - lastAgentPushRegisterAt < 15 * 60 * 1000) {
+    return true;
+  }
+  try {
+    const token = await registerStaffNotificationToken("web-agent");
+    if (token) {
+      agentPushNotificationsReady = true;
+      lastAgentPushRegisterAt = now;
+      if (remember) writeAgentNotificationsEnabled(true);
+      if (showUnavailableToast) showToast(t("agentNotificationsReady"));
+      return true;
+    }
+  } catch (error) {
+    agentPushNotificationsReady = false;
+    console.warn("Agent push registration failed", error);
+    if (showUnavailableToast) showToast(t("agentNotificationsUnavailable"));
+  }
+  return false;
+}
+
+async function activateAgentNotifications(options = {}) {
+  const { showUnavailableToast = true, remember = true, force = false } = options;
+  const permission = await ensureNotificationPermission();
+  await unlockNotificationSound();
+
+  if (permission !== "granted") {
+    if (permission === "denied") writeAgentNotificationsEnabled(false);
+    if (showUnavailableToast) showToast(t("agentNotificationsUnavailable"));
+    return false;
+  }
+
+  return registerAgentPushNotifications({ showUnavailableToast, remember, force });
+}
+
+async function renewAgentNotificationsIfAllowed(options = {}) {
+  if (!canUseBrowserNotifications()) return false;
+  const { force = false } = options;
+  const shouldRenew = Notification.permission === "granted" || readAgentNotificationsEnabled();
+  if (!shouldRenew) return false;
+  if (Notification.permission === "granted") {
+    await unlockNotificationSound();
+    return registerAgentPushNotifications({ showUnavailableToast: false, remember: true, force });
+  }
+  return activateAgentNotifications({ showUnavailableToast: false, remember: true, force });
+}
+
 function applyI18n() {
   document.documentElement.lang = lang;
   langToggle.textContent = lang === "es" ? "EN" : "ES";
-  const shortLabel = window.matchMedia("(max-width: 560px)").matches;
+  const shortLabel = compactSignOutQuery.matches;
   signOutBtn.textContent = shortLabel ? t("signOutShort") : t("signOut");
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     node.textContent = t(node.dataset.i18n);
@@ -412,13 +629,15 @@ function applyI18n() {
   if (currentStaffUser && currentStaffProfile) {
     staffBadge.textContent = `${currentStaffUser.email} | ${t("staffRole")}: ${currentStaffProfile.role}`;
   }
-  renderSummary();
-  renderOrders();
-  if (selectedOrderId) {
-    const order = ordersCache.find((row) => row.id === selectedOrderId);
-    if (order) renderDetail(order);
-    else closeDetail();
-  }
+  preserveSearchFocus(() => {
+    renderSummary();
+    renderOrders();
+    if (selectedOrderId) {
+      const order = ordersCache.find((row) => row.id === selectedOrderId);
+      if (order) renderDetail(order);
+      else closeDetail();
+    }
+  });
 }
 
 function stopRealtime() {
@@ -430,33 +649,53 @@ function startRealtime() {
   stopRealtime();
   unsubscribeOrders = listenOrders(
     (orders) => {
-      ordersCache = orders;
-      renderSummary();
-      renderOrders();
-      if (selectedOrderId) {
-        const order = ordersCache.find((row) => row.id === selectedOrderId);
-        if (order) renderDetail(order);
-        else closeDetail();
+      const nextOrderIds = new Set(orders.map((order) => order.id));
+      if (!hasSeenInitialOrdersSnapshot) {
+        knownOrderIds = nextOrderIds;
+        hasSeenInitialOrdersSnapshot = true;
+      } else {
+        const newOrders = orders.filter((order) => !knownOrderIds.has(order.id));
+        newOrders.forEach(notifyNewOrder);
+        knownOrderIds = nextOrderIds;
       }
+
+      ordersCache = orders;
+      preserveSearchFocus(() => {
+        renderSummary();
+        renderOrders();
+        if (selectedOrderId) {
+          const order = ordersCache.find((row) => row.id === selectedOrderId);
+          if (order) renderDetail(order);
+          else closeDetail();
+        }
+        openLinkedOrderIfReady();
+      });
     },
     () => showToast("Orders listener error"),
-    { scope: "agent_today" }
+    { scope: "agent_today", intervalMs: 5000, hiddenIntervalMs: 15000 }
   );
 }
 
 function lockUI() {
+  agentPushNotificationsReady = false;
   authGate.classList.remove("hidden");
   appSection.classList.add("hidden");
   signOutBtn.classList.add("hidden");
   staffBadge.textContent = "";
+  window.clearTimeout(searchFocusRestoreTimer);
+  lastSummaryMarkup = "";
+  lastOrdersMarkup = "";
+  hasSeenInitialOrdersSnapshot = false;
+  knownOrderIds = new Set();
   stopRealtime();
 }
 
-function unlockUI(user, profile) {
+async function unlockUI(user, profile) {
   authGate.classList.add("hidden");
   appSection.classList.remove("hidden");
   signOutBtn.classList.remove("hidden");
   staffBadge.textContent = `${user.email} | ${t("staffRole")}: ${profile.role}`;
+  await renewAgentNotificationsIfAllowed({ force: true });
   startRealtime();
 }
 
@@ -497,6 +736,12 @@ langToggle.addEventListener("click", () => {
   applyI18n();
 });
 
+if (enableAgentNotificationsBtn) {
+  enableAgentNotificationsBtn.addEventListener("click", async () => {
+    await activateAgentNotifications({ remember: true, force: true });
+  });
+}
+
 searchInput?.addEventListener("input", () => {
   searchTerm = searchInput.value || "";
   renderOrders();
@@ -523,7 +768,17 @@ detailModal?.addEventListener("click", (event) => {
   if (event.target === detailModal) closeDetail();
 });
 
-window.addEventListener("resize", applyI18n);
+if (typeof compactSignOutQuery.addEventListener === "function") {
+  compactSignOutQuery.addEventListener("change", applyI18n);
+} else if (typeof compactSignOutQuery.addListener === "function") {
+  compactSignOutQuery.addListener(applyI18n);
+}
+
+window.addEventListener("pointerdown", unlockNotificationSound, { once: true });
+window.addEventListener("keydown", unlockNotificationSound, { once: true });
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && currentStaffUser) renewAgentNotificationsIfAllowed();
+});
 
 onAuthChange(async (user) => {
   if (!user) {
@@ -549,7 +804,7 @@ onAuthChange(async (user) => {
   currentStaffProfile = access.profile;
   if (redirectIfWrongPanel(currentStaffProfile)) return;
   setAuthMessage("");
-  unlockUI(user, currentStaffProfile);
+  await unlockUI(user, currentStaffProfile);
 });
 
 applyI18n();
