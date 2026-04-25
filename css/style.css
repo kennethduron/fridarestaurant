@@ -38,6 +38,28 @@ body {
     var(--bg);
   line-height: 1.5;
   padding-top: 74px;
+  overflow-x: hidden;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+.hero-copy,
+.hero-card,
+.hero-feature,
+.reservation-form,
+.crm-card,
+.product-row,
+.terms-report-card,
+.agent-card,
+.kitchen-ticket,
+.modal-card {
+  min-width: 0;
 }
 
 h1,
@@ -162,6 +184,34 @@ h4 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+@media (max-width: 1120px) {
+  .nav-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 14px;
+  }
+
+  #primaryNav {
+    position: static;
+    top: auto;
+    left: auto;
+    transform: none;
+    justify-self: end;
+    max-width: 100%;
+  }
+
+  .nav-list {
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .nav-list a {
+    padding: 9px 13px;
+  }
 }
 
 #langToggle {
@@ -603,11 +653,14 @@ h4 {
 }
 
 #inicio,
-#menu,
 #pedido,
 #reservas,
 #nosotros {
   scroll-margin-top: 132px;
+}
+
+#menu {
+  scroll-margin-top: 190px;
 }
 
 .section-head h2 {
@@ -1158,11 +1211,66 @@ textarea:focus,
   margin-top: 8px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .qty-line button {
   padding: 4px 10px;
+}
+
+.qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid #ead6c0;
+  border-radius: 999px;
+  background: #fffdf9;
+}
+
+.qty-stepper .qty {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  line-height: 1;
+}
+
+.cart-qty-value {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.cart-remove-icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border: 1px solid #efd2cc;
+  border-radius: 999px;
+  background: #fff7f5;
+  color: #9a2f25;
+  display: inline-grid;
+  place-items: center;
+  font: inherit;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.cart-remove-icon:hover,
+.cart-remove-icon:focus-visible {
+  background: #ffe8e3;
+  border-color: #e6aaa0;
+  color: #7e1f17;
+  transform: translateY(-1px);
 }
 
 .cart-customer {
@@ -2342,7 +2450,8 @@ textarea:focus,
 
 .crm-work-modal-card > .order-creator,
 .crm-work-modal-card > .product-manager,
-.crm-work-modal-card > .terms-report {
+.crm-work-modal-card > .terms-report,
+.crm-work-modal-card > .food-report {
   width: 100%;
   min-height: 0;
   overflow: visible;
@@ -2574,6 +2683,21 @@ textarea:focus,
   line-height: 1.2;
   padding-left: 12px;
   padding-right: 12px;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.product-save.is-saving {
+  border-color: rgba(201, 142, 81, 0.58);
+  background: linear-gradient(180deg, #fff4e4 0%, #ffe7c7 100%);
+  color: #7d4b16;
+  box-shadow: 0 10px 18px rgba(184, 124, 58, 0.12);
+}
+
+.product-save.is-saved {
+  border-color: rgba(67, 151, 107, 0.34);
+  background: linear-gradient(180deg, #effaf3 0%, #dff5e8 100%);
+  color: #1d6d45;
+  box-shadow: 0 10px 18px rgba(36, 125, 80, 0.1);
 }
 
 .product-manager-empty {
@@ -2604,6 +2728,11 @@ textarea:focus,
   flex-wrap: wrap;
 }
 
+.terms-report-head > div,
+.terms-report-preview-head > div {
+  min-width: 0;
+}
+
 .terms-report-head h3 {
   margin: 0 0 6px;
 }
@@ -2623,7 +2752,7 @@ textarea:focus,
 
 .terms-report-toolbar {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
   margin-top: 14px;
 }
@@ -2668,7 +2797,7 @@ textarea:focus,
 
 .terms-report-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 10px;
   margin-top: 14px;
 }
@@ -2735,7 +2864,7 @@ textarea:focus,
 
 .terms-report-table {
   width: 100%;
-  min-width: 760px;
+  min-width: 680px;
   border-collapse: collapse;
 }
 
@@ -2983,7 +3112,7 @@ textarea:focus,
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 7px;
   flex: 0 0 auto;
 }
@@ -2994,8 +3123,29 @@ textarea:focus,
 }
 
 .order-creator-remove {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border: 1px solid #e3c6c9;
+  border-radius: 999px;
+  background: #fff7f7;
   color: #8e1634;
-  border-color: #e3c6c9;
+  display: inline-grid;
+  place-items: center;
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.order-creator-remove:hover,
+.order-creator-remove:focus-visible {
+  background: #ffe8e3;
+  border-color: #e6aaa0;
+  color: #7e1f17;
+  transform: translateY(-1px);
 }
 
 .order-creator-empty {
@@ -4285,7 +4435,7 @@ textarea:focus,
   }
 
   .terms-report-toolbar {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 
   .terms-report-summary {
@@ -4358,7 +4508,8 @@ textarea:focus,
 
   .crm-work-modal-card > .order-creator,
   .crm-work-modal-card > .product-manager,
-  .crm-work-modal-card > .terms-report {
+  .crm-work-modal-card > .terms-report,
+  .crm-work-modal-card > .food-report {
     padding: 12px;
   }
 
@@ -4860,7 +5011,8 @@ textarea:focus,
 
   .crm-work-modal-card > .order-creator,
   .crm-work-modal-card > .product-manager,
-  .crm-work-modal-card > .terms-report {
+  .crm-work-modal-card > .terms-report,
+  .crm-work-modal-card > .food-report {
     padding: 10px;
   }
 
@@ -5057,9 +5209,10 @@ textarea:focus,
     order: 1;
     min-width: 0;
     max-width: calc(100% - 132px);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.08;
   }
 
   .kitchen-page .crm-head-actions {
@@ -5115,6 +5268,7 @@ textarea:focus,
   .crm-work-modal-card > .order-creator,
   .crm-work-modal-card > .product-manager,
   .crm-work-modal-card > .terms-report,
+  .crm-work-modal-card > .food-report,
   .order-creator-card,
   .order-creator-layout,
   .order-product-panel,
@@ -5161,7 +5315,8 @@ textarea:focus,
 
   .crm-work-modal-card > .order-creator,
   .crm-work-modal-card > .product-manager,
-  .crm-work-modal-card > .terms-report {
+  .crm-work-modal-card > .terms-report,
+  .crm-work-modal-card > .food-report {
     padding-left: 8px;
     padding-right: 8px;
     overflow-x: hidden;
@@ -5379,11 +5534,12 @@ textarea:focus,
 
   .order-creator-remove {
     flex: 0 0 auto;
-    width: auto;
-    min-width: 0;
-    padding: 0 10px;
-    font-size: 0.78rem;
-    background: #fff7f7;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0;
+    font-size: 1.18rem;
   }
 
   .order-creator-submit {
@@ -5497,7 +5653,9 @@ textarea:focus,
   padding: 12px 14px;
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
+  max-width: 100%;
 }
 
 .kitchen-summary span {
@@ -5525,6 +5683,7 @@ textarea:focus,
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .kitchen-ticket p {
@@ -5654,7 +5813,8 @@ textarea:focus,
 
   .crm-work-modal-card > .order-creator,
   .crm-work-modal-card > .product-manager,
-  .crm-work-modal-card > .terms-report {
+  .crm-work-modal-card > .terms-report,
+  .crm-work-modal-card > .food-report {
     overflow: visible;
     padding: 0;
   }
@@ -5757,6 +5917,7 @@ textarea:focus,
 .agent-shell,
 .agent-page .section-head,
 .agent-toolbar,
+.agent-search-panel,
 .agent-page .crm-controls,
 .agent-summary,
 .agent-grid,
@@ -5835,6 +5996,7 @@ textarea:focus,
 
 .agent-page .section-head,
 .agent-toolbar,
+.agent-search-panel,
 .agent-page .crm-controls {
   position: relative;
   overflow: hidden;
@@ -5888,6 +6050,7 @@ textarea:focus,
 }
 
 .agent-toolbar,
+.agent-search-panel,
 .agent-page .crm-controls {
   padding: clamp(16px, 2.4vw, 22px);
 }
@@ -5947,12 +6110,17 @@ textarea:focus,
   height: 150px;
 }
 
+.agent-search-panel {
+  display: flex;
+  justify-content: center;
+}
+
 .agent-search {
   position: relative;
   z-index: 1;
   display: grid;
   gap: 10px;
-  max-width: 860px;
+  width: min(760px, 100%);
 }
 
 .agent-search span {
@@ -6311,6 +6479,7 @@ textarea:focus,
 
   .agent-page .section-head,
   .agent-toolbar,
+  .agent-search-panel,
   .agent-page .crm-controls {
     border-radius: 22px;
   }
@@ -6332,6 +6501,7 @@ textarea:focus,
   }
 
   .agent-toolbar,
+  .agent-search-panel,
   .agent-page .crm-controls,
   .agent-summary,
   .agent-grid {

@@ -492,13 +492,6 @@ function renderOrderCard(order) {
         <p><strong>${t("customer")}:</strong> ${escapeHtml(order?.customer?.name || "-")}</p>
         <p><strong>${t("table")}:</strong> ${escapeHtml(orderTableLabel(order))}</p>
         <p><strong>${t("orderType")}:</strong> ${escapeHtml(orderTypeLabel(order))}</p>
-        <p><strong>${t("comments")}:</strong> ${escapeHtml(orderComments(order))}</p>
-        <div class="agent-items-block">
-          <strong>${t("items")}:</strong>
-          <ul class="agent-items-list">
-            ${renderOrderItems(order)}
-          </ul>
-        </div>
         ${shouldShowTotal(order) ? `<p class="agent-total"><strong>${t("total")}:</strong> ${escapeHtml(money(order.total || 0))}</p>` : ""}
       </div>
       <div class="agent-card-actions">

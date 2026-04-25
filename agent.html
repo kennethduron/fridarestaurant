@@ -12,7 +12,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20260423g">
+  <link rel="stylesheet" href="css/style.css?v=20260425a">
   <link rel="icon" type="image/jpeg" href="assets/icon.jpg">
   <link rel="shortcut icon" href="assets/icon.jpg">
   <link rel="apple-touch-icon" href="assets/icon.jpg">
@@ -60,20 +60,6 @@
       </div>
 
       <section class="agent-toolbar">
-        <label class="agent-search">
-          <span data-i18n="searchLabel">Buscar orden</span>
-          <input
-            id="agentSearch"
-            type="text"
-            inputmode="search"
-            enterkeyhint="search"
-            autocapitalize="none"
-            autocomplete="off"
-            autocorrect="off"
-            spellcheck="false"
-            data-i18n-placeholder="searchPlaceholder"
-            placeholder="Buscar por mesa, cliente o número de orden">
-        </label>
         <div class="agent-toolbar-actions">
           <button id="enableAgentNotifications" class="btn btn-outline" type="button" data-i18n="agentNotificationsAction">Activar avisos</button>
           <p class="agent-notification-copy" data-i18n="agentNotificationsActionText">Activa avisos para recibir nuevas órdenes en este dispositivo.</p>
@@ -97,6 +83,23 @@
         </div>
       </section>
 
+      <section class="agent-search-panel">
+        <label class="agent-search">
+          <span data-i18n="searchLabel">Buscar orden</span>
+          <input
+            id="agentSearch"
+            type="text"
+            inputmode="search"
+            enterkeyhint="search"
+            autocapitalize="none"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            data-i18n-placeholder="searchPlaceholder"
+            placeholder="Buscar por mesa, cliente o número de orden">
+        </label>
+      </section>
+
       <section id="agentOrdersList" class="agent-grid"></section>
     </section>
   </main>
@@ -113,7 +116,7 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script type="module" src="js/agent.js?v=20260424b"></script>
+  <script type="module" src="js/agent.js?v=20260425c"></script>
 </body>
 
 </html>

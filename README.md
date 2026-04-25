@@ -1,148 +1,158 @@
-# Restaurante — Sitio público + CRM (HTML / CSS / JS)
+# Frida Restaurant
 
-Proyecto estático que incluye:
-- Sitio público bilingüe (Español por defecto) con menú, carrito y formulario de reservas.
-- Panel CRM en `crm.html` con lista en tiempo real de pedidos (aceptar / procesar / rechazar).
-- Integración con **Firebase Firestore** (pedidos y reservas).
-- SEO básico, accesibilidad, responsive (móvil y escritorio).
+Sistema web para restaurante con sitio público, pedidos, reservas, CRM operativo, pantalla de cocina, panel de meseros, configuración de productos, reportes y facturación fiscal.
 
-✅ Tecnologías: HTML, CSS puro, JavaScript (ES modules), Firebase Firestore (cliente).
+El proyecto está construido como una aplicación web ligera: HTML, CSS y JavaScript en el frontend, APIs server-side en Vercel, Supabase como base de datos y autenticación del personal, y Firebase Cloud Messaging para notificaciones push.
 
----
+## Módulos incluidos
+
+- `index.html`: sitio público bilingüe con menú, carrito, pedidos, seguimiento de orden y formulario de reservas.
+- `crm.html`: panel administrativo para pedidos, reservas, ventas, reportes, facturación y configuración.
+- `kitchen.html`: pantalla dedicada para cocina con pedidos en preparación.
+- `agent.html`: vista de meseros para consultar órdenes activas del día.
+- `api/`: endpoints server-side para autenticación, pedidos, reservas, notificaciones y ajustes.
+- `supabase/`: esquema SQL, migraciones e instrucciones para base de datos.
+- `js/`: lógica del frontend, menú, fiscal, CRM, cocina, meseros y conexión con API.
+- `css/style.css`: estilos responsive para sitio público y paneles internos.
+
+## Tecnologías
+
+- Frontend: HTML, CSS puro, JavaScript ES modules.
+- Backend: Vercel Serverless Functions en `api/`.
+- Base de datos: Supabase Postgres.
+- Autenticación del personal: Supabase Auth + tabla `staff_profiles`.
+- Notificaciones: Firebase Cloud Messaging.
+- Hosting público: Firebase Hosting.
+
+## Funcionalidad principal
+
+- Menú digital por categorías con imágenes y precios.
+- Carrito con pedidos para restaurante, recoger o delivery.
+- Reservas con fecha, hora, personas, ocasión, alergias y notas.
+- CRM con filtros de estado, resumen de ventas, calendario y reportes.
+- Gestión de productos: precios y disponibilidad.
+- Pantalla de cocina para avanzar pedidos.
+- Panel de meseros de solo lectura.
+- Facturación fiscal con CAI, rango autorizado, RTN, exoneraciones e impuestos.
+- Notificaciones push para clientes y personal.
+- Roles de personal: `admin`, `representative`, `kitchen`, `cashier`, `agent`.
 
 ## Ejecutar localmente
-1. Instala un servidor estático (opcional):
-   - npm start (usa `npx serve . -p 3000` desde la raíz del proyecto)
-   - O abre `index.html` / `crm.html` directamente en el navegador.
 
-## Firebase — configuración rápida
-1. Crea un proyecto en https://console.firebase.google.com/
-2. Habilita Firestore (modo de pruebas para desarrollo).
-4. (Opcional) Habilita Authentication (Google Sign-in) en la consola de Firebase si quieres proteger el CRM.
-   - Console > Authentication > Sign-in method > habilita Google.
-5. En `js/firebase-config.js` reemplaza `firebaseConfig` si usas otro proyecto (ya contiene tu configuración actual).
-6. Colecciones usadas (se crean automáticamente al escribir): `orders`, `reservations`. (El CRM no requiere inicio de sesión por defecto).
-
-Reglas mínimas para pruebas (no para producción):
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      // Desarrollo: permite todas las lecturas/escrituras (NO usar en producción)
-      allow read, write: if true;
-    }
-  }
-}
+```bash
+npm install
+npm start
 ```
 
-**Cómo aplicar estas reglas**
-- Consola Firebase: Firestore → Rules → pega el bloque y pulsa *Publish*.
-- Firebase CLI: coloca `firestore.rules` en la raíz del proyecto y ejecuta `firebase deploy --only firestore:rules`.
+El comando `npm start` sirve los archivos estáticos en:
 
-⚠️ **Seguridad:** estas reglas permiten acceso público completo. Úsalas solo durante el desarrollo. Antes de publicar, reemplázalas por reglas que validen `request.auth` y los campos de los documentos.
-
-Troubleshooting — si los pedidos no aparecen en el CRM
-1. Abre las DevTools del navegador (F12) en la página pública y en `crm.html` y mira la pestaña "Console" cuando presionas `Enviar a cocina`.
-   - Debes ver `Sending order to server:` seguido por el objeto pedido.
-   - Si hay un error, busca mensajes como `permission-denied` o `Network`.
-2. Verifica en la consola de Firebase (Firestore → Data) si existe un documento nuevo en la colección `orders`.
-   - Si el documento no existe y la consola muestra `permission-denied`, actualiza temporalmente las reglas de Firestore para permitir escritura en desarrollo.
-3. Asegúrate de que `js/firebase-config.js` contiene las credenciales del mismo proyecto (projectId).
-4. En caso de fallo por red o permisos, el sitio ahora guarda pedidos localmente y los sincronizará automáticamente cuando la conexión/regras lo permita (ver `offline_orders_v1` en localStorage).
-
-Mobile testing
-- En móviles el `cart drawer` se abre a pantalla completa; los botones de acción están apilados para facilitar el toque.
-- Para probar comportamiento offline: desconéctate de la red y envía un pedido — se almacenará en `localStorage` y el CRM recibirá la entrada cuando vuelvas a conectar.
-
-Order IDs
-- El CRM muestra ahora un `displayId` numérico fácil (si está disponible) además del ID interno de Firestore.
-- Nota: si has desplegado la Cloud Function, el `displayId` será generado por el servidor (canónico) en el momento en que el documento `orders` se cree; el cliente ya no fuerza ese valor para evitar duplicados.
-
-Cambia reglas antes de publicar (restringe por auth y validación).
+```text
+http://localhost:3000
 ```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      // Desarrollo: permite todo — reemplaza por reglas seguras antes de publicar
-      allow read, write: if true;
-    }
-  }
-}
+
+Para probar las APIs localmente con Vercel:
+
+```bash
+npm run dev:api
 ```
-Cambia reglas antes de publicar (restringe por auth y validación).
 
-## Qué hace cada archivo
-- `index.html` — sitio público (carrito, menú, reservas).
-- `crm.html` — panel CRM (escucha pedidos en tiempo real).
-- `css/style.css` — estilos responsivos y animaciones.
-- `js/firebase-config.js` — inicializa Firebase y exporta helpers (addOrder, listenOrders, updateOrderStatus, addReservation).
-- `js/app.js` — lógica del sitio público (carrito local + envío a Firestore, reservas).
-- `js/crm.js` — lógica del CRM (escucha en tiempo real, acciones).
+## Variables de entorno
 
-## Personalizar el menú / traducciones
-- Cambia los elementos del menú en `js/app.js` (array `menuData`). Cada item incluye `title` y `desc` en `es` y `en`.
-- Las cadenas UI están en el objeto `i18n` dentro de `js/app.js` y `js/crm.js`.
+Usa `.env.example` como referencia. Las variables públicas y privadas principales son:
 
-## SEO y accesibilidad
-- Meta tags (JSON-LD removed by request) en `index.html`.
-- Elementos con `aria-live`, roles y controles por teclado.
+```env
+SUPABASE_URL=
+SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+WEB_ORIGINS=
+STAFF_EMAIL_DOMAIN=frida.local
 
-## Siguientes pasos recomendados
-1. Configurar seguridad de Firestore (reglas) y autenticación para CRM.
-2. Añadir imágenes reales en `/assets` y sustituir los SVG placeholders.
-3. Implementar tests E2E si vas a desplegar en producción.
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
+FCM_VAPID_KEY=
+```
 
-### Server-side backup (Cloud Function) — recomendado ✅
-Se añadió una Cloud Function que actúa como respaldo y fuente de verdad del servidor cuando se crea un nuevo documento en `orders`.
-- Qué hace la función (`functions/index.js`):
-  - Genera un `displayId` secuencial **en el servidor** (transacción en `counters/orders`) si el pedido no lo tiene.
-  - Asegura que `createdAt` y `status` existan (valores server-side cuando sea necesario).
-  - Crea una copia de respaldo en `orders_backup/{orderId}` con `serverBackupAt`.
+Notas importantes:
 
-Requisitos / despliegue
-- Requiere Firebase CLI y un proyecto Firebase (el mismo `projectId` ya usado por el cliente).
-- **Nota:** las Cloud Functions requieren el plan Blaze para despliegue en la consola de Firebase.
+- `SUPABASE_SERVICE_ROLE_KEY` es privada y debe vivir solo en Vercel Environment Variables.
+- `WEB_ORIGINS` debe incluir los dominios autorizados del frontend, por ejemplo `https://fridarestauranthn.web.app`.
+- Las credenciales privadas de Firebase solo se usan en backend para enviar notificaciones.
 
-Pasos rápidos para desplegar la función:
-1. Instala y autentica Firebase CLI: `npm i -g firebase-tools` → `firebase login`.
-2. Desde la raíz del proyecto ejecuta `firebase init functions` (elige JavaScript) — o copia `functions/index.js` en la carpeta `functions/` si ya la añadiste.
-3. `npm --prefix functions install` para instalar dependencias localmente (o `cd functions && npm install`).
-4. Despliega: `firebase deploy --only functions`.
+## Supabase
 
-Verificación
-- Tras el despliegue envía un pedido desde la web pública; la función añadirá `displayId` y creará un documento espejo en `orders_backup`.
-- Revisa la sección _Functions > Logs_ en la consola de Firebase si algo falla.
+1. Crear proyecto en Supabase.
+2. Ejecutar el esquema:
 
-Si quieres, despliego la función por ti (necesitaré que conectes tu Firebase CLI) o te doy los comandos exactos para ejecutar en tu máquina.
+```text
+supabase/frida_schema.sql
+```
 
----
+3. Aplicar migraciones adicionales si existen en:
 
-Si quieres, preparo:
-- Reglas de Firestore sugeridas para producción.
-- Despliegue con Firebase Hosting (comandos y configuración).
-- Conversión del proyecto a una SPA con rutas y autenticación para el CRM.
+```text
+supabase/migrations/
+```
 
+4. Crear usuarios internos en Supabase Auth.
+5. Crear un perfil por usuario en `staff_profiles`.
 
-## CRM staff access setup (required)
-
-1. Enable Google provider in Firebase Auth:
-   - Firebase Console -> Authentication -> Sign-in method -> Google -> Enable.
-2. Publish the secure Firestore rules from `firestore.rules`.
-3. Create one document per staff user in `staff/{uid}` (collection: `staff`, document id: user uid):
+Ejemplo de perfil:
 
 ```json
 {
+  "username": "admin",
+  "role": "admin",
   "active": true,
-  "role": "admin"
+  "login_email": "admin@frida.local"
 }
 ```
 
-Allowed roles are: `admin`, `agent`, `representative`.
+## Acceso del personal
 
-How to get uid quickly:
-1. Open `crm.html` and sign in with Google once.
-2. If access is denied, copy the uid from Firebase Authentication -> Users.
-3. Create the corresponding `staff/{uid}` document above.
-4. Reload `crm.html`.
+Los paneles internos usan usuario y contraseña:
+
+- `crm.html`: administración, pedidos, reservas, reportes y facturación.
+- `kitchen.html`: cocina.
+- `agent.html`: meseros.
+
+La validación ocurre en `/api/auth/login`. El frontend guarda una sesión local y renueva el token con `/api/auth/refresh`.
+
+## Despliegue
+
+Frontend en Firebase Hosting:
+
+```bash
+firebase deploy --only hosting
+```
+
+APIs en Vercel:
+
+```bash
+npm run dev:api
+```
+
+Para producción, conecta el repositorio a Vercel y configura las variables privadas en el dashboard del proyecto.
+
+## Archivos de configuración clave
+
+- `firebase.json`: configuración de hosting y archivos ignorados en despliegue.
+- `.firebaserc`: proyectos Firebase vinculados.
+- `vercel.json`: configuración Vercel actual.
+- `.env.example`: plantilla de variables.
+- `docs/vercel-supabase-setup.md`: guía adicional de Supabase + Vercel.
+
+## Checklist antes de vender o entregar
+
+- Confirmar dominio final en `WEB_ORIGINS`.
+- Confirmar que el API base usado por `js/firebase-config.js` apunta al deployment correcto.
+- Crear al menos un usuario demo `admin`.
+- Probar flujo completo: pedido público -> CRM -> cocina -> listo -> entregado.
+- Probar reserva pública -> CRM -> aceptar/rechazar.
+- Configurar datos fiscales reales antes de emitir facturas.
+- Confirmar Firebase Messaging si se van a vender notificaciones push.
+- Limpiar logs locales antes de entregar el repositorio.
+
+## Estado del proyecto
+
+El sistema ya tiene la estructura principal para venderse como solución operativa para restaurante. La base de datos y las APIs centralizan la información sensible en servidor, y el frontend queda ligero para desplegarse fácilmente en Firebase Hosting.

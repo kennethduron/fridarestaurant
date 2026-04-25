@@ -1344,9 +1344,14 @@ function renderCart() {
           </div>
         </div>
         <div class="qty-line">
-          <button class="btn btn-outline qty" data-id="${row.id}" data-delta="-1">-</button>
-          <button class="btn btn-outline qty" data-id="${row.id}" data-delta="1">+</button>
-          <button class="btn btn-ghost remove" data-id="${row.id}">${t("remove")}</button>
+          <div class="qty-stepper" aria-label="Cantidad">
+            <button class="btn btn-outline qty" data-id="${row.id}" data-delta="-1" aria-label="Reducir cantidad">-</button>
+            <strong class="cart-qty-value">${row.qty}</strong>
+            <button class="btn btn-outline qty" data-id="${row.id}" data-delta="1" aria-label="Aumentar cantidad">+</button>
+          </div>
+          <button class="cart-remove-icon remove" data-id="${row.id}" title="${escapeHtml(t("remove"))}" aria-label="${escapeHtml(`${t("remove")} ${row.title[lang]}`)}">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
       </div>
     `
@@ -1657,12 +1662,24 @@ function scrollToPageSection(hash) {
   const target = document.getElementById(decodeURIComponent(hash.slice(1)));
   if (!target) return false;
 
-  const headerHeight = document.querySelector(".site-header")?.offsetHeight || 0;
-  const top = target.getBoundingClientRect().top + window.scrollY - headerHeight - 24;
-  window.scrollTo({
-    top: Math.max(0, top),
-    behavior: "smooth"
-  });
+  const scrollToTarget = (behavior = "smooth") => {
+    const headerHeight = document.querySelector(".site-header")?.offsetHeight || 0;
+    const visualTarget = hash === "#menu"
+      ? document.querySelector("#menu .section-head p") || target
+      : target;
+    const extraOffset = hash === "#menu" ? -10 : hash === "#pedido" ? -6 : hash === "#reservas" ? 0 : 28;
+    const top = visualTarget.getBoundingClientRect().top + window.scrollY - headerHeight - extraOffset;
+    window.scrollTo({
+      top: Math.max(0, top),
+      behavior
+    });
+  };
+
+  scrollToTarget();
+  if (hash === "#menu") {
+    window.setTimeout(() => scrollToTarget("smooth"), 180);
+    window.setTimeout(() => scrollToTarget("auto"), 520);
+  }
   window.history.pushState(null, "", hash);
   return true;
 }

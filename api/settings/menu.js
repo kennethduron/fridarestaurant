@@ -138,6 +138,7 @@ module.exports = async function handler(req, res) {
     requireMethod(req, ["GET", "PATCH"]);
 
     if (req.method === "GET") {
+      res.setHeader("Cache-Control", "public, s-maxage=15, stale-while-revalidate=60");
       const rows = await supabaseFetch(`/rest/v1/app_settings?key=eq.${SETTINGS_KEY}&select=value&limit=1`, {
         admin: true,
         prefer: "return=representation"

@@ -279,6 +279,39 @@ const i18n = {
     termsReportSummaryNote: "Solo toma pedidos entregados y usa el término de pago seleccionado.",
     termsReportLoading: "Cargando reporte histórico...",
     termsReportError: "No se pudo cargar el reporte histórico.",
+    foodReportTitle: "Comidas vendidas",
+    foodReportToolText: "Consulta qué platos se vendieron por rango de fechas y método de pago.",
+    foodReportText: "Filtra ventas entregadas por fechas, método de pago y nombre del plato para revisar su movimiento.",
+    foodReportStart: "Fecha inicio",
+    foodReportEnd: "Fecha final",
+    foodReportPayment: "Método de pago",
+    foodReportSearch: "Buscar plato",
+    foodReportSearchPlaceholder: "Escribe el nombre del plato",
+    foodReportDishFilter: "Plato del menú",
+    foodReportAll: "Todos los métodos",
+    foodReportDay: "Día",
+    foodReportMonth: "Mes",
+    foodReportYear: "Año",
+    foodReportCurrent: "Actual",
+    foodReportPreview: "Vista previa",
+    foodReportPrint: "Imprimir reporte",
+    foodReportCount: "Platos",
+    foodReportUnits: "Unidades",
+    foodReportRevenue: "Ventas",
+    foodReportTop: "Más vendido",
+    foodReportDish: "Comida",
+    foodReportOrders: "Pedidos",
+    foodReportFirstSold: "Primera venta",
+    foodReportLastSold: "Última venta",
+    foodReportRowsEmpty: "No hay comidas vendidas para ese filtro.",
+    foodReportPreviewTitle: "Vista previa del reporte",
+    foodReportRangeLabel: "Rango",
+    foodReportMethodLabel: "Método",
+    foodReportSearchLabel: "Plato",
+    foodReportSearchAll: "Todos los platos",
+    foodReportSummaryNote: "Solo toma pedidos entregados y agrupa las comidas según el filtro elegido.",
+    foodReportLoading: "Cargando reporte de comidas...",
+    foodReportError: "No se pudo cargar el reporte de comidas.",
     orderCreatorTitle: "Crear pedido",
     orderCreatorText: "Toma pedidos desde el CRM con productos, datos del cliente y forma de pago.",
     orderCreatorCollapsedText: "Crea pedidos internos para mesa, recoger o delivery sin salir del CRM.",
@@ -295,6 +328,7 @@ const i18n = {
     orderTypeDineIn: "Comer en restaurante",
     orderTypeTakeaway: "Recoger",
     orderTypeDelivery: "Delivery",
+    orderTypePedidosYa: "Pedidos Ya",
     orderCreatorNameLabel: "Nombre del cliente",
     orderCreatorPhoneLabel: "Teléfono",
     orderCreatorTableLabel: "Mesa o referencia",
@@ -309,6 +343,8 @@ const i18n = {
     orderCreatorReset: "Limpiar",
     orderCreatorNeedItems: "Agrega al menos un producto.",
     orderCreatorNeedCustomer: "Escribe el nombre del cliente.",
+    orderCreatorNeedPhone: "Escribe el teléfono del cliente.",
+    orderCreatorNeedTable: "Escribe el número de mesa.",
     orderCreatorNeedAddress: "Escribe la dirección para delivery.",
     orderCreatorCreated: "Pedido creado",
     orderCreatorError: "No se pudo crear el pedido.",
@@ -331,6 +367,8 @@ const i18n = {
     productSoldOutLabel: "Agotado",
     productSave: "Guardar producto",
     productSaved: "Producto actualizado",
+    productSavingLabel: "Guardando...",
+    productSavedLabel: "Guardado",
     productNoResults: "No hay productos con ese filtro.",
     productSettingsError: "No se pudieron cargar los productos.",
     qtySold: "Cantidad",
@@ -593,6 +631,39 @@ const i18n = {
     termsReportSummaryNote: "This only includes delivered orders and uses the selected payment term.",
     termsReportLoading: "Loading historical report...",
     termsReportError: "Could not load the historical report.",
+    foodReportTitle: "Food sold",
+    foodReportToolText: "Review which dishes were sold by date range and payment method.",
+    foodReportText: "Filter delivered sales by date range, payment method, and dish name to review movement.",
+    foodReportStart: "Start date",
+    foodReportEnd: "End date",
+    foodReportPayment: "Payment method",
+    foodReportSearch: "Search dish",
+    foodReportSearchPlaceholder: "Type the dish name",
+    foodReportDishFilter: "Menu dish",
+    foodReportAll: "All methods",
+    foodReportDay: "Day",
+    foodReportMonth: "Month",
+    foodReportYear: "Year",
+    foodReportCurrent: "Current",
+    foodReportPreview: "Preview",
+    foodReportPrint: "Print report",
+    foodReportCount: "Dishes",
+    foodReportUnits: "Units",
+    foodReportRevenue: "Sales",
+    foodReportTop: "Top seller",
+    foodReportDish: "Food",
+    foodReportOrders: "Orders",
+    foodReportFirstSold: "First sale",
+    foodReportLastSold: "Last sale",
+    foodReportRowsEmpty: "No sold dishes match that filter.",
+    foodReportPreviewTitle: "Report preview",
+    foodReportRangeLabel: "Range",
+    foodReportMethodLabel: "Method",
+    foodReportSearchLabel: "Dish",
+    foodReportSearchAll: "All dishes",
+    foodReportSummaryNote: "This only includes delivered orders and groups dishes by the selected filter.",
+    foodReportLoading: "Loading food report...",
+    foodReportError: "Could not load the food report.",
     orderCreatorTitle: "Create order",
     orderCreatorText: "Take CRM orders with products, customer details, and payment method.",
     orderCreatorCollapsedText: "Create internal dine-in, pickup, or delivery orders without leaving the CRM.",
@@ -609,6 +680,7 @@ const i18n = {
     orderTypeDineIn: "Dine in",
     orderTypeTakeaway: "Pickup",
     orderTypeDelivery: "Delivery",
+    orderTypePedidosYa: "Pedidos Ya",
     orderCreatorNameLabel: "Customer name",
     orderCreatorPhoneLabel: "Phone",
     orderCreatorTableLabel: "Table or reference",
@@ -623,6 +695,8 @@ const i18n = {
     orderCreatorReset: "Clear",
     orderCreatorNeedItems: "Add at least one product.",
     orderCreatorNeedCustomer: "Enter the customer name.",
+    orderCreatorNeedPhone: "Enter the customer phone.",
+    orderCreatorNeedTable: "Enter the table number.",
     orderCreatorNeedAddress: "Enter the delivery address.",
     orderCreatorCreated: "Order created",
     orderCreatorError: "Could not create the order.",
@@ -645,6 +719,8 @@ const i18n = {
     productSoldOutLabel: "Sold out",
     productSave: "Save product",
     productSaved: "Product updated",
+    productSavingLabel: "Saving...",
+    productSavedLabel: "Saved",
     productNoResults: "No products match that filter.",
     productSettingsError: "Could not load products.",
     qtySold: "Qty",
@@ -697,6 +773,9 @@ const productManager = document.getElementById("productManager");
 const termsReportModal = document.getElementById("termsReportModal");
 const closeTermsReportModalBtn = document.getElementById("closeTermsReportModal");
 const termsReport = document.getElementById("termsReport");
+const foodReportModal = document.getElementById("foodReportModal");
+const closeFoodReportModalBtn = document.getElementById("closeFoodReportModal");
+const foodReport = document.getElementById("foodReport");
 const orderCreator = document.getElementById("orderCreator");
 const viewButtons = Array.from(document.querySelectorAll(".chip[data-view]"));
 const filterButtons = Array.from(document.querySelectorAll(".chip[data-filter]"));
@@ -753,6 +832,7 @@ let productManagerExpanded = false;
 let productManagerSearchTerm = "";
 let productManagerCategory = "all";
 let productManagerEditedOnly = false;
+let productSaveUiState = new Map();
 let termsReportPreset = "day";
 let termsReportPayment = "all";
 let termsReportRange = { start: null, end: null };
@@ -760,6 +840,14 @@ let termsReportRowsCache = [];
 let termsReportLoading = false;
 let termsReportError = "";
 let termsReportRequestId = 0;
+let foodReportPreset = "day";
+let foodReportPayment = "all";
+let foodReportRange = { start: null, end: null };
+let foodReportSearch = "";
+let foodReportRowsCache = [];
+let foodReportLoading = false;
+let foodReportError = "";
+let foodReportRequestId = 0;
 let orderCreatorExpanded = false;
 let orderCreatorSearchTerm = "";
 let orderCreatorCategory = "all";
@@ -1421,6 +1509,19 @@ function termsReportPaymentLabel(method) {
   return salesPaymentMethodLabel(method);
 }
 
+function foodReportPaymentLabel(method) {
+  if (method === "all") return t("foodReportAll");
+  return salesPaymentMethodLabel(method);
+}
+
+function normalizeFoodReportSearchText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
 function salesPaymentBreakdown(orders) {
   const breakdown = {
     cash: { key: "cash", count: 0, revenue: 0 },
@@ -1660,7 +1761,20 @@ function filteredProductItems() {
 }
 
 function productManagerRowsHtml(rows) {
-  return rows.length ? rows.map((item) => `
+  return rows.length ? rows.map((item) => {
+    const saveState = productSaveUiState.get(item.id) || "idle";
+    const saveLabel = saveState === "saving"
+      ? t("productSavingLabel")
+      : saveState === "saved"
+        ? t("productSavedLabel")
+        : t("productSave");
+    const saveClass = saveState === "saving"
+      ? "is-saving"
+      : saveState === "saved"
+        ? "is-saved"
+        : "";
+    const saveDisabled = saveState === "saving" ? "disabled" : "";
+    return `
     <article class="product-row" data-product-id="${item.id}">
       <div class="product-row-main">
         <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title[lang])}" loading="lazy" onerror="this.onerror=null;this.src='assets/food.svg';">
@@ -1687,10 +1801,18 @@ function productManagerRowsHtml(rows) {
           <input class="product-soldout-input" type="checkbox" ${item.isSoldOut ? "checked" : ""}>
           <span>${t("productSoldOutLabel")}</span>
         </label>
-        <button type="button" class="btn btn-outline product-save" data-product-save="${item.id}">${t("productSave")}</button>
+        <button
+          type="button"
+          class="btn btn-outline product-save ${saveClass}"
+          data-product-save="${item.id}"
+          data-save-state="${saveState}"
+          ${saveDisabled}>
+          ${saveLabel}
+        </button>
       </div>
     </article>
-  `).join("") : `<p class="product-manager-empty">${t("productNoResults")}</p>`;
+  `;
+  }).join("") : `<p class="product-manager-empty">${t("productNoResults")}</p>`;
 }
 
 function refreshProductManagerResults() {
@@ -1781,6 +1903,13 @@ function readProductRowValues(productId) {
   };
 }
 
+function setProductSaveUiState(productId, state = "idle") {
+  if (!productId) return;
+  if (!state || state === "idle") productSaveUiState.delete(productId);
+  else productSaveUiState.set(productId, state);
+  renderProductManager();
+}
+
 async function saveProductSettings(productId) {
   const values = readProductRowValues(productId);
   if (!values) return;
@@ -1790,11 +1919,18 @@ async function saveProductSettings(productId) {
       [productId]: values
     }
   });
+  setProductSaveUiState(productId, "saving");
   try {
     menuSettings = normalizeMenuSettings(await withSlowBusyScreen(t("savingAction"), () => saveMenuSettings(menuSettings)));
+    setProductSaveUiState(productId, "saved");
     showToast(t("productSaved"));
-    renderProductManager();
+    window.setTimeout(() => {
+      if ((productSaveUiState.get(productId) || "idle") === "saved") {
+        setProductSaveUiState(productId, "idle");
+      }
+    }, 900);
   } catch (_error) {
+    setProductSaveUiState(productId, "idle");
     showToast("Error");
   }
 }
@@ -1940,7 +2076,9 @@ function renderOrderCreator() {
   const total = orderCreatorTotal();
   const count = orderCreatorItemCount();
   const addressHidden = orderCreatorType !== "delivery";
-  const tableHidden = orderCreatorType === "delivery";
+  const tableHidden = orderCreatorType !== "dine_in";
+  const phoneHidden = orderCreatorType === "dine_in" || orderCreatorType === "pedidos_ya";
+  const nameHidden = orderCreatorType !== "pedidos_ya";
 
   orderCreator.innerHTML = `
     <article class="order-creator-card ${orderCreatorExpanded ? "is-expanded" : "is-collapsed"}">
@@ -1996,7 +2134,9 @@ function renderOrderCreator() {
                     <button type="button" class="btn btn-outline" data-order-qty="${item.id}" data-delta="-1">-</button>
                     <span>${Number(item.qty || 0)}</span>
                     <button type="button" class="btn btn-outline" data-order-qty="${item.id}" data-delta="1">+</button>
-                    <button type="button" class="btn btn-ghost order-creator-remove" data-order-remove="${item.id}">${t("orderCreatorRemoveItem")}</button>
+                    <button type="button" class="order-creator-remove" data-order-remove="${item.id}" title="${escapeHtml(t("orderCreatorRemoveItem"))}" aria-label="${escapeHtml(`${t("orderCreatorRemoveItem")} ${item.title?.[lang] || item.name}`)}">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
                   </div>
                 </div>
               `).join("") : `<p class="order-creator-empty">${t("orderCreatorEmptyCart")}</p>`}
@@ -2015,13 +2155,14 @@ function renderOrderCreator() {
                   <option value="dine_in" ${orderCreatorType === "dine_in" ? "selected" : ""}>${t("orderTypeDineIn")}</option>
                   <option value="takeaway" ${orderCreatorType === "takeaway" ? "selected" : ""}>${t("orderTypeTakeaway")}</option>
                   <option value="delivery" ${orderCreatorType === "delivery" ? "selected" : ""}>${t("orderTypeDelivery")}</option>
+                  <option value="pedidos_ya" ${orderCreatorType === "pedidos_ya" ? "selected" : ""}>${t("orderTypePedidosYa")}</option>
                 </select>
               </label>
-              <label>
+              <label class="${nameHidden ? "hidden" : ""}">
                 <span>${t("orderCreatorNameLabel")}</span>
                 <input name="customerName" type="text" value="${escapeHtml(orderCreatorDraft.customerName)}" autocomplete="name" autocapitalize="words" required>
               </label>
-              <label>
+              <label class="${phoneHidden ? "hidden" : ""}">
                 <span>${t("orderCreatorPhoneLabel")}</span>
                 <input name="phone" type="tel" value="${escapeHtml(orderCreatorDraft.phone)}" inputmode="tel" autocomplete="tel">
               </label>
@@ -2039,7 +2180,7 @@ function renderOrderCreator() {
                   <option value="cash" ${orderCreatorDraft.paymentMethod === "cash" ? "selected" : ""}>${paymentMethodLabel("cash")}</option>
                   <option value="card" ${orderCreatorDraft.paymentMethod === "card" ? "selected" : ""}>${paymentMethodLabel("card")}</option>
                   <option value="bank_transfer" ${orderCreatorDraft.paymentMethod === "bank_transfer" ? "selected" : ""}>${paymentMethodLabel("bank_transfer")}</option>
-                  <option value="pedidos_ya" ${orderCreatorDraft.paymentMethod === "pedidos_ya" ? "selected" : ""}>${paymentMethodLabel("pedidos_ya")}</option>
+                  <option value="pedidos_ya" ${orderCreatorType === "pedidos_ya" || orderCreatorDraft.paymentMethod === "pedidos_ya" ? "selected" : ""}>${paymentMethodLabel("pedidos_ya")}</option>
                 </select>
               </label>
               <label>
@@ -2071,8 +2212,12 @@ async function submitCRMOrder() {
     showToast(t("orderCreatorNeedItems"));
     return;
   }
-  if (!orderCreatorDraft.customerName.trim()) {
-    showToast(t("orderCreatorNeedCustomer"));
+  if (orderCreatorType === "dine_in" && !orderCreatorDraft.table.trim()) {
+    showToast(t("orderCreatorNeedTable"));
+    return;
+  }
+  if ((orderCreatorType === "takeaway" || orderCreatorType === "delivery") && !orderCreatorDraft.phone.trim()) {
+    showToast(t("orderCreatorNeedPhone"));
     return;
   }
   if (orderCreatorType === "delivery" && !orderCreatorDraft.address.trim()) {
@@ -2090,24 +2235,28 @@ async function submitCRMOrder() {
     total: roundMoney(Number(item.qty || 0) * Number(item.price || 0))
   }));
   const total = orderCreatorTotal();
+  const customerName = orderCreatorDraft.customerName.trim() || orderCreatorCustomerNameFallback();
+  const normalizedOrderType = orderCreatorType === "pedidos_ya" ? "delivery" : orderCreatorType;
+  const paymentMethod = orderCreatorType === "pedidos_ya" ? "pedidos_ya" : (orderCreatorDraft.paymentMethod || "cash");
+  const paymentStatus = orderCreatorType === "pedidos_ya" ? "paid" : (orderCreatorDraft.paymentStatus || "unpaid");
   const payload = {
     language: lang,
-    order_type: orderCreatorType,
+    order_type: normalizedOrderType,
     customer: {
-      name: orderCreatorDraft.customerName.trim(),
-      phone: orderCreatorDraft.phone.trim(),
-      table: orderCreatorDraft.table.trim(),
-      deliveryAddress: orderCreatorDraft.address.trim(),
+      name: customerName,
+      phone: orderCreatorType === "dine_in" || orderCreatorType === "pedidos_ya" ? "" : orderCreatorDraft.phone.trim(),
+      table: orderCreatorType === "dine_in" ? orderCreatorDraft.table.trim() : "",
+      deliveryAddress: orderCreatorType === "delivery" ? orderCreatorDraft.address.trim() : "",
       comments: orderCreatorDraft.notes.trim(),
       pickup: orderCreatorType === "takeaway",
-      delivery: orderCreatorType === "delivery"
+      delivery: orderCreatorType === "delivery" || orderCreatorType === "pedidos_ya"
     },
     items,
     subtotal: total,
     total,
     payment: {
-      method: orderCreatorDraft.paymentMethod || "cash",
-      status: orderCreatorDraft.paymentStatus || "unpaid"
+      method: paymentMethod,
+      status: paymentStatus
     }
   };
 
@@ -2202,10 +2351,16 @@ function closeTermsReportModal() {
   termsReportModal.classList.add("hidden");
 }
 
+function closeFoodReportModal() {
+  if (!foodReportModal) return;
+  foodReportModal.classList.add("hidden");
+}
+
 function closeCrmWorkModals() {
   closeOrderCreatorModal();
   closeProductManagerModal();
   closeTermsReportModal();
+  closeFoodReportModal();
 }
 
 async function showCrmWorkspaceTool(tool) {
@@ -2216,6 +2371,8 @@ async function showCrmWorkspaceTool(tool) {
     orderCreatorExpanded = true;
     renderOrderCreator();
     closeProductManagerModal();
+    closeTermsReportModal();
+    closeFoodReportModal();
     orderCreatorModal?.classList.remove("hidden");
     return;
   }
@@ -2224,6 +2381,8 @@ async function showCrmWorkspaceTool(tool) {
     productManagerExpanded = true;
     renderProductManager();
     closeOrderCreatorModal();
+    closeTermsReportModal();
+    closeFoodReportModal();
     productManagerModal?.classList.remove("hidden");
     return;
   }
@@ -2231,9 +2390,20 @@ async function showCrmWorkspaceTool(tool) {
   if (tool === "terms-report") {
     closeOrderCreatorModal();
     closeProductManagerModal();
+    closeFoodReportModal();
     termsReportModal?.classList.remove("hidden");
     renderTermsReport();
     await refreshTermsReportData();
+    return;
+  }
+
+  if (tool === "food-report") {
+    closeOrderCreatorModal();
+    closeProductManagerModal();
+    closeTermsReportModal();
+    foodReportModal?.classList.remove("hidden");
+    renderFoodReport();
+    await refreshFoodReportData();
   }
 }
 
@@ -2299,6 +2469,18 @@ function defaultInvoiceData(order) {
     exemptOrderNumber: String(order?.invoice?.exemptOrderNumber || "").trim(),
     sagRegister: String(order?.invoice?.sagRegister || "").trim()
   };
+}
+
+function orderCreatorCustomerNameFallback() {
+  const table = orderCreatorDraft.table.trim();
+  if (orderCreatorType === "dine_in") {
+    return table
+      ? `${lang === "es" ? "Mesa" : "Table"} ${table}`
+      : (lang === "es" ? "Cliente en restaurante" : "Dine-in customer");
+  }
+  if (orderCreatorType === "pedidos_ya") return "Pedidos Ya";
+  if (orderCreatorType === "delivery") return lang === "es" ? "Cliente delivery" : "Delivery customer";
+  return lang === "es" ? "Cliente para llevar" : "Pickup customer";
 }
 
 function normalizeInvoiceDraftData(invoiceData = {}) {
@@ -2463,11 +2645,11 @@ function buildPrintableOrderHtml(order) {
   const customerName = escapeHtml(order.customer?.name || "Consumidor final");
   const businessName = escapeHtml(fiscalSettings.brandName || "Frida Restaurant");
   const businessPhone = escapeHtml(fiscalSettings.phone || "-");
-  const businessEmail = escapeHtml(fiscalSettings.email || "casabrava@gmail.com");
+  const businessEmail = escapeHtml(fiscalSettings.email || "info@fridarestaurant.hn");
   const businessAddress = escapeHtml(fiscalSettings.address || "-");
   const paymentMethodText = escapeHtml(paymentMethodLabel(invoicePaymentMethod(order)));
   const amountInWords = escapeHtml(amountToWordsEs(order.total).toUpperCase());
-  const logoUrl = new URL("assets/casa-brava-logo.jpg", window.location.href).href;
+  const logoUrl = new URL("assets/icon.jpg", window.location.href).href;
   const itemRows = (order.items || [])
     .map((item) => {
       const title = escapeHtml(foodName(item));
@@ -3064,6 +3246,7 @@ function applyI18n() {
   renderOrderCreator();
   renderProductManager();
   renderTermsReport();
+  renderFoodReport();
   renderOrders();
   renderReservations();
 }
@@ -3929,6 +4112,489 @@ function renderTermsReport() {
 function refreshTermsReportIfOpen() {
   if (!termsReportModal || termsReportModal.classList.contains("hidden")) return;
   renderTermsReport();
+}
+
+function syncFoodReportRange() {
+  const start = parseDate(foodReportRange.start) || new Date();
+  const end = parseDate(foodReportRange.end) || start;
+  if (start > end) {
+    foodReportRange = { start: startOfDay(end), end: endOfDay(start) };
+    return;
+  }
+  foodReportRange = { start: startOfDay(start), end: endOfDay(end) };
+}
+
+function setFoodReportPreset(preset, anchorDate = new Date()) {
+  foodReportPreset = preset;
+  foodReportRange = buildTermsReportPresetRange(preset, anchorDate);
+  syncFoodReportRange();
+}
+
+function resetFoodReportToCurrentPreset() {
+  setFoodReportPreset(foodReportPreset === "custom" ? "day" : foodReportPreset || "day", new Date());
+}
+
+function foodReportRangeText() {
+  syncFoodReportRange();
+  const locale = lang === "es" ? "es-HN" : "en-US";
+  const startText = foodReportRange.start.toLocaleDateString(locale);
+  const endText = foodReportRange.end.toLocaleDateString(locale);
+  return `${startText} - ${endText}`;
+}
+
+function shiftFoodReportRange(direction) {
+  const factor = Number(direction || 0);
+  if (!factor) return;
+  syncFoodReportRange();
+  if (foodReportPreset === "month") {
+    const anchor = new Date(foodReportRange.start);
+    anchor.setMonth(anchor.getMonth() + factor);
+    setFoodReportPreset("month", anchor);
+    return;
+  }
+  if (foodReportPreset === "year") {
+    const anchor = new Date(foodReportRange.start);
+    anchor.setFullYear(anchor.getFullYear() + factor);
+    setFoodReportPreset("year", anchor);
+    return;
+  }
+  const anchor = new Date(foodReportRange.start);
+  anchor.setDate(anchor.getDate() + factor);
+  setFoodReportPreset("day", anchor);
+}
+
+function foodReportRows() {
+  syncFoodReportRange();
+  const searchTerm = normalizeFoodReportSearchText(foodReportSearch);
+  const byFood = new Map();
+
+  foodReportRowsCache
+    .filter((order) => order.status === "delivered")
+    .forEach((order) => {
+      const when = parseDate(orderSalesDateValue(order)) || new Date();
+      (order.items || []).forEach((item) => {
+        const name = foodName(item);
+        const key = item?.id || item?.menu_item_id || normalizeFoodReportSearchText(name);
+        const qty = Number(item?.qty || item?.quantity || 0);
+        if (!key || !Number.isFinite(qty) || qty <= 0) return;
+        const unitPrice = Number(item?.price || 0);
+        const existing = byFood.get(key) || {
+          key,
+          name,
+          qty: 0,
+          sales: 0,
+          orderIds: new Set(),
+          firstSoldAt: when,
+          lastSoldAt: when
+        };
+        existing.qty += qty;
+        existing.sales = roundMoney(existing.sales + qty * (Number.isFinite(unitPrice) ? unitPrice : 0));
+        if (order?.id) existing.orderIds.add(order.id);
+        if (when < existing.firstSoldAt) existing.firstSoldAt = when;
+        if (when > existing.lastSoldAt) existing.lastSoldAt = when;
+        byFood.set(key, existing);
+      });
+    });
+
+  return Array.from(byFood.values())
+    .filter((row) => !searchTerm || normalizeFoodReportSearchText(row.name).includes(searchTerm))
+    .map((row) => ({
+      ...row,
+      orderCount: row.orderIds.size
+    }))
+    .sort((left, right) => {
+      if (right.qty !== left.qty) return right.qty - left.qty;
+      if (right.sales !== left.sales) return right.sales - left.sales;
+      return left.name.localeCompare(right.name, lang === "es" ? "es" : "en", { sensitivity: "base" });
+    });
+}
+
+function foodReportDishOptions() {
+  const names = new Map();
+
+  BASE_MENU_ITEMS.forEach((item) => {
+    const name = foodName(item);
+    const normalized = normalizeFoodReportSearchText(name);
+    if (!normalized) return;
+    names.set(normalized, name);
+  });
+
+  foodReportRowsCache.forEach((order) => {
+    (order.items || []).forEach((item) => {
+      const name = foodName(item);
+      const normalized = normalizeFoodReportSearchText(name);
+      if (!normalized) return;
+      if (!names.has(normalized)) names.set(normalized, name);
+    });
+  });
+
+  return Array.from(names.entries())
+    .map(([normalized, name]) => ({ normalized, name }))
+    .sort((left, right) => left.name.localeCompare(right.name, lang === "es" ? "es" : "en", { sensitivity: "base" }));
+}
+
+function foodReportSummary(rows) {
+  return rows.reduce((summary, row, index) => ({
+    count: summary.count + 1,
+    qty: summary.qty + row.qty,
+    sales: roundMoney(summary.sales + row.sales),
+    top: index === 0 ? row.name : summary.top
+  }), {
+    count: 0,
+    qty: 0,
+    sales: 0,
+    top: ""
+  });
+}
+
+function buildFoodReportPrintableHtml(rows, summary) {
+  const printedAt = new Date();
+  const locale = lang === "es" ? "es-HN" : "en-US";
+  const printedAtText = printedAt.toLocaleString(locale);
+  const selectedDishText = foodReportSearch.trim() || t("foodReportSearchAll");
+  const tableRows = rows.map((row) => `
+      <tr>
+        <td>${escapeHtml(row.name)}</td>
+        <td class="num">${row.qty}</td>
+        <td class="num">${escapeHtml(money(row.sales))}</td>
+        <td class="num">${row.orderCount}</td>
+        <td>${escapeHtml(row.firstSoldAt.toLocaleDateString(locale))}</td>
+        <td>${escapeHtml(row.lastSoldAt.toLocaleDateString(locale))}</td>
+      </tr>
+    `).join("");
+
+  return `
+    <!doctype html>
+    <html lang="${lang}">
+    <head>
+      <meta charset="utf-8">
+      <title>${escapeHtml(t("foodReportTitle"))}</title>
+      <style>
+        @page { margin: 12mm; }
+        * { box-sizing: border-box; }
+        body {
+          margin: 0;
+          color: #111;
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 12px;
+          line-height: 1.35;
+        }
+        h1, p { margin: 0; }
+        .head {
+          display: flex;
+          justify-content: space-between;
+          gap: 18px;
+          align-items: flex-start;
+          margin-bottom: 12mm;
+        }
+        .head h1 {
+          font-size: 24px;
+          margin-bottom: 4px;
+        }
+        .meta {
+          text-align: right;
+        }
+        .summary {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 8px;
+          margin-bottom: 10mm;
+        }
+        .summary-card {
+          border: 1px solid #d6d6d6;
+          border-radius: 10px;
+          padding: 10px 12px;
+        }
+        .summary-card span {
+          display: block;
+          font-size: 11px;
+          color: #666;
+          margin-bottom: 4px;
+        }
+        .summary-card strong {
+          font-size: 18px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        th, td {
+          border-bottom: 1px solid #ddd;
+          padding: 7px 8px;
+          text-align: left;
+          vertical-align: top;
+        }
+        th {
+          font-size: 11px;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+        .num {
+          text-align: right;
+          white-space: nowrap;
+        }
+        tfoot td {
+          font-weight: 700;
+          border-top: 2px solid #aaa;
+        }
+      </style>
+      <script>
+        window.addEventListener("load", () => {
+          setTimeout(() => {
+            window.focus();
+            window.print();
+          }, 150);
+        });
+      </script>
+    </head>
+    <body>
+      <section class="head">
+        <div>
+          <h1>Frida Restaurant</h1>
+          <p><strong>${escapeHtml(t("foodReportTitle"))}</strong></p>
+          <p>${escapeHtml(t("foodReportRangeLabel"))}: ${escapeHtml(foodReportRangeText())}</p>
+          <p>${escapeHtml(t("foodReportMethodLabel"))}: ${escapeHtml(foodReportPaymentLabel(foodReportPayment))}</p>
+          <p>${escapeHtml(t("foodReportSearchLabel"))}: ${escapeHtml(selectedDishText)}</p>
+        </div>
+        <div class="meta">
+          <p><strong>${lang === "es" ? "Impreso" : "Printed"}:</strong></p>
+          <p>${escapeHtml(printedAtText)}</p>
+        </div>
+      </section>
+      <section class="summary">
+        <article class="summary-card"><span>${escapeHtml(t("foodReportCount"))}</span><strong>${summary.count}</strong></article>
+        <article class="summary-card"><span>${escapeHtml(t("foodReportUnits"))}</span><strong>${summary.qty}</strong></article>
+        <article class="summary-card"><span>${escapeHtml(t("foodReportRevenue"))}</span><strong>${escapeHtml(money(summary.sales))}</strong></article>
+        <article class="summary-card"><span>${escapeHtml(t("foodReportTop"))}</span><strong>${escapeHtml(summary.top || "-")}</strong></article>
+      </section>
+      <table>
+        <thead>
+          <tr>
+            <th>${escapeHtml(t("foodReportDish"))}</th>
+            <th class="num">${escapeHtml(t("foodReportUnits"))}</th>
+            <th class="num">${escapeHtml(t("foodReportRevenue"))}</th>
+            <th class="num">${escapeHtml(t("foodReportOrders"))}</th>
+            <th>${escapeHtml(t("foodReportFirstSold"))}</th>
+            <th>${escapeHtml(t("foodReportLastSold"))}</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows || `<tr><td colspan="6">${escapeHtml(t("foodReportRowsEmpty"))}</td></tr>`}</tbody>
+        <tfoot>
+          <tr>
+            <td>${lang === "es" ? "Totales" : "Totals"}</td>
+            <td class="num">${summary.qty}</td>
+            <td class="num">${escapeHtml(money(summary.sales))}</td>
+            <td colspan="3">${escapeHtml(summary.top || "-")}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
+function printFoodReport() {
+  if (foodReportLoading) return;
+  const rows = foodReportRows();
+  const summary = foodReportSummary(rows);
+  if (!rows.length) return;
+  const printWindow = window.open("", "_blank", "width=1100,height=900");
+  if (!printWindow) return;
+  try {
+    printWindow.opener = null;
+  } catch (_error) {
+    // Ignore browsers that block changing opener.
+  }
+  printWindow.document.open();
+  printWindow.document.write("<!doctype html><html><head><meta charset=\"utf-8\"><title>Imprimiendo...</title></head><body style=\"font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.35;padding:16px;\">Preparando reporte...</body></html>");
+  printWindow.document.close();
+  printWindow.document.open();
+  printWindow.document.write(buildFoodReportPrintableHtml(rows, summary));
+  printWindow.document.close();
+}
+
+async function refreshFoodReportData() {
+  if (!foodReportRange.start || !foodReportRange.end) setFoodReportPreset("day");
+  syncFoodReportRange();
+  const requestId = ++foodReportRequestId;
+  foodReportLoading = true;
+  foodReportError = "";
+  foodReportRowsCache = [];
+  renderFoodReport();
+
+  try {
+    const rows = await loadOrders({
+      statuses: ["delivered"],
+      startDate: foodReportRange.start,
+      endDate: foodReportRange.end,
+      paymentMethod: foodReportPayment === "all" ? "" : foodReportPayment
+    });
+    if (requestId !== foodReportRequestId) return;
+    foodReportRowsCache = rows;
+  } catch (error) {
+    console.warn("Food report load failed", error);
+    if (requestId !== foodReportRequestId) return;
+    foodReportRowsCache = [];
+    foodReportError = t("foodReportError");
+  } finally {
+    if (requestId !== foodReportRequestId) return;
+    foodReportLoading = false;
+    renderFoodReport();
+  }
+}
+
+function renderFoodReport() {
+  if (!foodReport) return;
+  if (!foodReportRange.start || !foodReportRange.end) setFoodReportPreset("day");
+  syncFoodReportRange();
+  const rows = foodReportRows();
+  const summary = foodReportSummary(rows);
+  const locale = lang === "es" ? "es-HN" : "en-US";
+  const selectedDishText = foodReportSearch.trim() || t("foodReportSearchAll");
+  const dishOptions = foodReportDishOptions();
+  const normalizedSelectedDish = normalizeFoodReportSearchText(foodReportSearch);
+  const previewMarkup = foodReportLoading
+    ? `<p class="terms-report-empty">${t("foodReportLoading")}</p>`
+    : foodReportError
+      ? `<p class="terms-report-empty">${escapeHtml(foodReportError)}</p>`
+      : rows.length
+        ? `
+            <div class="terms-report-table-wrap">
+              <table class="terms-report-table">
+                <thead>
+                  <tr>
+                    <th>${t("foodReportDish")}</th>
+                    <th class="num">${t("foodReportUnits")}</th>
+                    <th class="num">${t("foodReportRevenue")}</th>
+                    <th class="num">${t("foodReportOrders")}</th>
+                    <th>${t("foodReportFirstSold")}</th>
+                    <th>${t("foodReportLastSold")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows.map((row) => `
+                    <tr>
+                      <td>${escapeHtml(row.name)}</td>
+                      <td class="num">${row.qty}</td>
+                      <td class="num">${escapeHtml(money(row.sales))}</td>
+                      <td class="num">${row.orderCount}</td>
+                      <td>${escapeHtml(row.firstSoldAt.toLocaleDateString(locale))}</td>
+                      <td>${escapeHtml(row.lastSoldAt.toLocaleDateString(locale))}</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+          `
+        : `<p class="terms-report-empty">${t("foodReportRowsEmpty")}</p>`;
+
+  foodReport.innerHTML = `
+    <article class="terms-report-card">
+      <header class="terms-report-head">
+        <div>
+          <h3>${t("foodReportTitle")}</h3>
+          <p>${t("foodReportText")}</p>
+        </div>
+        <div class="terms-report-head-actions">
+          <button type="button" class="btn btn-outline" data-food-report-preview>${t("foodReportPreview")}</button>
+          <button type="button" class="btn btn-primary" data-food-report-print ${!rows.length || foodReportLoading || foodReportError ? "disabled" : ""}>${t("foodReportPrint")}</button>
+        </div>
+      </header>
+      <div class="terms-report-toolbar">
+        <label>
+          <span>${t("foodReportStart")}</span>
+          <input id="foodReportStart" type="date" value="${escapeHtml(formatDateInputValue(foodReportRange.start))}">
+        </label>
+        <label>
+          <span>${t("foodReportEnd")}</span>
+          <input id="foodReportEnd" type="date" value="${escapeHtml(formatDateInputValue(foodReportRange.end))}">
+        </label>
+        <label>
+          <span>${t("foodReportPayment")}</span>
+          <select id="foodReportPayment">
+            <option value="all" ${foodReportPayment === "all" ? "selected" : ""}>${t("foodReportAll")}</option>
+            <option value="cash" ${foodReportPayment === "cash" ? "selected" : ""}>${t("payMethodCash")}</option>
+            <option value="card" ${foodReportPayment === "card" ? "selected" : ""}>${t("payMethodCard")}</option>
+            <option value="bank_transfer" ${foodReportPayment === "bank_transfer" ? "selected" : ""}>${t("payMethodTransfer")}</option>
+            <option value="pedidos_ya" ${foodReportPayment === "pedidos_ya" ? "selected" : ""}>${t("payMethodPedidosYa")}</option>
+          </select>
+        </label>
+        <label>
+          <span>${t("foodReportDishFilter")}</span>
+          <select id="foodReportDishSelect">
+            <option value="">${t("foodReportSearchAll")}</option>
+            ${dishOptions.map((option) => `
+              <option value="${escapeHtml(option.name)}" ${normalizedSelectedDish === option.normalized ? "selected" : ""}>${escapeHtml(option.name)}</option>
+            `).join("")}
+          </select>
+        </label>
+        <label>
+          <span>${t("foodReportSearch")}</span>
+          <input id="foodReportSearch" type="search" value="${escapeHtml(foodReportSearch)}" placeholder="${escapeHtml(t("foodReportSearchPlaceholder"))}" autocapitalize="words" autocomplete="off" spellcheck="false">
+        </label>
+      </div>
+      <div class="terms-report-controls">
+        <div class="terms-report-shift">
+          <button type="button" class="btn btn-outline" data-food-report-shift="-1" aria-label="${escapeHtml(t("actionBack"))}">&lt;</button>
+          <button type="button" class="btn btn-outline" data-food-report-current>${t("foodReportCurrent")}</button>
+          <button type="button" class="btn btn-outline" data-food-report-shift="1" aria-label="${escapeHtml(t("actionNext"))}">&gt;</button>
+        </div>
+        <div class="terms-report-presets">
+          <button type="button" class="btn ${foodReportPreset === "day" ? "btn-primary" : "btn-outline"}" data-food-report-preset="day" ${foodReportLoading ? "disabled" : ""}>${t("foodReportDay")}</button>
+          <button type="button" class="btn ${foodReportPreset === "month" ? "btn-primary" : "btn-outline"}" data-food-report-preset="month" ${foodReportLoading ? "disabled" : ""}>${t("foodReportMonth")}</button>
+          <button type="button" class="btn ${foodReportPreset === "year" ? "btn-primary" : "btn-outline"}" data-food-report-preset="year" ${foodReportLoading ? "disabled" : ""}>${t("foodReportYear")}</button>
+        </div>
+      </div>
+      <div class="terms-report-summary">
+        <article class="terms-report-summary-card">
+          <span>${t("foodReportCount")}</span>
+          <strong>${summary.count}</strong>
+        </article>
+        <article class="terms-report-summary-card">
+          <span>${t("foodReportUnits")}</span>
+          <strong>${summary.qty}</strong>
+        </article>
+        <article class="terms-report-summary-card">
+          <span>${t("foodReportRevenue")}</span>
+          <strong>${money(summary.sales)}</strong>
+        </article>
+        <article class="terms-report-summary-card">
+          <span>${t("foodReportTop")}</span>
+          <strong>${escapeHtml(summary.top || "-")}</strong>
+        </article>
+      </div>
+      <section class="terms-report-preview">
+        <div class="terms-report-preview-head">
+          <div>
+            <h4>${t("foodReportPreviewTitle")}</h4>
+            <p><strong>${t("foodReportRangeLabel")}:</strong> ${foodReportRangeText()}</p>
+            <p><strong>${t("foodReportMethodLabel")}:</strong> ${foodReportPaymentLabel(foodReportPayment)}</p>
+            <p><strong>${t("foodReportSearchLabel")}:</strong> ${escapeHtml(selectedDishText)}</p>
+          </div>
+          <p class="terms-report-note">${t("foodReportSummaryNote")}</p>
+        </div>
+        ${previewMarkup}
+      </section>
+    </article>
+  `;
+}
+
+function renderFoodReportKeepingSearchPosition(selectionStart = null, selectionEnd = null) {
+  const previousScrollY = window.scrollY;
+  renderFoodReport();
+  const nextSearchInput = document.getElementById("foodReportSearch");
+  if (!nextSearchInput) return;
+  nextSearchInput.focus({ preventScroll: true });
+  const inputLength = nextSearchInput.value.length;
+  const start = Number.isInteger(selectionStart) ? Math.min(selectionStart, inputLength) : inputLength;
+  const end = Number.isInteger(selectionEnd) ? Math.min(selectionEnd, inputLength) : start;
+  nextSearchInput.setSelectionRange(start, end);
+  window.scrollTo({ top: previousScrollY, behavior: "auto" });
+}
+
+function refreshFoodReportIfOpen() {
+  if (!foodReportModal || foodReportModal.classList.contains("hidden")) return;
+  renderFoodReport();
 }
 
 function renderOrders() {
@@ -4936,6 +5602,7 @@ function startRealtime() {
       renderFoodStats();
       renderSalesCalendar();
       refreshTermsReportIfOpen();
+      refreshFoodReportIfOpen();
       if (!editingOrderName && !editingInvoiceData && !editingReviewItems) {
         renderOrders();
         if (selectedOrderId) openReview(selectedOrderId, { preserveState: true });
@@ -5210,6 +5877,11 @@ if (termsReportModal) {
     if (event.target === termsReportModal) closeTermsReportModal();
   });
 }
+if (foodReportModal) {
+  foodReportModal.addEventListener("click", (event) => {
+    if (event.target === foodReportModal) closeFoodReportModal();
+  });
+}
 
 if (productManager) {
   productManager.addEventListener("click", (event) => {
@@ -5325,6 +5997,101 @@ if (termsReport) {
     if (paymentSelect) {
       termsReportPayment = paymentSelect.value || "all";
       refreshTermsReportData();
+    }
+  });
+}
+
+if (foodReport) {
+  foodReport.addEventListener("click", (event) => {
+    const presetButton = event.target.closest("[data-food-report-preset]");
+    if (presetButton) {
+      setFoodReportPreset(presetButton.dataset.foodReportPreset || "day");
+      refreshFoodReportData();
+      return;
+    }
+
+    const shiftButton = event.target.closest("[data-food-report-shift]");
+    if (shiftButton) {
+      shiftFoodReportRange(shiftButton.dataset.foodReportShift);
+      refreshFoodReportData();
+      return;
+    }
+
+    const currentButton = event.target.closest("[data-food-report-current]");
+    if (currentButton) {
+      resetFoodReportToCurrentPreset();
+      refreshFoodReportData();
+      return;
+    }
+
+    const previewButton = event.target.closest("[data-food-report-preview]");
+    if (previewButton) {
+      refreshFoodReportData();
+      return;
+    }
+
+    const printButton = event.target.closest("[data-food-report-print]");
+    if (printButton) {
+      printFoodReport();
+    }
+  });
+
+  foodReport.addEventListener("input", (event) => {
+    const searchInput = event.target.closest("#foodReportSearch");
+    if (!searchInput) return;
+    foodReportSearch = searchInput.value || "";
+    renderFoodReportKeepingSearchPosition(searchInput.selectionStart, searchInput.selectionEnd);
+  });
+
+  foodReport.addEventListener("focusout", (event) => {
+    const searchInput = event.target.closest("#foodReportSearch");
+    if (!searchInput) return;
+    foodReportSearch = searchInput.value || "";
+    window.requestAnimationFrame(renderFoodReport);
+  });
+
+  foodReport.addEventListener("keydown", (event) => {
+    const searchInput = event.target.closest("#foodReportSearch");
+    if (searchInput && event.key === "Enter") {
+      event.preventDefault();
+      searchInput.blur();
+    }
+  });
+
+  foodReport.addEventListener("change", (event) => {
+    const startInput = event.target.closest("#foodReportStart");
+    if (startInput) {
+      foodReportPreset = "custom";
+      foodReportRange = {
+        start: parseDateInputValue(startInput.value, "start") || foodReportRange.start || startOfDay(new Date()),
+        end: foodReportRange.end || endOfDay(new Date())
+      };
+      refreshFoodReportData();
+      return;
+    }
+
+    const endInput = event.target.closest("#foodReportEnd");
+    if (endInput) {
+      foodReportPreset = "custom";
+      foodReportRange = {
+        start: foodReportRange.start || startOfDay(new Date()),
+        end: parseDateInputValue(endInput.value, "end") || foodReportRange.end || endOfDay(new Date())
+      };
+      refreshFoodReportData();
+      return;
+    }
+
+    const paymentSelect = event.target.closest("#foodReportPayment");
+    if (paymentSelect) {
+      foodReportPayment = paymentSelect.value || "all";
+      refreshFoodReportData();
+      return;
+    }
+
+    const dishSelect = event.target.closest("#foodReportDishSelect");
+    if (dishSelect) {
+      foodReportSearch = dishSelect.value || "";
+      renderFoodReport();
     }
   });
 }
@@ -5459,6 +6226,7 @@ if (closeCrmSettingsBtn) closeCrmSettingsBtn.addEventListener("click", closeCrmS
 if (closeOrderCreatorModalBtn) closeOrderCreatorModalBtn.addEventListener("click", closeOrderCreatorModal);
 if (closeProductManagerModalBtn) closeProductManagerModalBtn.addEventListener("click", closeProductManagerModal);
 if (closeTermsReportModalBtn) closeTermsReportModalBtn.addEventListener("click", closeTermsReportModal);
+if (closeFoodReportModalBtn) closeFoodReportModalBtn.addEventListener("click", closeFoodReportModal);
 if (crmNavToggle) crmNavToggle.addEventListener("click", toggleCRMHeaderNav);
 if (crmHeaderNav) {
   crmHeaderNav.addEventListener("click", (event) => {
