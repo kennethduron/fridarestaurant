@@ -80,6 +80,9 @@ module.exports = async function handler(req, res) {
     const staff = await resolveViewingStaff(getBearerToken(req));
     const order = await fetchOrderById(orderId);
     if (!order) throw httpError(404, "order_not_found", "Order not found.");
+    if (staff?.role === "kitchen" && order.status !== "preparing") {
+      throw httpError(403, "role_denied", "Kitchen can only view orders in preparation.");
+    }
     sendJson(req, res, 200, { order: staff ? order : sanitizePublicOrder(order) }, ["GET", "PATCH", "OPTIONS"]);
   } catch (error) {
     sendJson(req, res, error.statusCode || 500, errorPayload(error), ["GET", "PATCH", "OPTIONS"]);

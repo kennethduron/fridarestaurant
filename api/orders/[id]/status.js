@@ -28,6 +28,15 @@ module.exports = async function handler(req, res) {
     const body = await readJson(req);
     const status = String(body.status || "").trim();
     assertOrderStatus(status);
+    if (staff.role === "kitchen" && status !== "ready") {
+      throw httpError(403, "role_denied", "Kitchen can only mark orders as ready.");
+    }
+
+    const currentOrder = await fetchOrderForKitchenGuard(orderId);
+    if (!currentOrder) throw httpError(404, "order_not_found", "Order not found.");
+    if (staff.role === "kitchen" && currentOrder.status !== "preparing") {
+      throw httpError(403, "role_denied", "Kitchen can only update orders in preparation.");
+    }
 
     const updatedRows = await supabaseFetch(`/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}`, {
       method: "PATCH",
@@ -60,6 +69,14 @@ module.exports = async function handler(req, res) {
     sendJson(req, res, error.statusCode || 500, errorPayload(error), ["PATCH", "OPTIONS"]);
   }
 };
+
+async function fetchOrderForKitchenGuard(orderId) {
+  const rows = await supabaseFetch(`/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}&select=id,status&limit=1`, {
+    admin: true,
+    prefer: "return=representation"
+  });
+  return Array.isArray(rows) ? rows[0] || null : rows || null;
+}
 
 async function notifyOrderStatus(order) {
   const rows = await supabaseFetch(`/rest/v1/notification_tokens?order_id=eq.${encodeURIComponent(order.id)}&active=eq.true&select=token`, {

@@ -96,11 +96,20 @@ async function loadOrdersForQuery(query, staff) {
   if (staff && staff.role === "agent") {
     return loadAgentOrders();
   }
+  if (staff && staff.role === "kitchen") {
+    return loadKitchenOrders();
+  }
   const scope = String(query.scope || "").trim();
   if (scope === "ops") {
     return loadOperationalOrders(query);
   }
   return loadFilteredOrders(query);
+}
+
+async function loadKitchenOrders() {
+  return fetchOrdersWithFilters({
+    statuses: ["preparing"]
+  });
 }
 
 async function loadAgentOrders() {
