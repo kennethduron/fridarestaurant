@@ -609,6 +609,14 @@ async function updateOrderInvoiceData(id, invoiceData) {
   });
 }
 
+async function voidFiscalInvoice(id, reason) {
+  const result = await apiRequest(`/api/orders/${encodeURIComponent(id)}/invoice`, {
+    method: "PATCH",
+    body: { action: "void", reason }
+  });
+  return result.order ? mapOrder(result.order) : null;
+}
+
 async function updateOrderCustomerName(id, customerName) {
   await apiRequest(`/api/orders/${encodeURIComponent(id)}`, {
     method: "PATCH",
@@ -855,6 +863,7 @@ export {
   updateOrderPaymentStatus,
   updateOrderPaymentMethod,
   updateOrderInvoiceData,
+  voidFiscalInvoice,
   updateOrderCustomerName,
   updateOrderItems,
   updateReservationStatus,

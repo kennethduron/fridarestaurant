@@ -3587,9 +3587,53 @@ textarea:focus,
   width: min(480px, 92%);
 }
 
+.fiscal-void-card {
+  width: min(560px, 92%);
+}
+
 .hide-order-confirm-text {
   margin: 5px 0 0;
   color: var(--muted);
+}
+
+.fiscal-void-text {
+  margin: 5px 0 0;
+  color: var(--muted);
+}
+
+.fiscal-void-field {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.fiscal-void-field span {
+  font-weight: 700;
+}
+
+.fiscal-void-field textarea {
+  width: 100%;
+  min-height: 112px;
+  resize: vertical;
+  border: 1px solid rgba(126, 76, 43, 0.28);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: inherit;
+}
+
+.invoice-void-notice {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(157, 47, 47, 0.24);
+  border-radius: 14px;
+  background: rgba(157, 47, 47, 0.07);
+  color: #4e1f1f;
+}
+
+.invoice-void-notice strong {
+  font-size: 1.02rem;
 }
 
 #reviewBody {

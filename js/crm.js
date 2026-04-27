@@ -7,6 +7,7 @@ import {
   updateOrderPaymentStatus,
   updateOrderPaymentMethod,
   updateOrderInvoiceData,
+  voidFiscalInvoice,
   updateOrderCustomerName,
   updateOrderItems,
   updateReservationStatus,
@@ -21,7 +22,7 @@ import {
   signOutUser,
   isStaffAuthorized,
   registerStaffNotificationToken
-} from "./firebase-config.js?v=20260424b";
+} from "./firebase-config.js?v=20260426a";
 import { DEFAULT_FISCAL_SETTINGS, mergeFiscalSettings } from "./fiscal-config.js?v=20260309a";
 import { BASE_MENU_ITEMS } from "./menu-data.js?v=20260419a";
 
@@ -101,9 +102,11 @@ const i18n = {
     actionBack: "Atrás",
     actionNext: "Siguiente",
     btnMarkPaid: "Marcar pagado",
-  btnPrint: "Factura normal",
+  btnPrint: "Ticket",
   btnFiscalPrint: "Factura fiscal",
   btnFiscalReprint: "Reimprimir factura fiscal",
+  btnFiscalVoided: "Factura anulada",
+  btnFiscalVoid: "Anular factura fiscal",
     btnSaveInvoice: "Guardar factura",
     review: "Revisar pedido",
     reviewShort: "Detalles",
@@ -167,6 +170,20 @@ const i18n = {
     invoicePrintBlockedExhausted: "No se puede mostrar la factura fiscal. El rango autorizado ya se excedió y debes actualizarlo en Ajustes fiscales.",
     invoiceDeadlineExceeded: "La fecha límite de emisión ya venció. Actualiza los ajustes fiscales.",
     invoicePrintBlockedExpired: "No se puede mostrar la factura fiscal. La fecha límite de emisión ya venció y debes actualizarla en Ajustes fiscales.",
+    invoiceVoidTitle: "Anular factura fiscal",
+    invoiceVoidText: "Esta acción deja la factura fiscal como anulada y conserva el número para el reporte contable.",
+    invoiceVoidReasonLabel: "Motivo de anulación",
+    invoiceVoidReasonPlaceholder: "Ejemplo: RTN incorrecto, cliente equivocado, pedido cancelado...",
+    invoiceVoidConfirm: "Anular factura",
+    invoiceVoidCancel: "Cancelar",
+    invoiceVoidMissingReason: "Escribe el motivo de anulación.",
+    invoiceVoidSuccess: "Factura fiscal anulada.",
+    invoiceVoidError: "No se pudo anular la factura fiscal.",
+    invoiceAlreadyVoided: "Esta factura fiscal ya fue anulada.",
+    invoiceVoidedNotice: "Factura fiscal anulada",
+    invoiceVoidedReason: "Motivo",
+    invoiceVoidedBy: "Anulada por",
+    invoiceVoidedAt: "Fecha de anulación",
     brandName: "Marca comercial",
     legalName: "Razón social",
     phone: "Teléfono",
@@ -256,9 +273,9 @@ const i18n = {
     calendarPrev: "Mes anterior",
     calendarNext: "Mes siguiente",
     calendarFoodBreakdown: "Comida vendida ese día",
-    termsReportTitle: "Facturas por términos",
-    termsReportToolText: "Filtra ventas entregadas por fecha y término para revisar e imprimir reportes.",
-    termsReportText: "Genera un reporte bajo demanda por rango de fechas y método de pago sin recargar el CRM.",
+    termsReportTitle: "Reporte fiscal",
+    termsReportToolText: "Revisa ventas entregadas con o sin factura fiscal activada.",
+    termsReportText: "Genera un reporte por fechas, método de pago y estado fiscal sin recargar el CRM.",
     termsReportStart: "Fecha inicio",
     termsReportEnd: "Fecha final",
     termsReportTerms: "Términos",
@@ -275,8 +292,16 @@ const i18n = {
     termsReportRangeLabel: "Rango",
     termsReportMethodLabel: "Término",
     termsReportInvoiceOrOrder: "Factura / Orden",
+    termsReportFiscal: "Estado fiscal",
+    termsReportFiscalAll: "Todas",
+    termsReportFiscalActivated: "Facturas fiscales activadas",
+    termsReportFiscalMissing: "Entregadas sin factura fiscal",
+    termsReportFiscalVoided: "Facturas fiscales anuladas",
+    termsReportFiscalActivatedShort: "Fiscal activada",
+    termsReportFiscalMissingShort: "Sin fiscal",
+    termsReportFiscalVoidedShort: "Anulada",
     termsReportTax: "Impuesto",
-    termsReportSummaryNote: "Solo toma pedidos entregados y usa el término de pago seleccionado.",
+    termsReportSummaryNote: "Solo toma pedidos entregados y separa si la factura fiscal fue activada.",
     termsReportLoading: "Cargando reporte histórico...",
     termsReportError: "No se pudo cargar el reporte histórico.",
     foodReportTitle: "Comidas vendidas",
@@ -453,9 +478,11 @@ const i18n = {
     actionBack: "Back",
     actionNext: "Next",
     btnMarkPaid: "Mark paid",
-  btnPrint: "Normal invoice",
+  btnPrint: "Ticket",
   btnFiscalPrint: "Fiscal invoice",
   btnFiscalReprint: "Reprint fiscal invoice",
+  btnFiscalVoided: "Voided invoice",
+  btnFiscalVoid: "Void fiscal invoice",
     btnSaveInvoice: "Save invoice",
     review: "Review order",
     reviewShort: "Details",
@@ -519,6 +546,20 @@ const i18n = {
     invoicePrintBlockedExhausted: "The fiscal invoice cannot be shown. The authorized range was exceeded and must be updated in Fiscal settings.",
     invoiceDeadlineExceeded: "The emission deadline already expired. Update Fiscal settings.",
     invoicePrintBlockedExpired: "The fiscal invoice cannot be shown. The emission deadline already expired and must be updated in Fiscal settings.",
+    invoiceVoidTitle: "Void fiscal invoice",
+    invoiceVoidText: "This marks the fiscal invoice as voided and keeps the number for accounting reports.",
+    invoiceVoidReasonLabel: "Void reason",
+    invoiceVoidReasonPlaceholder: "Example: wrong RTN, wrong customer, cancelled order...",
+    invoiceVoidConfirm: "Void invoice",
+    invoiceVoidCancel: "Cancel",
+    invoiceVoidMissingReason: "Enter the void reason.",
+    invoiceVoidSuccess: "Fiscal invoice voided.",
+    invoiceVoidError: "Could not void the fiscal invoice.",
+    invoiceAlreadyVoided: "This fiscal invoice was already voided.",
+    invoiceVoidedNotice: "Fiscal invoice voided",
+    invoiceVoidedReason: "Reason",
+    invoiceVoidedBy: "Voided by",
+    invoiceVoidedAt: "Voided at",
     brandName: "Brand name",
     legalName: "Legal name",
     phone: "Phone",
@@ -608,9 +649,9 @@ const i18n = {
     calendarPrev: "Previous month",
     calendarNext: "Next month",
     calendarFoodBreakdown: "Food sold that day",
-    termsReportTitle: "Invoices by terms",
-    termsReportToolText: "Filter delivered sales by date range and payment term to review and print reports.",
-    termsReportText: "Generate an on-demand report by date range and payment method without slowing down the CRM.",
+    termsReportTitle: "Fiscal report",
+    termsReportToolText: "Review delivered sales with or without an activated fiscal invoice.",
+    termsReportText: "Generate a report by date range, payment method, and fiscal status without slowing down the CRM.",
     termsReportStart: "Start date",
     termsReportEnd: "End date",
     termsReportTerms: "Terms",
@@ -627,8 +668,16 @@ const i18n = {
     termsReportRangeLabel: "Range",
     termsReportMethodLabel: "Term",
     termsReportInvoiceOrOrder: "Invoice / Order",
+    termsReportFiscal: "Fiscal status",
+    termsReportFiscalAll: "All",
+    termsReportFiscalActivated: "Activated fiscal invoices",
+    termsReportFiscalMissing: "Delivered without fiscal invoice",
+    termsReportFiscalVoided: "Voided fiscal invoices",
+    termsReportFiscalActivatedShort: "Fiscal activated",
+    termsReportFiscalMissingShort: "No fiscal",
+    termsReportFiscalVoidedShort: "Voided",
     termsReportTax: "Tax",
-    termsReportSummaryNote: "This only includes delivered orders and uses the selected payment term.",
+    termsReportSummaryNote: "This only includes delivered orders and separates whether the fiscal invoice was activated.",
     termsReportLoading: "Loading historical report...",
     termsReportError: "Could not load the historical report.",
     foodReportTitle: "Food sold",
@@ -794,6 +843,11 @@ const hideOrderConfirmModal = document.getElementById("hideOrderConfirmModal");
 const closeHideOrderConfirmBtn = document.getElementById("closeHideOrderConfirm");
 const cancelHideOrderBtn = document.getElementById("cancelHideOrder");
 const confirmHideOrderBtn = document.getElementById("confirmHideOrder");
+const fiscalVoidModal = document.getElementById("fiscalVoidModal");
+const closeFiscalVoidBtn = document.getElementById("closeFiscalVoid");
+const cancelFiscalVoidBtn = document.getElementById("cancelFiscalVoid");
+const confirmFiscalVoidBtn = document.getElementById("confirmFiscalVoid");
+const fiscalVoidReasonInput = document.getElementById("fiscalVoidReason");
 const fiscalSettingsModal = document.getElementById("fiscalSettingsModal");
 const fiscalSettingsForm = document.getElementById("crmFiscalSettingsForm");
 const closeFiscalSettingsBtn = document.getElementById("closeFiscalSettings");
@@ -810,6 +864,7 @@ let lang = "es";
 let activeFilter = "all";
 let activeReservationFilter = "all";
 let selectedOrderId = null;
+let pendingFiscalVoidOrderId = null;
 let currentStaffUser = null;
 let currentStaffProfile = null;
 let pendingAuthMessage = "";
@@ -835,6 +890,7 @@ let productManagerEditedOnly = false;
 let productSaveUiState = new Map();
 let termsReportPreset = "day";
 let termsReportPayment = "all";
+let termsReportFiscalStatus = "all";
 let termsReportRange = { start: null, end: null };
 let termsReportRowsCache = [];
 let termsReportLoading = false;
@@ -1507,6 +1563,28 @@ function salesPaymentMethodLabel(method) {
 function termsReportPaymentLabel(method) {
   if (method === "all") return t("termsReportAll");
   return salesPaymentMethodLabel(method);
+}
+
+function fiscalInvoiceActivated(order) {
+  return Boolean(String(order?.invoice?.invoiceNumber || "").trim() && !fiscalInvoiceVoided(order));
+}
+
+function fiscalInvoiceVoided(order) {
+  return Boolean(String(order?.invoice?.fiscalVoidedAt || "").trim());
+}
+
+function termsReportFiscalLabel(status) {
+  if (status === "activated") return t("termsReportFiscalActivated");
+  if (status === "missing") return t("termsReportFiscalMissing");
+  if (status === "voided") return t("termsReportFiscalVoided");
+  return t("termsReportFiscalAll");
+}
+
+function orderFiscalStatusLabel(order) {
+  if (fiscalInvoiceVoided(order)) return t("termsReportFiscalVoidedShort");
+  return fiscalInvoiceActivated(order)
+    ? t("termsReportFiscalActivatedShort")
+    : t("termsReportFiscalMissingShort");
 }
 
 function foodReportPaymentLabel(method) {
@@ -2464,6 +2542,12 @@ function defaultInvoiceData(order) {
     invoiceNumber: String(order?.invoice?.invoiceNumber || "").trim(),
     notes: String(order?.invoice?.notes || "").trim(),
     fiscalPrintedAt: String(order?.invoice?.fiscalPrintedAt || "").trim(),
+    fiscalVoidedAt: String(order?.invoice?.fiscalVoidedAt || "").trim(),
+    fiscalVoidReason: String(order?.invoice?.fiscalVoidReason || "").trim(),
+    fiscalVoidedByUsername: String(order?.invoice?.fiscalVoidedByUsername || "").trim(),
+    fiscalVoidedByStaffProfileId: String(order?.invoice?.fiscalVoidedByStaffProfileId || "").trim(),
+    fiscalVoidOriginalTotal: Number(order?.invoice?.fiscalVoidOriginalTotal || 0),
+    fiscalVoidInvoiceNumber: String(order?.invoice?.fiscalVoidInvoiceNumber || "").trim(),
     hasExoneration: Boolean(order?.invoice?.hasExoneration),
     exemptionRegister: String(order?.invoice?.exemptionRegister || "").trim(),
     exemptOrderNumber: String(order?.invoice?.exemptOrderNumber || "").trim(),
@@ -2490,6 +2574,12 @@ function normalizeInvoiceDraftData(invoiceData = {}) {
     invoiceNumber: String(invoiceData.invoiceNumber || "").trim(),
     notes: String(invoiceData.notes || "").trim(),
     fiscalPrintedAt: String(invoiceData.fiscalPrintedAt || "").trim(),
+    fiscalVoidedAt: String(invoiceData.fiscalVoidedAt || "").trim(),
+    fiscalVoidReason: String(invoiceData.fiscalVoidReason || "").trim(),
+    fiscalVoidedByUsername: String(invoiceData.fiscalVoidedByUsername || "").trim(),
+    fiscalVoidedByStaffProfileId: String(invoiceData.fiscalVoidedByStaffProfileId || "").trim(),
+    fiscalVoidOriginalTotal: Number(invoiceData.fiscalVoidOriginalTotal || 0),
+    fiscalVoidInvoiceNumber: String(invoiceData.fiscalVoidInvoiceNumber || "").trim(),
     hasExoneration: Boolean(invoiceData.hasExoneration),
     exemptionRegister: String(invoiceData.exemptionRegister || "").trim(),
     exemptOrderNumber: String(invoiceData.exemptOrderNumber || "").trim(),
@@ -2511,6 +2601,7 @@ function visibleInvoiceData(order) {
 }
 
 function fiscalPrintButtonLabel(order) {
+  if (fiscalInvoiceVoided(order)) return t("btnFiscalVoided");
   const fiscalPrintedAt = String(order?.invoice?.fiscalPrintedAt || "").trim();
   return fiscalPrintedAt ? t("btnFiscalReprint") : t("btnFiscalPrint");
 }
@@ -2857,7 +2948,7 @@ function buildFiscalPrintableOrderHtml(order) {
   const customerRTN = escapeHtml(invoice.billingRTN || t("customerRTNDefault"));
   const orderPhone = escapeHtml(order.customer?.phone || "-");
   const invoiceNumber = escapeHtml(invoice.invoiceNumber || "PENDIENTE");
-  const logoUrl = new URL("assets/casa-brava-logo.jpg", window.location.href).href;
+  const logoUrl = new URL("assets/icon.jpg", window.location.href).href;
   const breakdown = buildFiscalBreakdown(order);
   const amountInWords = escapeHtml(amountToWordsEs(breakdown.total).toUpperCase());
   const lineRows = breakdown.lines.map((row) => {
@@ -3111,6 +3202,11 @@ function buildFiscalPrintableOrderHtml(order) {
 }
 
 async function printFiscalOrder(orderId) {
+  const existingOrder = ordersCache.find((row) => row.id === orderId);
+  if (fiscalInvoiceVoided(existingOrder)) {
+    showToast(t("invoiceAlreadyVoided"));
+    return;
+  }
   const printWindow = window.open("", "_blank", "width=420,height=900");
   if (!printWindow) return;
   try {
@@ -3238,6 +3334,9 @@ function applyI18n() {
   });
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     node.textContent = t(node.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
+    node.setAttribute("placeholder", t(node.dataset.i18nPlaceholder));
   });
   updateStatusFilterButtonsForView(currentCRMView());
   renderStats();
@@ -3734,7 +3833,13 @@ function reportAmountsForOrder(order) {
 function termsReportRows() {
   syncTermsReportRange();
   return termsReportRowsCache
-    .filter((order) => order.status === "delivered")
+    .filter((order) => order.status === "delivered" || fiscalInvoiceVoided(order))
+    .filter((order) => {
+      if (termsReportFiscalStatus === "activated") return fiscalInvoiceActivated(order);
+      if (termsReportFiscalStatus === "missing") return !fiscalInvoiceActivated(order) && !fiscalInvoiceVoided(order);
+      if (termsReportFiscalStatus === "voided") return fiscalInvoiceVoided(order);
+      return true;
+    })
     .sort((left, right) => {
       const leftDate = parseDate(orderSalesDateValue(left))?.getTime() || 0;
       const rightDate = parseDate(orderSalesDateValue(right))?.getTime() || 0;
@@ -3748,6 +3853,7 @@ function termsReportRows() {
         when,
         paymentMethod: salesPaymentMethodKey(order),
         invoiceOrOrder: String(order.invoice?.invoiceNumber || "").trim() || `#${order.displayId || String(order.id || "").slice(0, 6)}`,
+        fiscalStatus: fiscalInvoiceVoided(order) ? "voided" : (fiscalInvoiceActivated(order) ? "activated" : "missing"),
         customerName: String(order.customer?.name || "").trim() || t("customerFinalConsumer"),
         subtotal: amounts.subtotal,
         tax: amounts.tax,
@@ -3759,10 +3865,13 @@ function termsReportRows() {
 function termsReportSummary(rows) {
   return rows.reduce((summary, row) => ({
     count: summary.count + 1,
+    fiscalCount: summary.fiscalCount + (row.fiscalStatus === "activated" ? 1 : 0),
+    missingFiscalCount: summary.missingFiscalCount + (row.fiscalStatus === "missing" ? 1 : 0),
+    voidedFiscalCount: summary.voidedFiscalCount + (row.fiscalStatus === "voided" ? 1 : 0),
     subtotal: roundMoney(summary.subtotal + row.subtotal),
     tax: roundMoney(summary.tax + row.tax),
     total: roundMoney(summary.total + row.total)
-  }), { count: 0, subtotal: 0, tax: 0, total: 0 });
+  }), { count: 0, fiscalCount: 0, missingFiscalCount: 0, voidedFiscalCount: 0, subtotal: 0, tax: 0, total: 0 });
 }
 
 function termsReportRangeText() {
@@ -3802,6 +3911,7 @@ function buildTermsReportPrintableHtml(rows, summary) {
         <td>${escapeHtml(row.when.toLocaleDateString(lang === "es" ? "es-HN" : "en-US"))}</td>
         <td>${escapeHtml(row.customerName)}</td>
         <td>${escapeHtml(row.invoiceOrOrder)}</td>
+        <td>${escapeHtml(orderFiscalStatusLabel(row.order))}</td>
         <td>${escapeHtml(termsReportPaymentLabel(row.paymentMethod))}</td>
         <td class="num">${escapeHtml(money(row.subtotal))}</td>
         <td class="num">${escapeHtml(money(row.tax))}</td>
@@ -3900,6 +4010,7 @@ function buildTermsReportPrintableHtml(rows, summary) {
           <p><strong>${escapeHtml(t("termsReportTitle"))}</strong></p>
           <p>${escapeHtml(t("termsReportRangeLabel"))}: ${escapeHtml(termsReportRangeText())}</p>
           <p>${escapeHtml(t("termsReportMethodLabel"))}: ${escapeHtml(termsReportPaymentLabel(termsReportPayment))}</p>
+          <p>${escapeHtml(t("termsReportFiscal"))}: ${escapeHtml(termsReportFiscalLabel(termsReportFiscalStatus))}</p>
         </div>
         <div class="meta">
           <p><strong>${lang === "es" ? "Impreso" : "Printed"}:</strong></p>
@@ -3908,6 +4019,9 @@ function buildTermsReportPrintableHtml(rows, summary) {
       </section>
       <section class="summary">
         <article class="summary-card"><span>${escapeHtml(t("termsReportCount"))}</span><strong>${summary.count}</strong></article>
+        <article class="summary-card"><span>${escapeHtml(t("termsReportFiscalActivatedShort"))}</span><strong>${summary.fiscalCount}</strong></article>
+        <article class="summary-card"><span>${escapeHtml(t("termsReportFiscalVoidedShort"))}</span><strong>${summary.voidedFiscalCount}</strong></article>
+        <article class="summary-card"><span>${escapeHtml(t("termsReportFiscalMissingShort"))}</span><strong>${summary.missingFiscalCount}</strong></article>
         <article class="summary-card"><span>${escapeHtml(t("subtotal"))}</span><strong>${escapeHtml(money(summary.subtotal))}</strong></article>
         <article class="summary-card"><span>${escapeHtml(t("termsReportTax"))}</span><strong>${escapeHtml(money(summary.tax))}</strong></article>
         <article class="summary-card"><span>${escapeHtml(t("total"))}</span><strong>${escapeHtml(money(summary.total))}</strong></article>
@@ -3918,16 +4032,17 @@ function buildTermsReportPrintableHtml(rows, summary) {
             <th>${escapeHtml(t("date"))}</th>
             <th>${escapeHtml(t("customer"))}</th>
             <th>${escapeHtml(t("termsReportInvoiceOrOrder"))}</th>
+            <th>${escapeHtml(t("termsReportFiscal"))}</th>
             <th>${escapeHtml(t("termsReportTerms"))}</th>
             <th class="num">${escapeHtml(t("subtotal"))}</th>
             <th class="num">${escapeHtml(t("termsReportTax"))}</th>
             <th class="num">${escapeHtml(t("total"))}</th>
           </tr>
         </thead>
-        <tbody>${tableRows || `<tr><td colspan="7">${escapeHtml(t("termsReportRowsEmpty"))}</td></tr>`}</tbody>
+        <tbody>${tableRows || `<tr><td colspan="8">${escapeHtml(t("termsReportRowsEmpty"))}</td></tr>`}</tbody>
         <tfoot>
           <tr>
-            <td colspan="4">${lang === "es" ? "Totales" : "Totals"}</td>
+            <td colspan="5">${lang === "es" ? "Totales" : "Totals"}</td>
             <td class="num">${escapeHtml(money(summary.subtotal))}</td>
             <td class="num">${escapeHtml(money(summary.tax))}</td>
             <td class="num">${escapeHtml(money(summary.total))}</td>
@@ -3970,7 +4085,7 @@ async function refreshTermsReportData() {
 
   try {
     const rows = await loadOrders({
-      statuses: ["delivered"],
+      statuses: ["delivered", "cancelled", "rejected"],
       startDate: termsReportRange.start,
       endDate: termsReportRange.end,
       paymentMethod: termsReportPayment === "all" ? "" : termsReportPayment
@@ -3991,6 +4106,7 @@ async function refreshTermsReportData() {
 
 function renderTermsReport() {
   if (!termsReport) return;
+  if (termsReportHasActiveDropdown()) return;
   if (!termsReportRange.start || !termsReportRange.end) setTermsReportPreset("day");
   syncTermsReportRange();
   const rows = termsReportRows();
@@ -4008,6 +4124,7 @@ function renderTermsReport() {
                       <th>${t("date")}</th>
                       <th>${t("customer")}</th>
                       <th>${t("termsReportInvoiceOrOrder")}</th>
+                      <th>${t("termsReportFiscal")}</th>
                       <th>${t("termsReportTerms")}</th>
                       <th class="num">${t("subtotal")}</th>
                       <th class="num">${t("termsReportTax")}</th>
@@ -4020,6 +4137,7 @@ function renderTermsReport() {
                         <td>${escapeHtml(row.when.toLocaleDateString(lang === "es" ? "es-HN" : "en-US"))}</td>
                         <td>${escapeHtml(row.customerName)}</td>
                         <td>${escapeHtml(row.invoiceOrOrder)}</td>
+                        <td>${escapeHtml(orderFiscalStatusLabel(row.order))}</td>
                         <td>${escapeHtml(termsReportPaymentLabel(row.paymentMethod))}</td>
                         <td class="num">${escapeHtml(money(row.subtotal))}</td>
                         <td class="num">${escapeHtml(money(row.tax))}</td>
@@ -4063,6 +4181,15 @@ function renderTermsReport() {
             <option value="pedidos_ya" ${termsReportPayment === "pedidos_ya" ? "selected" : ""}>${t("payMethodPedidosYa")}</option>
           </select>
         </label>
+        <label>
+          <span>${t("termsReportFiscal")}</span>
+          <select id="termsReportFiscalStatus">
+            <option value="all" ${termsReportFiscalStatus === "all" ? "selected" : ""}>${t("termsReportFiscalAll")}</option>
+            <option value="missing" ${termsReportFiscalStatus === "missing" ? "selected" : ""}>${t("termsReportFiscalMissing")}</option>
+            <option value="activated" ${termsReportFiscalStatus === "activated" ? "selected" : ""}>${t("termsReportFiscalActivated")}</option>
+            <option value="voided" ${termsReportFiscalStatus === "voided" ? "selected" : ""}>${t("termsReportFiscalVoided")}</option>
+          </select>
+        </label>
       </div>
       <div class="terms-report-controls">
         <div class="terms-report-shift">
@@ -4080,6 +4207,18 @@ function renderTermsReport() {
         <article class="terms-report-summary-card">
           <span>${t("termsReportCount")}</span>
           <strong>${summary.count}</strong>
+        </article>
+        <article class="terms-report-summary-card">
+          <span>${t("termsReportFiscalActivatedShort")}</span>
+          <strong>${summary.fiscalCount}</strong>
+        </article>
+        <article class="terms-report-summary-card">
+          <span>${t("termsReportFiscalVoidedShort")}</span>
+          <strong>${summary.voidedFiscalCount}</strong>
+        </article>
+        <article class="terms-report-summary-card">
+          <span>${t("termsReportFiscalMissingShort")}</span>
+          <strong>${summary.missingFiscalCount}</strong>
         </article>
         <article class="terms-report-summary-card">
           <span>${t("subtotal")}</span>
@@ -4100,6 +4239,7 @@ function renderTermsReport() {
             <h4>${t("termsReportPreviewTitle")}</h4>
             <p><strong>${t("termsReportRangeLabel")}:</strong> ${termsReportRangeText()}</p>
             <p><strong>${t("termsReportMethodLabel")}:</strong> ${termsReportPaymentLabel(termsReportPayment)}</p>
+            <p><strong>${t("termsReportFiscal")}:</strong> ${termsReportFiscalLabel(termsReportFiscalStatus)}</p>
           </div>
           <p class="terms-report-note">${t("termsReportSummaryNote")}</p>
         </div>
@@ -4112,6 +4252,16 @@ function renderTermsReport() {
 function refreshTermsReportIfOpen() {
   if (!termsReportModal || termsReportModal.classList.contains("hidden")) return;
   renderTermsReport();
+}
+
+function termsReportHasActiveDropdown() {
+  const active = document.activeElement;
+  return Boolean(
+    active &&
+    termsReport &&
+    termsReport.contains(active) &&
+    active.tagName === "SELECT"
+  );
 }
 
 function syncFoodReportRange() {
@@ -4624,7 +4774,7 @@ function renderOrders() {
             </div>
             <div class="crm-print-actions">
               <button class="btn btn-outline print-order print-order-small" data-id="${order.id}">${t("btnPrint")}</button>
-              <button class="btn btn-outline print-fiscal-order print-order-small" data-id="${order.id}">${fiscalPrintButtonLabel(order)}</button>
+              <button class="btn btn-outline print-fiscal-order print-order-small" data-id="${order.id}" ${fiscalInvoiceVoided(order) ? "disabled" : ""}>${fiscalPrintButtonLabel(order)}</button>
             </div>
           </div>
         </div>
@@ -4718,6 +4868,14 @@ function reservationAreaLabel(value) {
 function canEditReviewItems(order) {
   const role = String(currentStaffProfile?.role || "").toLowerCase();
   return role === "admin" && order && !["delivered", "rejected"].includes(order.status);
+}
+
+function canVoidFiscalInvoice(order) {
+  const role = String(currentStaffProfile?.role || "").toLowerCase();
+  return ["admin", "cashier"].includes(role)
+    && Boolean(String(order?.invoice?.invoiceNumber || "").trim())
+    && Boolean(String(order?.invoice?.fiscalPrintedAt || "").trim())
+    && !fiscalInvoiceVoided(order);
 }
 
 function reviewCatalogItems() {
@@ -4987,6 +5145,18 @@ function renderReviewItemsSection(order) {
 function renderReviewBody(order) {
   const invoice = visibleInvoiceData(order);
   const phone = String(order.customer?.phone || "").trim();
+  const fiscalVoided = Boolean(invoice.fiscalVoidedAt);
+  const fiscalVoidNotice = fiscalVoided
+    ? `
+      <aside class="invoice-void-notice">
+        <strong>${t("invoiceVoidedNotice")}</strong>
+        <span>${t("invoiceNumber")}: ${escapeHtml(invoice.fiscalVoidInvoiceNumber || invoice.invoiceNumber || "-")}</span>
+        <span>${t("invoiceVoidedReason")}: ${escapeHtml(invoice.fiscalVoidReason || "-")}</span>
+        <span>${t("invoiceVoidedBy")}: ${escapeHtml(invoice.fiscalVoidedByUsername || "-")}</span>
+        <span>${t("invoiceVoidedAt")}: ${escapeHtml(formatDate(invoice.fiscalVoidedAt))}</span>
+      </aside>
+    `
+    : "";
   return `
     <p>
       ${t("customer")}: <strong>${order.customer?.name || ""}</strong>
@@ -5018,8 +5188,12 @@ function renderReviewBody(order) {
         </label>
       </div>
       <div class="invoice-editor-actions">
-        <button class="btn btn-outline print-fiscal-order" data-id="${order.id}">${fiscalPrintButtonLabel(order)}</button>
+        <button class="btn btn-outline print-fiscal-order" data-id="${order.id}" ${fiscalVoided ? "disabled" : ""}>${fiscalPrintButtonLabel(order)}</button>
+        ${canVoidFiscalInvoice(order)
+          ? `<button class="btn btn-outline void-fiscal-order" data-id="${order.id}">${t("btnFiscalVoid")}</button>`
+          : ""}
       </div>
+      ${fiscalVoidNotice}
     </section>
   `;
 }
@@ -5102,6 +5276,47 @@ function confirmHideOrder() {
   closeHideOrderConfirm();
   renderOrders();
   showToast(t("orderHidden"));
+}
+
+function openFiscalVoidModal(orderId) {
+  const order = ordersCache.find((row) => row.id === orderId);
+  if (!order || !canVoidFiscalInvoice(order)) return;
+  pendingFiscalVoidOrderId = orderId;
+  if (fiscalVoidReasonInput) fiscalVoidReasonInput.value = "";
+  fiscalVoidModal?.classList.remove("hidden");
+  window.setTimeout(() => fiscalVoidReasonInput?.focus(), 30);
+}
+
+function closeFiscalVoidModal() {
+  pendingFiscalVoidOrderId = null;
+  if (fiscalVoidReasonInput) fiscalVoidReasonInput.value = "";
+  fiscalVoidModal?.classList.add("hidden");
+}
+
+async function confirmFiscalVoid() {
+  if (!pendingFiscalVoidOrderId) return;
+  const reason = String(fiscalVoidReasonInput?.value || "").trim();
+  if (!reason) {
+    showToast(t("invoiceVoidMissingReason"));
+    fiscalVoidReasonInput?.focus();
+    return;
+  }
+
+  const orderId = pendingFiscalVoidOrderId;
+  try {
+    const updatedOrder = await withSlowBusyScreen(t("savingAction"), () => voidFiscalInvoice(orderId, reason));
+    if (!updatedOrder) throw new Error("missing_updated_order");
+    patchOrderInCache(orderId, () => updatedOrder);
+    invoiceDraftPendingValues.delete(orderId);
+    invoiceDraftLastSavedValues.set(orderId, serializeInvoiceDraft(defaultInvoiceData(updatedOrder)));
+    closeFiscalVoidModal();
+    refreshOrderViews(orderId);
+    renderTermsReport();
+    showToast(t("invoiceVoidSuccess"));
+  } catch (error) {
+    const message = error && error.message ? error.message : "";
+    showToast(message === "fiscal_invoice_already_voided" ? t("invoiceAlreadyVoided") : t("invoiceVoidError"));
+  }
 }
 
 function closeCRMHeaderNav() {
@@ -5856,6 +6071,14 @@ if (crmSettingsModal) {
       return;
     }
 
+    const navLink = event.target.closest("[data-crm-nav-link]");
+    if (navLink) {
+      event.preventDefault();
+      closeCrmSettingsModal();
+      window.open(navLink.href, "_blank", "noopener");
+      return;
+    }
+
     const toolButton = event.target.closest("[data-open-crm-tool]");
     if (!toolButton) return;
     showCrmWorkspaceTool(toolButton.dataset.openCrmTool);
@@ -5997,7 +6220,20 @@ if (termsReport) {
     if (paymentSelect) {
       termsReportPayment = paymentSelect.value || "all";
       refreshTermsReportData();
+      return;
     }
+
+    const fiscalStatusSelect = event.target.closest("#termsReportFiscalStatus");
+    if (fiscalStatusSelect) {
+      termsReportFiscalStatus = fiscalStatusSelect.value || "all";
+      renderTermsReport();
+    }
+  });
+
+  termsReport.addEventListener("focusout", (event) => {
+    const select = event.target.closest("#termsReportPayment, #termsReportFiscalStatus");
+    if (!select) return;
+    window.requestAnimationFrame(renderTermsReport);
   });
 }
 
@@ -6201,6 +6437,12 @@ confirmHideOrderBtn?.addEventListener("click", confirmHideOrder);
 hideOrderConfirmModal?.addEventListener("click", (event) => {
   if (event.target === hideOrderConfirmModal) closeHideOrderConfirm();
 });
+closeFiscalVoidBtn?.addEventListener("click", closeFiscalVoidModal);
+cancelFiscalVoidBtn?.addEventListener("click", closeFiscalVoidModal);
+confirmFiscalVoidBtn?.addEventListener("click", confirmFiscalVoid);
+fiscalVoidModal?.addEventListener("click", (event) => {
+  if (event.target === fiscalVoidModal) closeFiscalVoidModal();
+});
 if (openFiscalSettingsBtn) {
   openFiscalSettingsBtn.addEventListener("click", () => {
     closeCrmSettingsModal();
@@ -6357,6 +6599,12 @@ reviewBody.addEventListener("click", async (event) => {
   const fiscalPrintButton = event.target.closest(".print-fiscal-order");
   if (fiscalPrintButton) {
     await printFiscalOrder(fiscalPrintButton.dataset.id);
+    return;
+  }
+
+  const fiscalVoidButton = event.target.closest(".void-fiscal-order");
+  if (fiscalVoidButton) {
+    openFiscalVoidModal(fiscalVoidButton.dataset.id);
   }
 });
 
