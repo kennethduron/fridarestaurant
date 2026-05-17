@@ -1,7 +1,10 @@
 node_modules/
+.codex-tools/
 .env
 .env.*
 !.env.example
+firebase-debug.log
+debug-*.html
 .DS_Store
 .vscode/
 coverage/

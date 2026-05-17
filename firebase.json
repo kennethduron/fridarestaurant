@@ -10,6 +10,7 @@
         "firebase.json",
         "firestore.rules",
         "README.md",
+        "debug-*.html",
         "package.json",
         "package-lock.json",
         "firebase-debug.log",
